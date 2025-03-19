@@ -1,5 +1,4 @@
 using UnityEngine;
-using OculusSampleFramework;
 
 public class HandFlapMovement : MonoBehaviour
 {
