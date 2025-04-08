@@ -9,12 +9,15 @@ public class HandFlapMovement : MonoBehaviour
     public float glideStrength = 2f; // How strong the gliding effect is
     public float turnStrength = 3f; // How sharp the turns are while gliding
     public float descentSpeed = 2f; // How fast we descend when hands are tilted down
+    public float forwardPropulsionStrength = 3f; // Strength of forward movement during flaps
+    public float glideRotationSpeed = 45f; // Degrees per second for rotation while gliding
     private Vector3 velocity = Vector3.zero; // Stores the player's movement speed
     private Vector3 prevLeftPos, prevRightPos; // Stores the previous frame positions of hands    
     private bool isGliding = false;
     private Vector3 flapDirection; // Stores the direction of the flap
     private bool isFlapping = false;
     private bool isGrounded = false; // You'll need to implement ground detection
+    public float minHandSpread = 0.2f; // Minimum distance between hands for gliding control
 
 
     void Start()
@@ -28,55 +31,55 @@ public class HandFlapMovement : MonoBehaviour
         // Calculate hand movements
         Vector3 leftHandDelta = (leftHand.position - prevLeftPos) / Time.deltaTime;
         Vector3 rightHandDelta = (rightHand.position - prevRightPos) / Time.deltaTime;
+        Vector3 handDirection = (rightHand.position - leftHand.position).normalized;
+        float handDistance = Vector3.Distance(leftHand.position, rightHand.position);
 
-        isFlapping = leftHandDelta.y < -1f && rightHandDelta.y < -1f;
+        isFlapping = (leftHandDelta.y < -1f && rightHandDelta.y < -1f);
         isGliding = !isFlapping && !isGrounded && velocity.magnitude > 0.1f;
         Debug.Log($"State - Flapping: {isFlapping}, Gliding: {isGliding}");
 
         if (isFlapping)
         {
+            // Calculate flap direction and forward movement
             Vector3 handPlane = (rightHand.position - leftHand.position).normalized;
             flapDirection = Vector3.Cross(handPlane, Vector3.right);
-            Debug.Log($"Flapping! Direction: {flapDirection}");
-
+            
+            // Add upward force
             velocity += flapDirection * flapStrength;
             velocity.y = Mathf.Max(velocity.y + gravityCompensation, velocity.y);
+            
+            // Add forward propulsion in the direction player is facing
+            velocity += transform.forward * forwardPropulsionStrength;
+            
+            Debug.Log($"Flapping - Vertical Force: {flapDirection * flapStrength}, Forward Force: {transform.forward * forwardPropulsionStrength}");
         }
-        
         else if (isGliding)
+        {
+            // Handle gliding rotation based on arm tilt
+            if (handDistance > minHandSpread)
             {
-                Vector3 handDirection = rightHand.position - leftHand.position;
-                float handAngle = Vector3.Angle(handDirection, Vector3.right);
-                Vector3 handNormal = Vector3.Cross(handDirection, Vector3.right);
-                float pitchAngle = Vector3.Angle(handNormal, Vector3.up);
-                Debug.Log($"Gliding - Hand angle: {handAngle:F2}°, Pitch: {pitchAngle:F2}°");
-
-                if (Mathf.Abs(handAngle - 180f) < 30f)
+                // Calculate tilt angle of arms (left/right)
+                Vector3 idealHorizontalPlane = Vector3.right; // Reference for level arms
+                float tiltAngle = Vector3.SignedAngle(handDirection, idealHorizontalPlane, Vector3.forward);
+                
+                // Apply rotation based on tilt
+                float rotationAmount = 0f;
+                if (Mathf.Abs(tiltAngle) > 10f) // Add a small deadzone
                 {
-                    // Apply forward glide
-                    velocity += transform.forward * glideStrength * Time.deltaTime;
-
-                    // ✅ NEW: Always allow slow descent while gliding
-                    velocity += Vector3.down * descentSpeed * Time.deltaTime;
-
-                    // Optional: add descent boost when pitched downward
-                    if (pitchAngle > 100f)
-                    {
-                        velocity += Vector3.down * descentSpeed * 0.5f * Time.deltaTime;
-                        Debug.Log($"Descending faster - Pitch angle: {pitchAngle:F2}°");
-                    }
-
-                    // Handle turning based on banking
-                    float bankAngle = (handAngle - 180f);
-                    Vector3 turnDirection = transform.right * bankAngle * turnStrength * Time.deltaTime;
-                    velocity += turnDirection;
-                    Debug.Log($"Gliding - Bank angle: {bankAngle:F2}°, Turn direction: {turnDirection}");
+                    rotationAmount = Mathf.Sign(tiltAngle) * glideRotationSpeed * Time.deltaTime;
+                    transform.Rotate(Vector3.up, rotationAmount);
                 }
-                else
-                {
-                    Debug.Log("Improper hand position while gliding");
-                }
+                
+                Debug.Log($"Gliding Rotation - Tilt Angle: {tiltAngle:F2}°, Rotation Amount: {rotationAmount:F2}°");
+                
+                // Normal gliding forward movement
+                velocity += transform.forward * glideStrength * Time.deltaTime;
             }
+            else
+            {
+                Debug.Log($"Hands too close for glide control. Distance: {handDistance:F2}");
+            }
+        }
 
         // ✅ REMOVED: Block that prevented downward movement
         // if (velocity.y < 0) { velocity.y = 0f; }
@@ -100,12 +103,10 @@ public class HandFlapMovement : MonoBehaviour
         transform.position += velocity * Time.deltaTime;
         Debug.Log($"Current velocity: {velocity}, Position: {transform.position}");
 
-        // Air resistance
-        float previousSpeed = velocity.magnitude;
+        // Air resistance (less while gliding)
         velocity *= isGliding ? 0.99f : 0.98f;
-        Debug.Log($"Air resistance - Speed change: {previousSpeed:F2} -> {velocity.magnitude:F2}");
 
-        // Update hand positions
+        // Store hand positions for next frame
         prevLeftPos = leftHand.position;
         prevRightPos = rightHand.position;
     }
