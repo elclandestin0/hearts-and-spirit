@@ -98,12 +98,16 @@ public class HandFlapMovement : MonoBehaviour
             Debug.Log($"Stalling - descending manually at {fallSpeed:F2}");
         }
 
-        // ✅ Always apply forward movement
-        float currentSpeed = velocity.magnitude;
-        velocity = transform.forward * currentSpeed;
-        transform.position += velocity * Time.deltaTime;
-        Debug.Log($"Redirected velocity to forward: {velocity}");
+        // ✅ Redirect only the horizontal velocity toward facing direction
+        Vector3 horizontal = new Vector3(velocity.x, 0f, velocity.z);
+        float horizontalSpeed = horizontal.magnitude;
+        Vector3 redirected = transform.forward * horizontalSpeed;
+        velocity = new Vector3(redirected.x, velocity.y, redirected.z);
 
+        // Apply movement
+        transform.position += velocity * Time.deltaTime;
+        Debug.Log($"Redirected horizontal velocity. Full Velocity: {velocity}");
+        
         // Air resistance (less while gliding)
         velocity *= isGliding ? 0.99f : 0.98f;
 
