@@ -60,12 +60,13 @@ public class HandFlapMovement : MonoBehaviour
             if (handDistance > minHandSpread)
             {
                 // Calculate tilt angle of arms (left/right)
-                Vector3 idealHorizontalPlane = Vector3.right; // Reference for level arms
-                float tiltAngle = Vector3.SignedAngle(handDirection, idealHorizontalPlane, Vector3.forward);
+                Vector3 localHandDirection = transform.InverseTransformDirection(handDirection);
+                float tiltAngle = Vector3.SignedAngle(localHandDirection, Vector3.right, Vector3.forward);
+                Debug.Log("tiltAngle " + tiltAngle);
                 
                 // Apply rotation based on tilt
                 float rotationAmount = 0f;
-                if (Mathf.Abs(tiltAngle) > 10f) // Add a small deadzone
+                if (Mathf.Abs(tiltAngle) > 35f) // Add a small deadzone
                 {
                     rotationAmount = Mathf.Sign(tiltAngle) * glideRotationSpeed * Time.deltaTime;
                     transform.Rotate(Vector3.up, rotationAmount);
@@ -74,7 +75,7 @@ public class HandFlapMovement : MonoBehaviour
                 Debug.Log($"Gliding Rotation - Tilt Angle: {tiltAngle:F2}°, Rotation Amount: {rotationAmount:F2}°");
                 
                 // Normal gliding forward movement
-                velocity -= transform.forward * glideStrength * Time.deltaTime;
+                velocity -= -(transform.forward) * glideStrength * Time.deltaTime;
             }
             else
             {
@@ -98,8 +99,10 @@ public class HandFlapMovement : MonoBehaviour
         }
 
         // ✅ Always apply forward movement
+        float currentSpeed = velocity.magnitude;
+        velocity = transform.forward * currentSpeed;
         transform.position += velocity * Time.deltaTime;
-        Debug.Log($"Current velocity: {velocity}, Position: {transform.position}");
+        Debug.Log($"Redirected velocity to forward: {velocity}");
 
         // Air resistance (less while gliding)
         velocity *= isGliding ? 0.99f : 0.98f;
