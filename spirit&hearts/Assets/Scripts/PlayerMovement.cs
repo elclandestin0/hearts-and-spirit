@@ -17,7 +17,7 @@ public class HandFlapMovement : MonoBehaviour
     private Vector3 flapDirection; // Stores the direction of the flap
     private bool isFlapping = false;
     private bool isGrounded = false; // You'll need to implement ground detection
-    public float minHandSpread = 0.2f; // Minimum distance between hands for gliding control
+    public float minHandSpread = 1.0f; // Minimum distance between hands for gliding control
 
 
     void Start()
@@ -33,7 +33,8 @@ public class HandFlapMovement : MonoBehaviour
         Vector3 rightHandDelta = (rightHand.position - prevRightPos) / Time.deltaTime;
         Vector3 handDirection = (rightHand.position - leftHand.position).normalized;
         float handDistance = Vector3.Distance(leftHand.position, rightHand.position);
-
+        Debug.Log("handDistance: " + handDistance);
+        
         isFlapping = (leftHandDelta.y < -1f && rightHandDelta.y < -1f);
         isGliding = !isFlapping && !isGrounded && velocity.magnitude > 0.1f;
         Debug.Log($"State - Flapping: {isFlapping}, Gliding: {isGliding}");
@@ -73,16 +74,13 @@ public class HandFlapMovement : MonoBehaviour
                 Debug.Log($"Gliding Rotation - Tilt Angle: {tiltAngle:F2}°, Rotation Amount: {rotationAmount:F2}°");
                 
                 // Normal gliding forward movement
-                velocity += transform.forward * glideStrength * Time.deltaTime;
+                velocity -= transform.forward * glideStrength * Time.deltaTime;
             }
             else
             {
                 Debug.Log($"Hands too close for glide control. Distance: {handDistance:F2}");
             }
         }
-
-        // ✅ REMOVED: Block that prevented downward movement
-        // if (velocity.y < 0) { velocity.y = 0f; }
 
         // Clamp speed
         Vector3 preClampVelocity = velocity;
