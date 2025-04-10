@@ -179,16 +179,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHand: {fileID: 1879581670}
   rightHand: {fileID: 976548209}
-  head: {fileID: 0}
-  flapStrength: 2
-  forwardPropulsionStrength: 3
-  gravityCompensation: 2
-  glideStrength: 2
-  glideRotationSpeed: 90
-  descentSpeed: 9.8
-  minHandSpread: 1
-  maxSpeed: 5
-  turnStrength: 1.5
+  head: {fileID: 883068447}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -836,15 +827,6 @@ MonoBehaviour:
   leftHand: {fileID: 1879581670}
   rightHand: {fileID: 976548209}
   head: {fileID: 883068447}
-  flapStrength: 4
-  forwardPropulsionStrength: 10
-  gravityCompensation: 3
-  glideStrength: 2
-  glideRotationSpeed: 45
-  descentSpeed: 0.5
-  minHandSpread: 1
-  maxSpeed: 5
-  turnStrength: 3
 --- !u!1 &1566607230
 GameObject:
   m_ObjectHideFlags: 0
