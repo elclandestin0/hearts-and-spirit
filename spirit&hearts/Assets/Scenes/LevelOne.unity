@@ -165,21 +165,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &386830428
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1717954561211700993}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6560b921969d41689e73b92fcab3c40, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  leftHand: {fileID: 1879581670}
-  rightHand: {fileID: 976548209}
-  head: {fileID: 883068447}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -301,6 +286,56 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!1 &529738722
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 529738723}
+  - component: {fileID: 529738724}
+  m_Layer: 0
+  m_Name: GhostFlightRecorder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &529738723
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 529738722}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.040759146, y: 2.5972762, z: -0.31688666}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &529738724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 529738722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7a562f0bf7207e43bd327aca57560fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftHand: {fileID: 1879581670}
+  rightHand: {fileID: 976548209}
+  head: {fileID: 883068447}
+  recordDuration: 60
+  recordRate: 60
+  startRecord: 0
 --- !u!1 &592424483
 GameObject:
   m_ObjectHideFlags: 0
@@ -340,6 +375,53 @@ Transform:
   - {fileID: 8366379412282983233}
   - {fileID: 1879581670}
   m_Father: {fileID: 1413808936}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &757878847
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 757878849}
+  - component: {fileID: 757878848}
+  m_Layer: 0
+  m_Name: GhostFlightPlayback
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &757878848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 757878847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64697c974df548341a96aa7cd878571d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flightDataFile: {fileID: 4900000, guid: 6356877672fa5f34ea91f57da49ef936, type: 3}
+  playbackSpeed: 1
+  loop: 1
+--- !u!4 &757878849
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 757878847}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 4.54144, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &832575517
 GameObject:
@@ -403,7 +485,7 @@ GameObject:
   - component: {fileID: 883068449}
   - component: {fileID: 883068448}
   m_Layer: 2
-  m_Name: Cube
+  m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -511,7 +593,7 @@ GameObject:
   - component: {fileID: 976548211}
   - component: {fileID: 976548210}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: RightWing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -821,12 +903,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1413808935}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6560b921969d41689e73b92fcab3c40, type: 3}
+  m_Script: {fileID: 11500000, guid: c5715228c87929342b64c70252dd8fb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   leftHand: {fileID: 1879581670}
   rightHand: {fileID: 976548209}
   head: {fileID: 883068447}
+  gravity: 4
+  ghost: {fileID: 757878848}
+  useGhostInput: 1
 --- !u!1 &1566607230
 GameObject:
   m_ObjectHideFlags: 0
@@ -930,7 +1015,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 1, z: 100}
+  m_LocalScale: {x: 100, y: 1, z: 1000}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -1571,7 +1656,7 @@ GameObject:
   - component: {fileID: 1879581672}
   - component: {fileID: 1879581671}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: LeftWing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3018,7 +3103,6 @@ GameObject:
   - component: {fileID: 6520291405218171043}
   - component: {fileID: 5826056641865101853}
   - component: {fileID: 5033801202728758093}
-  - component: {fileID: 386830428}
   m_Layer: 2
   m_Name: XR Origin (XR Rig)
   m_TagString: Untagged
@@ -9014,3 +9098,5 @@ SceneRoots:
   - {fileID: 105321800}
   - {fileID: 8367196137769097054}
   - {fileID: 1717954561211700994}
+  - {fileID: 529738723}
+  - {fileID: 757878849}
