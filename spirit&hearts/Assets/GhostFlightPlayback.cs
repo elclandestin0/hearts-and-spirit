@@ -11,9 +11,14 @@ public class GhostFlightPlayback : MonoBehaviour
 
         public Vector3 leftHandPosition;
         public Quaternion leftHandRotation;
+        public Vector3 leftHandVelocity;
 
         public Vector3 rightHandPosition;
         public Quaternion rightHandRotation;
+        public Vector3 rightHandVelocity;
+
+        public float flapMagnitude;
+        public Vector3 resultingVelocity;
     }
 
 
@@ -33,6 +38,7 @@ public class GhostFlightPlayback : MonoBehaviour
     private List<FlightFrame> frames = new List<FlightFrame>();
     private float playbackTime = 0f;
     private float frameRate = 60f;
+    private int frameIndex = 0;
 
     void Start()
     {
@@ -44,7 +50,7 @@ public class GhostFlightPlayback : MonoBehaviour
         if (frames.Count == 0) return;
 
         playbackTime += Time.deltaTime * playbackSpeed;
-        int frameIndex = Mathf.FloorToInt(playbackTime * frameRate);
+        frameIndex = Mathf.FloorToInt(playbackTime * frameRate);
 
         if (frameIndex >= frames.Count)
         {
@@ -90,4 +96,16 @@ public class GhostFlightPlayback : MonoBehaviour
     {
         public FlightFrame[] frames;
     }
+
+    public FlightFrame? CurrentFrame
+    {
+        get
+        {
+            if (frames.Count == 0 || frameIndex >= frames.Count)
+                return null;
+
+            return frames[frameIndex];
+        }
+    }
+
 }

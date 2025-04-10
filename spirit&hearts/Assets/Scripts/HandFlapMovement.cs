@@ -10,9 +10,9 @@ public class HandFlapMovement : MonoBehaviour
     [Header("Physics Controls")]
     [SerializeField] private float gravity = 4f; // m/s²
     
-    [Header("Ghost References")]
-    [SerializeField] private GhostFlightPlayback ghost;
-    [SerializeField] private bool useGhostInput = false;
+
+    [Header("Recorder")]
+    [SerializeField] private GhostFlightRecorder recorder;
 
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 0.35f;
@@ -36,11 +36,17 @@ public class HandFlapMovement : MonoBehaviour
 
     void Update()
     {
-        // 🔁 Override input if ghost is active
-        Vector3 headPos = useGhostInput ? ghost.headPos : head.position;
-        Vector3 headFwd = useGhostInput ? (ghost.headRot * Vector3.forward) : head.forward;
-        Vector3 leftHandPos = useGhostInput ? ghost.leftHandPos : leftHand.position;
-        Vector3 rightHandPos = useGhostInput ? ghost.rightHandPos : rightHand.position;
+        // 🔁 Override rotation input if ghost is active, with any flight record
+        Quaternion headRot = head.rotation;
+        Quaternion leftRot = leftHand.rotation;
+        Quaternion rightRot = rightHand.rotation;
+       
+
+        // 🔁 Override position input if ghost is active
+        Vector3 headPos =  head.position;
+        Vector3 headFwd = head.forward;
+        Vector3 leftHandPos = leftHand.position;
+        Vector3 rightHandPos = rightHand.position;
 
         // ───── Motion + Posture Setup ─────
         Vector3 leftHandDelta = (leftHandPos - prevLeftPos) / Time.deltaTime;
@@ -134,10 +140,19 @@ public class HandFlapMovement : MonoBehaviour
         Debug.DrawLine(transform.position, transform.position + Vector3.up * 2f, Color.blue, 0f, false); // Lift dir
 
         // 🔁 Update hands unless ghosting
-        if (!useGhostInput)
+        prevLeftPos = leftHandPos;
+        prevRightPos = rightHandPos;
+
+        // 🎥 Record the final, actual frame data (true physics)
+        if (recorder != null && recorder.enabled)
         {
-            prevLeftPos = leftHandPos;
-            prevRightPos = rightHandPos;
+            recorder.RecordFrame(
+                headPos, headRot,
+                leftHandPos, leftRot,
+                rightHandPos, rightRot,
+                leftHandDelta, rightHandDelta,
+                velocity.magnitude, velocity
+            );
         }
     }
 }
