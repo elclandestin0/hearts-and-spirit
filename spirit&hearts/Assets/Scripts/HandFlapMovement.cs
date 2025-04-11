@@ -24,8 +24,6 @@ public class HandFlapMovement : MonoBehaviour
 
     private Vector3 velocity = Vector3.zero;
     private Vector3 prevLeftPos, prevRightPos;
-    private bool isGliding = false;
-    private bool isFlapping = false;
     private bool isGrounded = false;
 
     void Start()
@@ -36,114 +34,75 @@ public class HandFlapMovement : MonoBehaviour
 
     void Update()
     {
-        // 🔁 Override rotation input if ghost is active, with any flight record
-        Quaternion headRot = head.rotation;
-        Quaternion leftRot = leftHand.rotation;
-        Quaternion rightRot = rightHand.rotation;
-       
-
-        // 🔁 Override position input if ghost is active
-        Vector3 headPos =  head.position;
+        // 🔁 Get positions + rotations
+        Vector3 headPos = head.position;
         Vector3 headFwd = head.forward;
+        Quaternion headRot = head.rotation;
+
         Vector3 leftHandPos = leftHand.position;
         Vector3 rightHandPos = rightHand.position;
+        Quaternion leftRot = leftHand.rotation;
+        Quaternion rightRot = rightHand.rotation;
 
-        // ───── Motion + Posture Setup ─────
+        // ───── Hand Motion Setup ─────
         Vector3 leftHandDelta = (leftHandPos - prevLeftPos) / Time.deltaTime;
         Vector3 rightHandDelta = (rightHandPos - prevRightPos) / Time.deltaTime;
-        Vector3 handDirection = (rightHandPos - leftHandPos).normalized;
         float handDistance = Vector3.Distance(leftHandPos, rightHandPos);
 
-        isFlapping = (leftHandDelta.y < -1f && rightHandDelta.y < -1f);
-        isGliding = !isFlapping && !isGrounded && velocity.magnitude > 0.1f;
+        float flapMagnitude = Mathf.Clamp01(Mathf.Min(-leftHandDelta.y, -rightHandDelta.y));
+        bool wingsOutstretched = handDistance > minHandSpread;
 
-        if (isFlapping)
+        // 🐦 Apply flap velocity
+        if (flapMagnitude > 0.05f)
         {
-            // 🐦 Flap = Lift + Thrust from posture
-            Vector3 headToLeft = leftHandPos - headPos;
-            Vector3 headToRight = rightHandPos - headPos;
-            Vector3 postureNormal = Vector3.Cross(headToRight, headToLeft).normalized;
-
-            Vector3 upwardLift = Vector3.up * flapStrength;
-            Vector3 forwardThrust = headFwd * forwardPropulsionStrength;
-
-            velocity += upwardLift;
-            velocity += forwardThrust;
-
-            Debug.DrawLine(headPos, headPos + postureNormal * 2f, Color.green, 0f, false); // Flap direction
-        }
-        else if (isGliding)
-        {
-            if (handDistance > minHandSpread)
-            {
-                // 🪲 Simulate lift from forward velocity
-                float forwardSpeed = Vector3.Dot(velocity, headFwd);
-                float liftForce = Mathf.Clamp01(forwardSpeed / maxSpeed) * flapStrength * 0.8f;
-                velocity += Vector3.up * liftForce * Time.deltaTime;
-
-                // Glide push forward
-                Vector3 forwardGlide = headFwd * glideStrength;
-                velocity += forwardGlide * Time.deltaTime;
-
-                // 🦅 Stronger eagle dive based on look angle
-                float diveAngle = Vector3.Angle(headFwd, Vector3.down);
-                if (diveAngle < 60f)
-                {
-                    float diveIntensity = Mathf.InverseLerp(75f, 15f, diveAngle);
-                    float diveSpeed = diveIntensity * 20f;
-                    float diveForward = diveIntensity * 12f;
-
-                    velocity += Vector3.down * diveSpeed * Time.deltaTime;
-                    velocity += headFwd * diveForward * Time.deltaTime;
-
-                    Debug.Log($"[DIVE] Angle: {diveAngle:F1}°, Intensity: {diveIntensity:F2}, Down: {diveSpeed:F2}, Forward: {diveForward:F2}");
-                }
-
-                // Descent limit based on forward speed
-                float verticalDescentCap = Mathf.Lerp(0f, -0.5f, 1f - (forwardSpeed / maxSpeed));
-                velocity.y = Mathf.Max(velocity.y, verticalDescentCap);
-
-                // 🔄 [Future Feature] Glide turning by hand tilt
-                /*
-                Vector3 localHandDirection = transform.InverseTransformDirection(handDirection);
-                float tiltAngle = Vector3.SignedAngle(localHandDirection, Vector3.right, Vector3.forward);
-
-                if (Mathf.Abs(tiltAngle) > 25f)
-                {
-                    float rotationAmount = Mathf.Sign(tiltAngle) * glideRotationSpeed * Time.deltaTime;
-                    transform.Rotate(Vector3.up, rotationAmount);
-                    Debug.Log($"[GLIDE TURN] Tilt: {tiltAngle:F2}°, Rotated: {rotationAmount:F2}°");
-                }
-                */
-            }
+            velocity += FlightPhysics.CalculateFlapVelocity(
+                headFwd,
+                flapMagnitude,
+                flapStrength,
+                forwardPropulsionStrength
+            );
         }
 
-        // 🤝 Gradually steer toward head.forward
-        Vector3 currentHorizontal = new Vector3(velocity.x, 0f, velocity.z);
-        float currentSpeed = currentHorizontal.magnitude;
-        Vector3 desiredDirection = headFwd.normalized;
-        Vector3 smoothForward = Vector3.Lerp(currentHorizontal.normalized, desiredDirection, 0.05f);
-        velocity = smoothForward * currentSpeed + Vector3.up * velocity.y;
+        // 🪂 Apply glide physics
+        if (wingsOutstretched && flapMagnitude < 0.05f && velocity.magnitude > 0.1f)
+        {
+            velocity = FlightPhysics.CalculateGlideVelocity(
+                velocity,
+                headFwd,
+                handDistance,
+                minHandSpread,
+                flapStrength,
+                glideStrength,
+                maxSpeed,
+                Time.deltaTime
+            );
+        }
 
-        // ✈️ Apply movement
+        // 🧭 Smooth turn toward look direction
+        Vector3 horiz = new Vector3(velocity.x, 0, velocity.z);
+        Vector3 forwardBlend = Vector3.Lerp(horiz.normalized, headFwd, 0.05f);
+        velocity = forwardBlend * horiz.magnitude + Vector3.up * velocity.y;
+
+        // ✈️ Move player
         transform.position += velocity * Time.deltaTime;
 
-        // 🌍 Apply constant gravity
+        // 🌍 Apply gravity
         velocity += Vector3.down * gravity * Time.deltaTime;
 
-        // 🌬️ Drag
-        velocity *= isGliding ? 0.99f : 0.98f;
+        // 🌬️ Apply drag
+        bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
+        velocity *= inGlidePosture ? 0.99f : 0.98f;
 
-        // 🧪 Debug Lines
+        // 🧪 Debug lines
         Debug.DrawLine(transform.position, transform.position + velocity.normalized * 2f, Color.cyan, 0f, false); // Velocity
-        Debug.DrawLine(headPos, headPos + headFwd * 2f, Color.white, 0f, false); // Look direction
-        Debug.DrawLine(transform.position, transform.position + Vector3.up * 2f, Color.blue, 0f, false); // Lift dir
+        Debug.DrawLine(headPos, headPos + headFwd * 2f, Color.white, 0f, false); // Head forward
+        Debug.DrawLine(transform.position, transform.position + Vector3.up * 2f, Color.blue, 0f, false); // Upward
 
-        // 🔁 Update hands unless ghosting
+        // 🔁 Save for next frame
         prevLeftPos = leftHandPos;
         prevRightPos = rightHandPos;
 
-        // 🎥 Record the final, actual frame data (true physics)
+        // 🎥 Record
         if (recorder != null && recorder.enabled)
         {
             recorder.RecordFrame(
@@ -151,7 +110,7 @@ public class HandFlapMovement : MonoBehaviour
                 leftHandPos, leftRot,
                 rightHandPos, rightRot,
                 leftHandDelta, rightHandDelta,
-                velocity.magnitude, velocity
+                flapMagnitude, velocity
             );
         }
     }
