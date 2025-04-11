@@ -43,8 +43,8 @@ MonoBehaviour:
     y: 0
     width: 912
     height: 617
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 202, y: 226}
+  m_MaxSize: {x: 4002, y: 4026}
   m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 17}
@@ -124,8 +124,8 @@ MonoBehaviour:
     y: 0
     width: 263
     height: 617
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 201, y: 226}
+  m_MaxSize: {x: 4001, y: 4026}
   m_ActualView: {fileID: 16}
   m_Panes:
   - {fileID: 16}
@@ -403,7 +403,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 696
+    y: 641
     width: 1174
     height: 298
   m_SerializedDataModeController:
@@ -447,7 +447,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: d2b90000
     m_LastClickedID: 47570
-    m_ExpandedIDs: 00000000e4b70000e6b70000e8b70000eab7000000ca9a3b
+    m_ExpandedIDs: 0000000018b800001ab800001cb800001eb80000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -476,7 +476,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000e4b70000e6b70000e8b70000eab70000
+    m_ExpandedIDs: 0000000018b800001ab800001cb800001eb80000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -555,8 +555,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Inspector\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 1175
-    y: 79
+    x: 1176
+    y: 24
     width: 744
     height: 915
   m_SerializedDataModeController:
@@ -605,7 +605,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 79
+    y: 24
     width: 262
     height: 591
   m_SerializedDataModeController:
@@ -622,23 +622,23 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: d2b2ffff
-      m_LastClickedID: -19758
+      m_SelectedIDs: 
+      m_LastClickedID: 0
       m_ExpandedIDs: e894ffff1afbffffd0b40000d4b40000d8b40000dcb40000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: GhostHead
-        m_OriginalName: GhostHead
+        m_Name: 
+        m_OriginalName: 
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: -26916
+        m_UserData: 0
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 0
+        m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_TrimLeadingAndTrailingWhitespace: 0
         m_ClientGUIView: {fileID: 5}
@@ -670,8 +670,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Scene\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 263
-    y: 79
+    x: 264
+    y: 24
     width: 910
     height: 591
   m_SerializedDataModeController:
@@ -1208,11 +1208,11 @@ MonoBehaviour:
   m_Rotation:
     m_Target: {x: 0.12825862, y: -0.4777242, z: 0.07073584, w: 0.8662149}
     speed: 2
-    m_Value: {x: 0.12825847, y: -0.47772363, z: 0.07073576, w: 0.86621386}
+    m_Value: {x: -0.12825862, y: 0.47772416, z: -0.07073584, w: -0.8662149}
   m_Size:
     m_Target: 1.033673
     speed: 2
-    m_Value: 11.517581
+    m_Value: 1.033673
   m_Ortho:
     m_Target: 0
     speed: 2
