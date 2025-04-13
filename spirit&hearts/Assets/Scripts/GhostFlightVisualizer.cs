@@ -33,27 +33,28 @@ public class GhostFlightVisualizer : MonoBehaviour
         // 🔴 Draw original recorded velocity
         Vector3 originalDir = frame.resultingVelocity.normalized * velocityLineLength;
         Debug.DrawLine(frame.headPosition, frame.headPosition + originalDir, Color.red, 0f, false);
-
-        // 🟢 Simulate corrected velocity from posture
-        Vector3 correctedVelocity = SimulateVelocityFromFrame(frame);
-        Vector3 correctedDir = correctedVelocity.normalized * velocityLineLength;
-        Debug.DrawLine(frame.headPosition, frame.headPosition + correctedDir, Color.green, 0f, false);
+        
+        // Draw dive line
+        Vector3 headForward = frame.headRotation * Vector3.forward;
+        DrawDiveDebug(frame.headPosition, headForward);
     }
 
-    Vector3 SimulateVelocityFromFrame(GhostFlightPlayback.FlightFrame frame)
+    void DrawDiveDebug(Vector3 headPos, Vector3 headForward)
     {
-        Vector3 simulated = Vector3.zero;
+        // Always draw the forward direction from the head
+        Debug.DrawRay(headPos, headForward * 2f, Color.white);
 
-        Vector3 headFwd = frame.headRotation * Vector3.forward;
-        float flapMagnitude = frame.flapMagnitude;
+        // Draw world-down for reference
+        Debug.DrawRay(headPos, Vector3.down * 2f, Color.gray);
 
-        // Reapply flap-based lift + thrust
-        float flapStrength = 0.35f;
-        float forwardThrust = 0.5f;
+        // Angle between head forward and world down
+        float diveAngle = Vector3.Angle(headForward, Vector3.down);
 
-        simulated += Vector3.up * flapStrength * flapMagnitude;
-        simulated += headFwd * forwardThrust * flapMagnitude;
+        // Visualize when you're "diving"
+        Color coneColor = diveAngle < 60f ? Color.cyan : Color.yellow;
+        Debug.DrawRay(headPos, Quaternion.Euler(60f, 0f, 0f) * Vector3.down * 2f, coneColor);
+        Debug.DrawRay(headPos, Quaternion.Euler(-60f, 0f, 0f) * Vector3.down * 2f, coneColor);
 
-        return simulated;
+        Debug.Log($"[DIVE DEBUG] Angle to down: {diveAngle:F1}° — {(diveAngle < 60f ? "🦅 Diving!" : "🧍 No dive")}");
     }
 }

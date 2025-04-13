@@ -512,9 +512,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64697c974df548341a96aa7cd878571d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  flightDataFile: {fileID: 4900000, guid: 6356877672fa5f34ea91f57da49ef936, type: 3}
+  flightDataFile: {fileID: 4900000, guid: 9ad6f789272560643a6987b4fcb884dd, type: 3}
   playbackSpeed: 1
   loop: 1
+  frameIndex: 0
 --- !u!4 &757878849
 Transform:
   m_ObjectHideFlags: 0
@@ -703,7 +704,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &860427832
 Transform:
   m_ObjectHideFlags: 0
@@ -895,6 +896,7 @@ MonoBehaviour:
   headTarget: {fileID: 1657512280}
   leftWingTarget: {fileID: 775865940}
   rightWingTarget: {fileID: 642075021}
+  velocityLineLength: 3
 --- !u!1 &976548208
 GameObject:
   m_ObjectHideFlags: 0
@@ -3531,7 +3533,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1717954561211700994
 Transform:
   m_ObjectHideFlags: 0

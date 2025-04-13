@@ -15,8 +15,8 @@ public class HandFlapMovement : MonoBehaviour
     [SerializeField] private GhostFlightRecorder recorder;
 
     // 🔒 Script-controlled flight values
-    private readonly float flapStrength = 0.35f;
-    private readonly float forwardPropulsionStrength = 0.5f;
+    private readonly float flapStrength = 1f;
+    private readonly float forwardPropulsionStrength = 1.43f;
     private readonly float glideStrength = 2.5f;
     private readonly float maxSpeed = 7f;
     private readonly float minHandSpread = 1.0f;
@@ -66,7 +66,7 @@ public class HandFlapMovement : MonoBehaviour
         // 🪂 Apply glide physics
         if (wingsOutstretched && flapMagnitude < 0.05f && velocity.magnitude > 0.1f)
         {
-            velocity = FlightPhysics.CalculateGlideVelocity(
+            velocity += FlightPhysics.CalculateGlideVelocity(
                 velocity,
                 headFwd,
                 handDistance,
@@ -95,8 +95,6 @@ public class HandFlapMovement : MonoBehaviour
 
         // 🧪 Debug lines
         Debug.DrawLine(transform.position, transform.position + velocity.normalized * 2f, Color.cyan, 0f, false); // Velocity
-        Debug.DrawLine(headPos, headPos + headFwd * 2f, Color.white, 0f, false); // Head forward
-        Debug.DrawLine(transform.position, transform.position + Vector3.up * 2f, Color.blue, 0f, false); // Upward
 
         // 🔁 Save for next frame
         prevLeftPos = leftHandPos;

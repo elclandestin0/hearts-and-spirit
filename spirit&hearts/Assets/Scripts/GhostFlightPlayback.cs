@@ -38,7 +38,7 @@ public class GhostFlightPlayback : MonoBehaviour
     private List<FlightFrame> frames = new List<FlightFrame>();
     private float playbackTime = 0f;
     private float frameRate = 60f;
-    private int frameIndex = 0;
+    public int frameIndex = 0;
 
     void Start()
     {
