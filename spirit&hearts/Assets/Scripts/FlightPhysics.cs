@@ -25,29 +25,38 @@ public static class FlightPhysics
         Vector3 velocity = currentVelocity;
 
         if (handDistance <= minHandSpread)
-            return velocity; // not a valid glide
+            return velocity; // Not gliding if hands are too close
 
+        // ✈️ Base glide lift
         float forwardSpeed = Vector3.Dot(velocity, headForward);
         float liftForce = Mathf.Clamp01(forwardSpeed / maxSpeed) * flapStrength * 0.8f;
         velocity += Vector3.up * liftForce * deltaTime;
 
+        // 🌬️ Forward push from gliding
         velocity += headForward * glideStrength * deltaTime;
 
+        // 🦅 Smooth dive ramp based on angle
         float diveAngle = Vector3.Angle(headForward, Vector3.down);
-        if (diveAngle < 60f)
+        Debug.Log("Dive angle: " + diveAngle);
+
+        if (diveAngle < 45f) // start easing in
         {
-            Debug.Log("Diving");
-            float diveIntensity = Mathf.InverseLerp(75f, 15f, diveAngle);
-            float diveSpeed = diveIntensity * 20f;
-            float diveForward = diveIntensity * 12f;
+            Debug.Log("Diving: " + diveAngle);
+            float diveIntensity = Mathf.InverseLerp(45f, 10f, diveAngle); // 0 to 1 between 45° and 10°
+            float diveSpeed = diveIntensity * 30f;     // vertical drop
+            float diveForward = diveIntensity * 1f;   // horizontal plunge
 
             velocity += Vector3.down * diveSpeed * deltaTime;
             velocity += headForward * diveForward * deltaTime;
+
+            Debug.Log($"[DIVE] Angle: {diveAngle:F1}°, Intensity: {diveIntensity:F2}, Down: {diveSpeed:F1}, Forward: {diveForward:F1}");
         }
-        Debug.Log("dive angle " + diveAngle);
+
+        // 🪂 Prevent falling too fast without forward speed
         float descentLimit = Mathf.Lerp(0f, -0.5f, 1f - (forwardSpeed / maxSpeed));
         velocity.y = Mathf.Max(velocity.y, descentLimit);
 
         return velocity;
     }
+
 }

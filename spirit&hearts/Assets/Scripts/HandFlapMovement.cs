@@ -17,7 +17,7 @@ public class HandFlapMovement : MonoBehaviour
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1.43f;
-    private readonly float glideStrength = 2.5f;
+    private readonly float glideStrength = 5f;
     private readonly float maxSpeed = 7f;
     private readonly float minHandSpread = 1.0f;
     private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
@@ -63,10 +63,13 @@ public class HandFlapMovement : MonoBehaviour
             );
         }
 
-        // 🪂 Apply glide physics
-        if (wingsOutstretched && flapMagnitude < 0.05f && velocity.magnitude > 0.1f)
+        bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
+
+        // 🪂 Apply glide physics and smooth forward redirection together
+        if (inGlidePosture && velocity.magnitude > 0.1f)
         {
-            velocity += FlightPhysics.CalculateGlideVelocity(
+            // Apply lift, dive, forward push
+            velocity = FlightPhysics.CalculateGlideVelocity(
                 velocity,
                 headFwd,
                 handDistance,
@@ -78,10 +81,12 @@ public class HandFlapMovement : MonoBehaviour
             );
         }
 
-        // 🧭 Smooth turn toward look direction
-        Vector3 horiz = new Vector3(velocity.x, 0, velocity.z);
-        Vector3 forwardBlend = Vector3.Lerp(horiz.normalized, headFwd, 0.05f);
-        velocity = forwardBlend * horiz.magnitude + Vector3.up * velocity.y;
+        Vector3 currentDir = velocity.normalized;
+        Vector3 desiredDir = headFwd.normalized;
+        float blendAmount = Time.deltaTime * 2f;
+
+        Vector3 blendedDir = Vector3.Slerp(currentDir, desiredDir, blendAmount);
+        velocity = blendedDir * velocity.magnitude;
 
         // ✈️ Move player
         transform.position += velocity * Time.deltaTime;
@@ -90,7 +95,6 @@ public class HandFlapMovement : MonoBehaviour
         velocity += Vector3.down * gravity * Time.deltaTime;
 
         // 🌬️ Apply drag
-        bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
         velocity *= inGlidePosture ? 0.99f : 0.98f;
 
         // 🧪 Debug lines
