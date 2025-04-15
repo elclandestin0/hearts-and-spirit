@@ -1066,7 +1066,7 @@ Transform:
   m_GameObject: {fileID: 1413808935}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 100.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1104,7 +1104,7 @@ MonoBehaviour:
   leftHand: {fileID: 1879581670}
   rightHand: {fileID: 976548209}
   head: {fileID: 883068447}
-  gravity: -9.8
+  gravity: 9.8
   recorder: {fileID: 529738724}
 --- !u!1 &1434572844
 GameObject:

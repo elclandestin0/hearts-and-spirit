@@ -2,7 +2,12 @@ using UnityEngine;
 
 public static class FlightPhysics
 {
-    public static Vector3 CalculateFlapVelocity(Vector3 headForward, float flapMagnitude, float flapStrength = 0.35f, float forwardThrust = 0.5f)
+    public static Vector3 CalculateFlapVelocity(
+    Vector3 headForward,
+    float flapMagnitude,
+    float flapStrength = 0.35f,
+    float forwardThrust = 0.5f
+)
     {
         Vector3 velocity = Vector3.zero;
 
@@ -17,7 +22,6 @@ public static class FlightPhysics
         Vector3 headForward,
         float handDistance,
         float minHandSpread,
-        float flapStrength,
         float glideStrength,
         float maxSpeed,
         float deltaTime)
@@ -29,8 +33,13 @@ public static class FlightPhysics
 
         // ✈️ Base glide lift from current forward speed
         float forwardSpeed = Vector3.Dot(velocity, headForward);
-        float liftForce = Mathf.Clamp01(forwardSpeed / maxSpeed) * flapStrength * 0.8f;
-        velocity += Vector3.up * liftForce * deltaTime;
+        float liftForce = Mathf.Clamp01(forwardSpeed / maxSpeed) * 0.8f;
+        // Only apply lift if player isn't looking up too much
+        float upwardAngle = Vector3.Angle(headForward, Vector3.up);
+        float upwardSuppression = Mathf.InverseLerp(90f, 30f, upwardAngle); // 90° (horizontal) = 1, 30° (almost up) = 0
+
+        float adjustedLift = liftForce * upwardSuppression;
+        velocity += Vector3.up * adjustedLift * deltaTime;
 
         // 🌬️ Forward push from gliding
         velocity += headForward * glideStrength * deltaTime;

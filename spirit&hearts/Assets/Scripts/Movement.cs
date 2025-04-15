@@ -8,7 +8,7 @@ public class Movement : MonoBehaviour
     public Transform head;
 
     [Header("Physics Controls")]
-    [SerializeField] private float gravity = -9.8f; // m/s²
+    [SerializeField] private float gravity = 9.8f; // m/s²
     
 
     [Header("Recorder")]
@@ -20,7 +20,7 @@ public class Movement : MonoBehaviour
     private readonly float glideStrength = 5f;
     private readonly float maxSpeed = 20f;
     private readonly float minHandSpread = 1.0f;
-    private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
+    // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
 
     private Vector3 velocity = Vector3.zero;
     private Vector3 prevLeftPos, prevRightPos;
@@ -31,35 +31,48 @@ public class Movement : MonoBehaviour
 
     void Start()
     {
-        prevLeftPos = leftHand.position;
-        prevRightPos = rightHand.position;
+        // Save initial world-space hand positions for motion delta
+        prevLeftPos = leftHand.position - head.position;
+        prevRightPos = rightHand.position - head.position;
     }
 
     void Update()
     {
-        // 🔁 Get positions + rotations
+        // 🎯 Position references
         Vector3 headPos = head.position;
         Vector3 headFwd = head.forward;
         Quaternion headRot = head.rotation;
 
-        Vector3 leftHandPos = leftHand.position;
-        Vector3 rightHandPos = rightHand.position;
         Quaternion leftRot = leftHand.rotation;
         Quaternion rightRot = rightHand.rotation;
 
-        // ───── Hand Motion Setup ─────
-        Vector3 leftHandDelta = (leftHandPos - prevLeftPos) / Time.deltaTime;
-        Vector3 rightHandDelta = (rightHandPos - prevRightPos) / Time.deltaTime;
-        float handDistance = Vector3.Distance(leftHandPos, rightHandPos);
+        // 🔁 Deltas in WORLD space (for flap motion detection)
+        Vector3 currentLeftRel = leftHand.position - head.position;
+        Vector3 currentRightRel = rightHand.position - head.position;
 
-        float flapMagnitude = Mathf.Clamp01(Mathf.Min(-leftHandDelta.y, -rightHandDelta.y));
+        Vector3 leftHandDelta = (currentLeftRel - prevLeftPos) / Time.deltaTime;
+        Vector3 rightHandDelta = (currentRightRel - prevRightPos) / Time.deltaTime;
+
+        // 📏 Local space hand distance for posture
+        float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
 
-        // 🐦 Apply flap velocity
-        if (flapMagnitude > 0.05f)
+        // 🐦 Flap detection
+        float leftSpeed = -leftHandDelta.y;
+        float rightSpeed = -rightHandDelta.y;
+
+        Debug.Log($"Left speed: {leftSpeed:F2}, Right speed: {rightSpeed:F2}");
+
+        float minFlapThreshold = 1.5f;
+        bool isFlapping = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold;
+
+        float flapMagnitude = isFlapping
+            ? Mathf.Clamp01((leftSpeed + rightSpeed) / 2f / 5f)
+            : 0f;
+
+        if (isFlapping)
         {
-            // TO-DO: 
-            // - If grip buttons are held, calculate strength as percentage of magnitude capped to 10
+            Debug.Log("✋ Flapping");
             velocity += FlightPhysics.CalculateFlapVelocity(
                 headFwd,
                 flapMagnitude,
@@ -68,58 +81,62 @@ public class Movement : MonoBehaviour
             );
         }
 
+        // 🪂 Glide posture logic
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
-
-        // 🪂 Apply glide physics and smooth forward redirection together
         if (inGlidePosture && velocity.magnitude > 0.1f)
         {
-            // Apply lift, dive, forward push
+            Debug.Log("🕊️ Gliding");
             velocity = FlightPhysics.CalculateGlideVelocity(
                 velocity,
                 headFwd,
                 handDistance,
                 minHandSpread,
-                flapStrength,
                 glideStrength,
                 maxSpeed,
                 Time.deltaTime
             );
 
-            // Blend only in gravity
-            Vector3 currentDir = velocity.normalized;
-            Vector3 desiredDir = headFwd.normalized;
-            float blendAmount = Time.deltaTime * 2f;
+            // 🎯 Smooth forward alignment
+            float fallAlignment = Mathf.Clamp01(Vector3.Dot(velocity.normalized, headFwd.normalized)); // 0 = opposite, 1 = aligned
+            float blendStrength = Mathf.Lerp(0.05f, 0.5f, fallAlignment); // strong when aligned, weak when diving
 
-            Vector3 blendedDir = Vector3.Slerp(currentDir, desiredDir, blendAmount);
+            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * blendStrength);
             velocity = blendedDir * velocity.magnitude;
-
-            // 🌍 Apply gravity
-            velocity += Vector3.down * gravity * Time.deltaTime;
+        }
+        else
+        {
+            // 👇 Simulate fall posture
+            Vector3 fallDir = Vector3.Slerp(velocity.normalized, Vector3.down, Time.deltaTime * 0.5f);
+            velocity = fallDir * velocity.magnitude;
         }
 
-        // ✈️ Move player
+        // 🌍 Apply gravity
+        velocity += Vector3.down * gravity * Time.deltaTime;
+
+        // ✈️ Apply movement
         transform.position += velocity * Time.deltaTime;
 
         // 🌬️ Apply drag
-        velocity *= inGlidePosture ? 0.99f : 0.98f;
+        velocity *= 0.995f;
 
-        // 🧪 Debug lines
-        Debug.DrawLine(transform.position, transform.position + velocity.normalized * 2f, Color.cyan, 0f, false); // Velocity
+        // 🧪 Debug
+        Debug.DrawLine(transform.position, transform.position + velocity.normalized * 2f, Color.cyan, 0f, false);
 
-        // 🔁 Save for next frame
-        prevLeftPos = leftHandPos;
-        prevRightPos = rightHandPos;
+        // 🔁 Save previous frame world-space hand positions
+        prevLeftPos = currentLeftRel;
+        prevRightPos = currentRightRel;
 
-        // 🎥 Record
+        // 🎥 Record    
         if (recorder != null && recorder.enabled)
         {
             recorder.RecordFrame(
                 headPos, headRot,
-                leftHandPos, leftRot,
-                rightHandPos, rightRot,
+                currentLeftRel, leftRot,
+                currentRightRel, rightRot,
                 leftHandDelta, rightHandDelta,
                 flapMagnitude, velocity
             );
         }
     }
+
 }
