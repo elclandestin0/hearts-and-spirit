@@ -8,7 +8,7 @@ public class HandFlapMovement : MonoBehaviour
     public Transform head;
 
     [Header("Physics Controls")]
-    [SerializeField] private float gravity = 4f; // m/s²
+    [SerializeField] private float gravity = -9.8f; // m/s²
     
 
     [Header("Recorder")]
@@ -18,13 +18,16 @@ public class HandFlapMovement : MonoBehaviour
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1.43f;
     private readonly float glideStrength = 5f;
-    private readonly float maxSpeed = 7f;
+    private readonly float maxSpeed = 20f;
     private readonly float minHandSpread = 1.0f;
     private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
 
     private Vector3 velocity = Vector3.zero;
     private Vector3 prevLeftPos, prevRightPos;
     private bool isGrounded = false;
+
+    public Vector3 CurrentVelocity => velocity;
+
 
     void Start()
     {
@@ -55,6 +58,8 @@ public class HandFlapMovement : MonoBehaviour
         // 🐦 Apply flap velocity
         if (flapMagnitude > 0.05f)
         {
+            // TO-DO: 
+            // - If grip buttons are held, calculate strength as percentage of magnitude capped to 10
             velocity += FlightPhysics.CalculateFlapVelocity(
                 headFwd,
                 flapMagnitude,
@@ -79,20 +84,21 @@ public class HandFlapMovement : MonoBehaviour
                 maxSpeed,
                 Time.deltaTime
             );
+
+            // Blend only in gravity
+            Vector3 currentDir = velocity.normalized;
+            Vector3 desiredDir = headFwd.normalized;
+            float blendAmount = Time.deltaTime * 2f;
+
+            Vector3 blendedDir = Vector3.Slerp(currentDir, desiredDir, blendAmount);
+            velocity = blendedDir * velocity.magnitude;
+
+            // 🌍 Apply gravity
+            velocity += Vector3.down * gravity * Time.deltaTime;
         }
-
-        Vector3 currentDir = velocity.normalized;
-        Vector3 desiredDir = headFwd.normalized;
-        float blendAmount = Time.deltaTime * 2f;
-
-        Vector3 blendedDir = Vector3.Slerp(currentDir, desiredDir, blendAmount);
-        velocity = blendedDir * velocity.magnitude;
 
         // ✈️ Move player
         transform.position += velocity * Time.deltaTime;
-
-        // 🌍 Apply gravity
-        velocity += Vector3.down * gravity * Time.deltaTime;
 
         // 🌬️ Apply drag
         velocity *= inGlidePosture ? 0.99f : 0.98f;

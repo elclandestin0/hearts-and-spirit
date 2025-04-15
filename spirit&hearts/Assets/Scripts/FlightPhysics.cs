@@ -39,17 +39,19 @@ public static class FlightPhysics
         float diveAngle = Vector3.Angle(headForward, Vector3.down);
         Debug.Log("Dive angle: " + diveAngle);
 
-        if (diveAngle < 45f) // start easing in
+        if (diveAngle < 60f)
         {
-            Debug.Log("Diving: " + diveAngle);
-            float diveIntensity = Mathf.InverseLerp(45f, 10f, diveAngle); // 0 to 1 between 45° and 10°
-            float diveSpeed = diveIntensity * 30f;     // vertical drop
-            float diveForward = diveIntensity * 1f;   // horizontal plunge
+            // Dive intensity scales from 0.8 → 1.0 as you approach 10°
+            float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);  // 60° = 0, 10° = 1
+            float diveIntensity = Mathf.Lerp(0.8f, 1.0f, rawDive);   // Scale nicely
 
-            velocity += Vector3.down * diveSpeed * deltaTime;
-            velocity += headForward * diveForward * deltaTime;
+            // Direction is exactly where you're looking
+            Vector3 diveDir = headForward.normalized;
 
-            Debug.Log($"[DIVE] Angle: {diveAngle:F1}°, Intensity: {diveIntensity:F2}, Down: {diveSpeed:F1}, Forward: {diveForward:F1}");
+            float diveSpeed = diveIntensity * 100f;
+            velocity += diveDir * diveSpeed * deltaTime;
+
+            Debug.Log($"[DIVE] 💥 DiveAngle: {diveAngle:F1}°, Intensity: {diveIntensity:F2}, Speed: {diveSpeed:F1}, Dir: {diveDir}");
         }
 
         // 🪂 Prevent falling too fast without forward speed
