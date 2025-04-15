@@ -27,7 +27,7 @@ public static class FlightPhysics
         if (handDistance <= minHandSpread)
             return velocity; // Not gliding if hands are too close
 
-        // ✈️ Base glide lift
+        // ✈️ Base glide lift from current forward speed
         float forwardSpeed = Vector3.Dot(velocity, headForward);
         float liftForce = Mathf.Clamp01(forwardSpeed / maxSpeed) * flapStrength * 0.8f;
         velocity += Vector3.up * liftForce * deltaTime;
@@ -37,28 +37,28 @@ public static class FlightPhysics
 
         // 🦅 Smooth dive ramp based on angle
         float diveAngle = Vector3.Angle(headForward, Vector3.down);
-        Debug.Log("Dive angle: " + diveAngle);
-
         if (diveAngle < 60f)
         {
-            // Dive intensity scales from 0.8 → 1.0 as you approach 10°
-            float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);  // 60° = 0, 10° = 1
-            float diveIntensity = Mathf.Lerp(0.8f, 1.0f, rawDive);   // Scale nicely
+            // Dive intensity from 0.8 to 1.0 between 60° and 10°
+            float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);
+            float diveIntensity = Mathf.Lerp(0.8f, 1.0f, rawDive);
 
-            // Direction is exactly where you're looking
+            // Dive direction is exactly where the player is looking
             Vector3 diveDir = headForward.normalized;
 
-            float diveSpeed = diveIntensity * 100f;
+            // Dive force
+            float diveSpeed = diveIntensity * 30f;
             velocity += diveDir * diveSpeed * deltaTime;
-
-            Debug.Log($"[DIVE] 💥 DiveAngle: {diveAngle:F1}°, Intensity: {diveIntensity:F2}, Speed: {diveSpeed:F1}, Dir: {diveDir}");
+            Debug.Log($"[DIVE] Angle: {diveAngle:F1}°, Intensity: {diveIntensity:F2}, Speed: {diveSpeed:F1}, Dir: {diveDir}");
         }
 
-        // 🪂 Prevent falling too fast without forward speed
+
+        // 🪂 Cap downward velocity when gliding slowly
         float descentLimit = Mathf.Lerp(0f, -0.5f, 1f - (forwardSpeed / maxSpeed));
         velocity.y = Mathf.Max(velocity.y, descentLimit);
 
         return velocity;
     }
+
 
 }

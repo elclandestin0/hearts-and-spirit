@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class HandFlapMovement : MonoBehaviour
+public class Movement : MonoBehaviour
 {
     [Header("XR References")]
     public Transform leftHand;

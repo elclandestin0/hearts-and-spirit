@@ -42,7 +42,7 @@ public class GhostFlightRecorder : MonoBehaviour
         timer = 0f;
         nextRecord = 0f;
         isRecording = true;
-        Debug.Log("🎙️ Recorder triggered by HandFlapMovement.");
+        Debug.Log("🎙️ Recorder triggered by Movement script.");
     }
 
     void OnApplicationQuit()
