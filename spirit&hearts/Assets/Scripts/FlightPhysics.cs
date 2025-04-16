@@ -27,22 +27,33 @@ public static class FlightPhysics
         float deltaTime)
     {
         Vector3 velocity = currentVelocity;
+        Debug.Log($"[GLIDE] In: Velocity = {currentVelocity}, Mag = {currentVelocity.magnitude}");
 
-        if (handDistance <= minHandSpread)
-            return velocity; // Not gliding if hands are too close
+        // Directional blend
+        Vector3 currentDir = velocity.normalized;
+        float currentSpeed = velocity.magnitude;
 
-        // ✈️ Base glide lift from current forward speed
+        // Blend direction + slightly smooth the magnitude (optional, tweakable)
+        Vector3 blendedDir = Vector3.Slerp(currentDir, headForward.normalized, deltaTime * 2f);
+        float blendedSpeed = Mathf.Lerp(currentSpeed, currentSpeed + glideStrength, deltaTime * 2f); // optional smoothing
+
+        velocity = blendedDir * blendedSpeed;
+
+        // Forward push
+        Vector3 glidePush = blendedDir * glideStrength * deltaTime;
+        Debug.Log($"[GLIDE] GlidePush = {glidePush}");
+        velocity += glidePush;
+
+        // Lift
         float forwardSpeed = Vector3.Dot(velocity, headForward);
-        float liftForce = Mathf.Clamp01(forwardSpeed / maxSpeed) * 0.8f;
-        // Only apply lift if player isn't looking up too much
-        float upwardAngle = Vector3.Angle(headForward, Vector3.up);
-        float upwardSuppression = Mathf.InverseLerp(90f, 30f, upwardAngle); // 90° (horizontal) = 1, 30° (almost up) = 0
+        float lift = Mathf.Clamp01(forwardSpeed / maxSpeed);
+        float upAngle = Vector3.Angle(headForward, Vector3.up);
+        float liftFactor = Mathf.InverseLerp(90f, 10f, upAngle);
+        Debug.Log($"[GLIDE] LiftFactor = {liftFactor:F2}, LiftForce = {lift}, FinalLift = {lift * liftFactor * deltaTime * 8f}");
+        velocity += Vector3.up * lift * liftFactor * deltaTime * 8f;
 
-        float adjustedLift = liftForce * upwardSuppression;
-        velocity += Vector3.up * adjustedLift * deltaTime;
-
-        // 🌬️ Forward push from gliding
-        velocity += headForward * glideStrength * deltaTime;
+        // Final output
+        Debug.Log($"[GLIDE] Out: Velocity = {velocity}, Y = {velocity.y:F2}, Z = {velocity.z:F2}");
 
         // 🦅 Smooth dive ramp based on angle
         float diveAngle = Vector3.Angle(headForward, Vector3.down);
@@ -61,10 +72,19 @@ public static class FlightPhysics
             Debug.Log($"[DIVE] Angle: {diveAngle:F1}°, Intensity: {diveIntensity:F2}, Speed: {diveSpeed:F1}, Dir: {diveDir}");
         }
 
+        // 🛑 Cap forward speed
+        Vector3 forwardDir = headForward.normalized;
+        float currentForwardSpeed = Vector3.Dot(velocity, forwardDir);
 
-        // 🪂 Cap downward velocity when gliding slowly
-        float descentLimit = Mathf.Lerp(0f, -0.5f, 1f - (forwardSpeed / maxSpeed));
-        velocity.y = Mathf.Max(velocity.y, descentLimit);
+        if (currentForwardSpeed > maxSpeed)
+        {
+            // Remove the excess in the forward direction
+            Vector3 forwardVelocity = forwardDir * currentForwardSpeed;
+            Vector3 excess = forwardVelocity - (forwardDir * maxSpeed);
+            velocity -= excess;
+
+            Debug.Log($"[GLIDE] ⚠️ Forward speed capped: {currentForwardSpeed:F2} → {maxSpeed:F2}");
+        }
 
         return velocity;
     }

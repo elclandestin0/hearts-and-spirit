@@ -10,7 +10,6 @@ public class Movement : MonoBehaviour
     [Header("Physics Controls")]
     [SerializeField] private float gravity = 9.8f; // m/s²
     
-
     [Header("Recorder")]
     [SerializeField] private GhostFlightRecorder recorder;
 
@@ -18,13 +17,13 @@ public class Movement : MonoBehaviour
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1.43f;
     private readonly float glideStrength = 5f;
-    private readonly float maxSpeed = 20f;
+    private readonly float maxSpeed = 50f;
     private readonly float minHandSpread = 1.0f;
     // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
-
     private Vector3 velocity = Vector3.zero;
     private Vector3 prevLeftPos, prevRightPos;
     private bool isGrounded = false;
+    [SerializeField] private bool isGliding = false;
 
     public Vector3 CurrentVelocity => velocity;
 
@@ -83,7 +82,7 @@ public class Movement : MonoBehaviour
 
         // 🪂 Glide posture logic
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
-        if (inGlidePosture && velocity.magnitude > 0.1f)
+        if ((inGlidePosture && velocity.magnitude > 0.1f) || isGliding)
         {
             Debug.Log("🕊️ Gliding");
             velocity = FlightPhysics.CalculateGlideVelocity(
@@ -95,22 +94,8 @@ public class Movement : MonoBehaviour
                 maxSpeed,
                 Time.deltaTime
             );
-
-            // 🎯 Smooth forward alignment
-            float fallAlignment = Mathf.Clamp01(Vector3.Dot(velocity.normalized, headFwd.normalized)); // 0 = opposite, 1 = aligned
-            float blendStrength = Mathf.Lerp(0.05f, 0.5f, fallAlignment); // strong when aligned, weak when diving
-
-            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * blendStrength);
-            velocity = blendedDir * velocity.magnitude;
-        }
-        else
-        {
-            // 👇 Simulate fall posture
-            Vector3 fallDir = Vector3.Slerp(velocity.normalized, Vector3.down, Time.deltaTime * 0.5f);
-            velocity = fallDir * velocity.magnitude;
         }
 
-        // 🌍 Apply gravity
         velocity += Vector3.down * gravity * Time.deltaTime;
 
         // ✈️ Apply movement
