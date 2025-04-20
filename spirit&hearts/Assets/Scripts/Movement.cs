@@ -117,7 +117,7 @@ public class Movement : MonoBehaviour
 
         // 🪂 Glide posture logic
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
-        if ((inGlidePosture && velocity.magnitude > 0.1f && readyToGlide) || isGliding)
+        if ((inGlidePosture && velocity.magnitude > 0.1f) || isGliding)
         {
             Debug.Log("🕊️ Gliding");
             velocity = FlightPhysics.CalculateGlideVelocity(
