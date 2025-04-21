@@ -25,7 +25,12 @@ public class Movement : MonoBehaviour
     private bool isGrounded = false;
     [SerializeField] private bool isGliding = false;
 
+    // Publicly accessible variables for reference
     public Vector3 CurrentVelocity => velocity;
+
+    // Logger variable(s)
+    private static readonly Logger diveLogger = new Logger(Debug.unityLogger.logHandler);
+
 
 
     void Start()
@@ -86,6 +91,23 @@ public class Movement : MonoBehaviour
         if ((inGlidePosture && velocity.magnitude > 0.1f) || isGliding)
         {
             Debug.Log("🕊️ Gliding");
+            // Are both hands behind the head?
+            Vector3 leftToHead = leftHand.position - head.position;
+            Vector3 rightToHead = rightHand.position - head.position;
+
+            float leftDot = Vector3.Dot(leftToHead, head.forward);
+            float rightDot = Vector3.Dot(rightToHead, head.forward);
+
+            bool leftBehind = leftDot < -0.2f;
+            bool rightBehind = rightDot < -0.2f;
+
+            bool isManualDivePose = leftBehind && rightBehind;
+
+            // 🧪 Debug logs
+            diveLogger.Log("Dive", $"[DIVE CHECK] LeftDot: {leftDot:F2}, RightDot: {rightDot:F2}");
+            diveLogger.Log("Dive", $"[DIVE CHECK] LeftBehind: {leftBehind}, RightBehind: {rightBehind}");
+            diveLogger.Log("Dive", $"[DIVE CHECK] isManualDivePose: {isManualDivePose}");
+
             velocity = FlightPhysics.CalculateGlideVelocity(
                 velocity,
                 headFwd,
