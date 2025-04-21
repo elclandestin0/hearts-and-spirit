@@ -80,40 +80,6 @@ public class Movement : MonoBehaviour
             );
         }
 
-        // 🔄 Reverse Stroke Detection (Backwards propulsion)
-
-        // Roll (Z) for palm orientation
-        float leftZ = leftRot.eulerAngles.z;
-        float rightZ = rightRot.eulerAngles.z;
-
-        // Normalize angles to -180 to 180
-        leftZ = (leftZ > 180f) ? leftZ - 360f : leftZ;
-        rightZ = (rightZ > 180f) ? rightZ - 360f : rightZ;
-
-        // Palm facing downward = GlidePosture
-        bool leftPalmDown = leftZ > -45f && leftZ < 45f;
-        bool rightPalmDown = rightZ > -45f && rightZ < 45f;
-
-        // Palm facing downward = GlidePosture
-        bool leftPalmForward = leftZ > -135f && leftZ < -45f;
-        bool rightPalmForward = rightZ < 135f && rightZ > 45f;
-        Debug.Log("leftPalmDown " + leftPalmDown + " rightPalmDown " + rightPalmDown);
-        bool readyToGlide = leftPalmDown && rightPalmDown;
-
-        // Backward motion
-        bool leftStrokeBack = leftHandDelta.z < -0.2f;
-        bool rightStrokeBack = rightHandDelta.z < -0.2f;
-
-        bool leftBackStroke = leftPalmForward  && leftStrokeBack;
-        bool rightBackStroke = rightPalmForward && rightStrokeBack;
-
-        if (leftBackStroke && rightBackStroke)
-        {
-            float reverseForce = 1f; // Tune this value
-            velocity += -head.forward * reverseForce * Time.deltaTime;
-
-            Debug.Log($"🌀 Reverse Stroke | L:{leftBackStroke} R:{rightBackStroke} | L-Z:{leftZ:F1} R-Z:{rightZ:F1}");
-        }
 
         // 🪂 Glide posture logic
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
