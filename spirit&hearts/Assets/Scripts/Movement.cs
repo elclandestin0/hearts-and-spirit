@@ -17,12 +17,14 @@ public class Movement : MonoBehaviour
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1.43f;
     private readonly float glideStrength = 5f;
-    private readonly float maxSpeed = 50f;
+    private readonly float maxSpeed = 30f;
+    private readonly float maxDiveSpeed = 80f; // or 100f
     private readonly float minHandSpread = 1.0f;
     // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
     private Vector3 velocity = Vector3.zero;
     private Vector3 prevLeftPos, prevRightPos;
-    private bool isGrounded = false;
+    // To-do: use later
+    // private bool isGrounded = false;
     [SerializeField] private bool isGliding = false;
 
     // Publicly accessible variables for reference
@@ -111,11 +113,11 @@ public class Movement : MonoBehaviour
             velocity = FlightPhysics.CalculateGlideVelocity(
                 velocity,
                 headFwd,
-                handDistance,
-                minHandSpread,
                 glideStrength,
                 maxSpeed,
-                Time.deltaTime
+                maxDiveSpeed,
+                Time.deltaTime,
+                isManualDivePose
             );
         }
 

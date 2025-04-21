@@ -20,11 +20,11 @@ public static class FlightPhysics
     public static Vector3 CalculateGlideVelocity(
         Vector3 currentVelocity,
         Vector3 headForward,
-        float handDistance,
-        float minHandSpread,
         float glideStrength,
         float maxSpeed,
-        float deltaTime)
+        float maxDiveSpeed,
+        float deltaTime,
+        bool isManualDivePose)
     {
         Vector3 velocity = currentVelocity;
         Debug.Log($"[GLIDE] In: Velocity = {currentVelocity}, Mag = {currentVelocity.magnitude}");
@@ -57,7 +57,7 @@ public static class FlightPhysics
 
         // 🦅 Smooth dive ramp based on angle
         float diveAngle = Vector3.Angle(headForward, Vector3.down);
-        if (diveAngle < 60f)
+        if (diveAngle < 60f && isManualDivePose)
         {
             // Dive intensity from 0.8 to 1.0 between 60° and 10°
             float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);
@@ -67,7 +67,7 @@ public static class FlightPhysics
             Vector3 diveDir = headForward.normalized;
 
             // Dive force
-            float diveSpeed = diveIntensity * 30f;
+            float diveSpeed = diveIntensity * maxDiveSpeed;
             velocity += diveDir * diveSpeed * deltaTime;
             Debug.Log($"[DIVE] Angle: {diveAngle:F1}°, Intensity: {diveIntensity:F2}, Speed: {diveSpeed:F1}, Dir: {diveDir}");
         }
@@ -75,15 +75,15 @@ public static class FlightPhysics
         // 🛑 Cap forward speed
         Vector3 forwardDir = headForward.normalized;
         float currentForwardSpeed = Vector3.Dot(velocity, forwardDir);
+        float speedLimit = isManualDivePose ? maxDiveSpeed : maxSpeed;
 
-        if (currentForwardSpeed > maxSpeed)
+        if (currentForwardSpeed > speedLimit)
         {
-            // Remove the excess in the forward direction
             Vector3 forwardVelocity = forwardDir * currentForwardSpeed;
-            Vector3 excess = forwardVelocity - (forwardDir * maxSpeed);
+            Vector3 excess = forwardVelocity - (forwardDir * speedLimit);
             velocity -= excess;
 
-            Debug.Log($"[GLIDE] ⚠️ Forward speed capped: {currentForwardSpeed:F2} → {maxSpeed:F2}");
+            Debug.Log($"[GLIDE] ⚠️ Forward speed capped: {currentForwardSpeed:F2} → {speedLimit:F2}");
         }
 
         return velocity;
