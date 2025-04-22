@@ -9,6 +9,7 @@ public class Movement : MonoBehaviour
 
     [Header("Physics Controls")]
     [SerializeField] private float gravity = 9.8f; // m/s²
+    [SerializeField] private float glideTime = 0f;
     
     [Header("Recorder")]
     [SerializeField] private GhostFlightRecorder recorder;
@@ -84,6 +85,8 @@ public class Movement : MonoBehaviour
                 flapStrength,
                 forwardPropulsionStrength
             );
+
+            glideTime = 0f;
         }
 
 
@@ -116,7 +119,8 @@ public class Movement : MonoBehaviour
                 maxSpeed,
                 maxDiveSpeed,
                 Time.deltaTime,
-                isManualDivePose
+                isManualDivePose,
+                ref glideTime
             );
         }
 
