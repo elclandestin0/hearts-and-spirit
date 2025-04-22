@@ -29,6 +29,7 @@ public class Movement : MonoBehaviour
 
     // Publicly accessible variables for reference
     public Vector3 CurrentVelocity => velocity;
+    public Transform Head => head;
 
     // Logger variable(s)
     private static readonly Logger diveLogger = new Logger(Debug.unityLogger.logHandler);
@@ -66,8 +67,6 @@ public class Movement : MonoBehaviour
         // 🐦 Flap detection
         float leftSpeed = -leftHandDelta.y;
         float rightSpeed = -rightHandDelta.y;
-
-        Debug.Log($"Left speed: {leftSpeed:F2}, Right speed: {rightSpeed:F2}");
 
         float minFlapThreshold = 1.5f;
         bool isFlapping = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold;
@@ -127,7 +126,7 @@ public class Movement : MonoBehaviour
         transform.position += velocity * Time.deltaTime;
 
         // 🌬️ Apply drag
-        velocity *= 0.995f;
+        velocity *= 0.985f;
 
         // 🧪 Debug
         Debug.DrawLine(transform.position, transform.position + velocity.normalized * 2f, Color.cyan, 0f, false);

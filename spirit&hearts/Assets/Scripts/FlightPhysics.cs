@@ -40,9 +40,10 @@ public static class FlightPhysics
         velocity = blendedDir * blendedSpeed;
 
         // Forward push
-        Vector3 glidePush = blendedDir * glideStrength * deltaTime;
-        Debug.Log($"[GLIDE] GlidePush = {glidePush}");
-        velocity += glidePush;
+        // To-do: we need to see whether we need to add this or not based on realism.
+        // Vector3 glidePush = blendedDir * glideStrength * deltaTime;
+        // Debug.Log($"[GLIDE] GlidePush = {glidePush}");
+        // velocity += glidePush;
 
         // Lift
         float forwardSpeed = Vector3.Dot(velocity, headForward);
@@ -50,7 +51,7 @@ public static class FlightPhysics
         float upAngle = Vector3.Angle(headForward, Vector3.up);
         float liftFactor = Mathf.InverseLerp(90f, 10f, upAngle);
         Debug.Log($"[GLIDE] LiftFactor = {liftFactor:F2}, LiftForce = {lift}, FinalLift = {lift * liftFactor * deltaTime * 8f}");
-        velocity += Vector3.up * (lift * liftFactor * deltaTime * 8f);
+        velocity += Vector3.up * (lift * liftFactor * deltaTime);
 
         // Final output
         Debug.Log($"[GLIDE] Out: Velocity = {velocity}, Y = {velocity.y:F2}, Z = {velocity.z:F2}");
