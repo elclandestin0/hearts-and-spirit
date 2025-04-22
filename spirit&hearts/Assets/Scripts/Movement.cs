@@ -78,7 +78,6 @@ public class Movement : MonoBehaviour
 
         if (isFlapping)
         {
-            Debug.Log("✋ Flapping");
             velocity += FlightPhysics.CalculateFlapVelocity(
                 headFwd,
                 flapMagnitude,

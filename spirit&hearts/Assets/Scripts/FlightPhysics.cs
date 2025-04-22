@@ -65,13 +65,16 @@ public static class FlightPhysics
             float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);
             float diveIntensity = Mathf.Lerp(0.8f, 1.0f, rawDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
+            Debug.Log($"[DIVING - Velocity before calculation] Velocity: {velocity:F2}, diveSpeed: {diveSpeed:F2}");
             velocity += headForward.normalized * diveSpeed * deltaTime;
+            Debug.Log($"[DIVING - Velocity after calculation] Velocity: {velocity:F2}, diveSpeed: {diveSpeed:F2}");
         }
 
         // 🛑 Cap forward speed
         float currentForwardSpeed = Vector3.Dot(velocity, headForward);
         float speedLimit = maxDiveSpeed;
 
+        Debug.Log($"[SPEED CHECK BEFORE CAP] Velocity: {velocity:F2}");
         if (currentForwardSpeed > speedLimit)
         {
             Vector3 forwardDir = headForward.normalized;
@@ -79,6 +82,7 @@ public static class FlightPhysics
             Vector3 excess = forwardVelocity - (forwardDir * speedLimit);
             velocity -= excess;
         }
+        Debug.Log($"[SPEED CHECK AFTER CAP] Velocity: {velocity:F2}");
         return velocity;
     }
 }
