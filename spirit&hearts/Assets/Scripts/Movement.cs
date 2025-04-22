@@ -94,7 +94,6 @@ public class Movement : MonoBehaviour
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
         if ((inGlidePosture && velocity.magnitude > 0.1f) || isGliding)
         {
-            Debug.Log("🕊️ Gliding");
             // Are both hands behind the head?
             Vector3 leftToHead = leftHand.position - head.position;
             Vector3 rightToHead = rightHand.position - head.position;
