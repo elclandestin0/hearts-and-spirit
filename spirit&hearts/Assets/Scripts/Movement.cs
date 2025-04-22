@@ -17,7 +17,7 @@ public class Movement : MonoBehaviour
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1.43f;
-    private readonly float glideStrength = 5f;
+    private readonly float glideStrength = 2.5f;
     private readonly float maxSpeed = 30f;
     private readonly float maxDiveSpeed = 80f; // or 100f
     private readonly float minHandSpread = 1.0f;
@@ -35,13 +35,11 @@ public class Movement : MonoBehaviour
     // Logger variable(s)
     private static readonly Logger diveLogger = new Logger(Debug.unityLogger.logHandler);
 
-
-
     void Start()
     {
         // Save initial world-space hand positions for motion delta
-        prevLeftPos = leftHand.position - head.position;
-        prevRightPos = rightHand.position - head.position;
+        prevLeftPos = leftHand.position;
+        prevRightPos = rightHand.position;
     }
 
     void Update()
@@ -55,8 +53,8 @@ public class Movement : MonoBehaviour
         Quaternion rightRot = rightHand.rotation;
 
         // 🔁 Deltas in WORLD space (for flap motion detection)
-        Vector3 currentLeftRel = leftHand.position - head.position;
-        Vector3 currentRightRel = rightHand.position - head.position;
+        Vector3 currentLeftRel = leftHand.position;
+        Vector3 currentRightRel = rightHand.position;
 
         Vector3 leftHandDelta = (currentLeftRel - prevLeftPos) / Time.deltaTime;
         Vector3 rightHandDelta = (currentRightRel - prevRightPos) / Time.deltaTime;
@@ -128,7 +126,8 @@ public class Movement : MonoBehaviour
         velocity *= 0.995f;
 
         // 🧪 Debug
-        Debug.DrawLine(transform.position, transform.position + velocity.normalized * 2f, Color.cyan, 0f, false);
+        Debug.DrawLine(head.position, head.position + velocity.normalized * 5f, Color.cyan, 0f, false);
+        Debug.DrawLine(head.position, head.position + headFwd * 3f, Color.red, 0f, false);
 
         // 🔁 Save previous frame world-space hand positions
         prevLeftPos = currentLeftRel;

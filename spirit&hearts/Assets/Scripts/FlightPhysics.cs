@@ -69,7 +69,7 @@ public static class FlightPhysics
             Debug.Log($"[DIVE CHECK] RawDive: {rawDive:F2}, DiveIntensity: {diveIntensity:F2}, DiveSpeed: {diveSpeed:F2}, Velocity: {velocity:F2}");
             
             // 👇 Dive resets glide decay for future lift
-            glideTime = Mathf.Max(0f, glideTime - deltaTime * 5f);
+            glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
         } 
         else 
         {

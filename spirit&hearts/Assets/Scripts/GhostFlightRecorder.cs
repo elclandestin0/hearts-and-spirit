@@ -8,33 +8,10 @@ public class GhostFlightRecorder : MonoBehaviour
     public Transform leftHand;
     public Transform rightHand;
     public Transform head;
-
-    [Header("Record Controls")]
-    public float recordDuration = 60f;
-    public float recordRate = 60f;
-
     private List<GhostFlightPlayback.FlightFrame> frames = new List<GhostFlightPlayback.FlightFrame>();
-    private bool startRecord = false;
     private float timer = 0f;
     private float nextRecord = 0f;
     private bool isRecording = false;
-    private float autosaveTimer = 0f;
-    private float autosaveInterval = 10f;
-
-    void Update()
-    {
-
-        if (isRecording)
-        {
-            autosaveTimer += Time.deltaTime;
-            if (autosaveTimer >= autosaveInterval)
-            {
-                SaveToFile(); // Overwrite file, or version it
-                autosaveTimer = 0f;
-            }
-        }
-
-    }
 
     public void BeginRecording()
     {
@@ -55,17 +32,32 @@ public class GhostFlightRecorder : MonoBehaviour
     }
 
 
-    public void SaveToFile()
+public void SaveToFile()
+{
+    string folderPath = Application.dataPath + "/FlightRecords";
+    if (!Directory.Exists(folderPath))
     {
-        string path = Application.dataPath + "/ghost_flight.json";
-
-        GhostFlightContainer container = new GhostFlightContainer();
-        container.frames = frames.ToArray();
-        string json = JsonUtility.ToJson(container, true);
-
-        File.WriteAllText(path, json);
-        Debug.Log("Saved ghost flight to: " + path);
+        Directory.CreateDirectory(folderPath);
     }
+
+    int fileIndex = 1;
+    string filePath;
+
+    // Keep incrementing until we find a new file name
+    do
+    {
+        filePath = Path.Combine(folderPath, $"ghost_flight_{fileIndex:D3}.json");
+        fileIndex++;
+    } while (File.Exists(filePath));
+
+    GhostFlightContainer container = new GhostFlightContainer();
+    container.frames = frames.ToArray();
+    string json = JsonUtility.ToJson(container, true);
+
+    File.WriteAllText(filePath, json);
+    Debug.Log("💾 Saved ghost flight to: " + filePath);
+}
+
 
     [System.Serializable]
     private class GhostFlightContainer
