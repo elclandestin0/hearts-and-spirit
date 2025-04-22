@@ -125,7 +125,7 @@ public class Movement : MonoBehaviour
         transform.position += velocity * Time.deltaTime;
 
         // 🌬️ Apply drag
-        velocity *= 0.985f;
+        velocity *= 0.995f;
 
         // 🧪 Debug
         Debug.DrawLine(transform.position, transform.position + velocity.normalized * 2f, Color.cyan, 0f, false);

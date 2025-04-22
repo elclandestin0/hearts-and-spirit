@@ -40,7 +40,7 @@ public static class FlightPhysics
         velocity = blendedDir * blendedSpeed;
 
         // 🌬️ Decaying glide push
-        float glideDecay = Mathf.Clamp01(1f - (glideTime * 0.05f));
+        float glideDecay = 1f - (glideTime * 0.05f);
         float currentGlideStrength = glideStrength * glideDecay;
         velocity += blendedDir * currentGlideStrength * deltaTime;
 
@@ -48,7 +48,7 @@ public static class FlightPhysics
         float forwardSpeed = Vector3.Dot(velocity, headForward);
         float lift = Mathf.Clamp01(forwardSpeed / maxSpeed);
         float upAngle = Vector3.Angle(headForward, Vector3.up);
-        float liftFactor = Mathf.InverseLerp(90f, 10f, upAngle);
+        float liftFactor = Mathf.InverseLerp(90f, 0f, upAngle);
 
         // 🧮 Lift decay modifier based on glide time, stronger pull down over time
         float liftDecay = (1f - (Mathf.Pow(glideTime, 1.2f) * 0.04f)); // nonlinear decay
