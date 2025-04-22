@@ -48,7 +48,7 @@ public static class FlightPhysics
         float forwardSpeed = Vector3.Dot(velocity, headForward);
         float lift = Mathf.Clamp01(forwardSpeed / maxSpeed);
         float upAngle = Vector3.Angle(headForward, Vector3.up);
-        float liftFactor = Mathf.InverseLerp(90f, 0f, upAngle);
+        float liftFactor = Mathf.InverseLerp(90f, 10f, upAngle);
 
         // 🧮 Lift decay modifier based on glide time, stronger pull down over time
         float liftDecay = (1f - (Mathf.Pow(glideTime, 1.2f) * 0.04f)); // nonlinear decay
@@ -62,7 +62,7 @@ public static class FlightPhysics
         if (diveAngle < 60f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);
-            float diveIntensity = Mathf.Lerp(0.8f, 1.0f, rawDive);
+            float diveIntensity = Mathf.Lerp(0.001f, 1.0f, rawDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
             Debug.Log($"[DIVING - Velocity before calculation] Velocity: {velocity:F2}, diveSpeed: {diveSpeed:F2}");
             velocity += headForward.normalized * diveSpeed * deltaTime;
