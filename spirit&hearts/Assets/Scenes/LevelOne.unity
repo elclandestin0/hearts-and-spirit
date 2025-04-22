@@ -499,7 +499,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movement: {fileID: 1413808939}
-  currentState: 0
+  currentState: 2
   rotationSpeed: 90
   upAngle: -60
   downAngle: 60
@@ -1155,7 +1155,7 @@ MonoBehaviour:
   leftHand: {fileID: 1879581670}
   rightHand: {fileID: 976548209}
   head: {fileID: 883068447}
-  gravity: 9.82
+  gravity: 9.8
   glideTime: 0
   recorder: {fileID: 529738724}
   isGliding: 1

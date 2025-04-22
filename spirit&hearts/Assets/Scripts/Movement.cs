@@ -105,10 +105,7 @@ public class Movement : MonoBehaviour
 
             bool isManualDivePose = leftBehind && rightBehind;
 
-            // 🧪 Debug logs
-            diveLogger.Log("Dive", $"[DIVE CHECK] LeftDot: {leftDot:F2}, RightDot: {rightDot:F2}");
-            diveLogger.Log("Dive", $"[DIVE CHECK] LeftBehind: {leftBehind}, RightBehind: {rightBehind}");
-            diveLogger.Log("Dive", $"[DIVE CHECK] isManualDivePose: {isManualDivePose}");
+            Debug.Log($"[DIVE CHECK] LeftDot: {leftDot:F2}, RightDot: {rightDot:F2}");
 
             velocity = FlightPhysics.CalculateGlideVelocity(
                 velocity,
@@ -117,7 +114,7 @@ public class Movement : MonoBehaviour
                 maxSpeed,
                 maxDiveSpeed,
                 Time.deltaTime,
-                isManualDivePose,
+                true,
                 ref glideTime
             );
         }
