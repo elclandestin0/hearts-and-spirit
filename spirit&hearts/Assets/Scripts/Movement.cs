@@ -8,7 +8,7 @@ public class Movement : MonoBehaviour
     public Transform head;
 
     [Header("Physics Controls")]
-    [SerializeField] private float gravity = 9.8f; // m/s²
+    // [SerializeField] private float gravity = 9.8f; // m/s²
     [SerializeField] private float glideTime = 0f;
     public float diveAngle = 0f;
     
@@ -82,6 +82,8 @@ public class Movement : MonoBehaviour
             velocity += FlightPhysics.CalculateFlapVelocity(
                 headFwd,
                 flapMagnitude,
+                transform.position,
+                World.Instance.transform.position,
                 flapStrength,
                 forwardPropulsionStrength
             );
@@ -118,11 +120,13 @@ public class Movement : MonoBehaviour
                 Time.deltaTime,
                 true,
                 ref glideTime,
-                ref diveAngle
+                ref diveAngle,
+                transform.position,
+                World.Instance.transform.position
             );
         }
 
-        velocity += Vector3.down * gravity * Time.deltaTime;
+        velocity += World.Instance.GetGravityForce(transform.position) * Time.deltaTime;
 
         // ✈️ Apply movement
         transform.position += velocity * Time.deltaTime;
@@ -137,6 +141,12 @@ public class Movement : MonoBehaviour
         // 🔁 Save previous frame world-space hand positions
         prevLeftPos = currentLeftRel;
         prevRightPos = currentRightRel;
+
+        // Rotate according to the World
+        Vector3 sphereUp = (transform.position - World.Instance.transform.position).normalized;
+        Quaternion targetRotation = Quaternion.FromToRotation(transform.up, sphereUp) * transform.rotation;
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f); // Adjust speed (5f) to your liking
+
 
         // 🎥 Record    
         if (recorder != null && recorder.enabled)
