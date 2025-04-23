@@ -28,8 +28,8 @@ public class Movement : MonoBehaviour
     // To-do: use later
     // private bool isGrounded = false;
     [Header("Debug variables")]
-    [SerializeField] private bool isGliding = false;
-    [SerializeField] private bool isFlapping = false;
+    public bool isGliding = false;
+    public bool isFlapping = false;
 
     // Publicly accessible variables for reference
     public Vector3 CurrentVelocity => velocity;

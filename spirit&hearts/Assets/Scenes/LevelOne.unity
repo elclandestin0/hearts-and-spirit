@@ -1451,6 +1451,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2659945209513103479, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
   m_PrefabInstance: {fileID: 688568978}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1696997819 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5574356274160726731, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
+  m_PrefabInstance: {fileID: 688568978}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 805397c44c78e1240b28024a759e183e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1713584858
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1473,11 +1484,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 742033683525306372, guid: 4f749876204a348f8898421176b31869, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.16999817
+      value: -0.146
       objectReference: {fileID: 0}
     - target: {fileID: 742033683525306372, guid: 4f749876204a348f8898421176b31869, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.22001147
+      value: 0.226
       objectReference: {fileID: 0}
     - target: {fileID: 742033683525306372, guid: 4f749876204a348f8898421176b31869, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1639,6 +1650,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1696997818}
+  movementScript: {fileID: 1696997819}
   moveDuration: 2
   waitDuration: 5
   hoverAmplitude: 0.1
