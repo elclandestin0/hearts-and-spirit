@@ -10,6 +10,7 @@ public class Movement : MonoBehaviour
     [Header("Physics Controls")]
     [SerializeField] private float gravity = 9.8f; // m/s²
     [SerializeField] private float glideTime = 0f;
+    public float diveAngle = 0f;
     
     [Header("Recorder")]
     [SerializeField] private GhostFlightRecorder recorder;
@@ -19,18 +20,19 @@ public class Movement : MonoBehaviour
     private readonly float forwardPropulsionStrength = 1.43f;
     private readonly float glideStrength = 2.5f;
     private readonly float maxSpeed = 30f;
-    private readonly float maxDiveSpeed = 80f; // or 100f
+    private readonly float maxDiveSpeed = 80f;
     private readonly float minHandSpread = 1.0f;
     // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
     private Vector3 velocity = Vector3.zero;
     private Vector3 prevLeftPos, prevRightPos;
     // To-do: use later
     // private bool isGrounded = false;
+    [Header("Debug variables")]
     [SerializeField] private bool isGliding = false;
+    [SerializeField] private bool isFlapping = false;
 
     // Publicly accessible variables for reference
     public Vector3 CurrentVelocity => velocity;
-    public Transform Head => head;
 
     // Logger variable(s)
     private static readonly Logger diveLogger = new Logger(Debug.unityLogger.logHandler);
@@ -68,14 +70,15 @@ public class Movement : MonoBehaviour
         float rightSpeed = -rightHandDelta.y;
 
         float minFlapThreshold = 1.5f;
-        bool isFlapping = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold;
+        bool isFlappingPosture = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold;
 
-        float flapMagnitude = isFlapping
+        float flapMagnitude = isFlappingPosture
             ? Mathf.Clamp01((leftSpeed + rightSpeed) / 2f / 5f)
             : 0f;
 
-        if (isFlapping)
+        if (isFlappingPosture && isFlapping)
         {
+            Debug.Log("Flapping");
             velocity += FlightPhysics.CalculateFlapVelocity(
                 headFwd,
                 flapMagnitude,
@@ -91,6 +94,7 @@ public class Movement : MonoBehaviour
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
         if ((inGlidePosture && velocity.magnitude > 0.1f) || isGliding)
         {
+            Debug.Log("Gliding");
             // Are both hands behind the head?
             Vector3 leftToHead = leftHand.position - head.position;
             Vector3 rightToHead = rightHand.position - head.position;
@@ -113,7 +117,8 @@ public class Movement : MonoBehaviour
                 maxDiveSpeed,
                 Time.deltaTime,
                 true,
-                ref glideTime
+                ref glideTime,
+                ref diveAngle
             );
         }
 

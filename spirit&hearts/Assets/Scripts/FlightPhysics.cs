@@ -24,7 +24,8 @@ public static class FlightPhysics
         float maxDiveSpeed,
         float deltaTime,
         bool isManualDivePose,
-        ref float glideTime)
+        ref float glideTime,
+        ref float diveAngle)
     {
        Vector3 velocity = currentVelocity;
 
@@ -58,7 +59,7 @@ public static class FlightPhysics
         velocity += Vector3.up * liftPower;
 
         // 🦅 Dive mechanic
-        float diveAngle = Vector3.Angle(headForward, Vector3.down);
+        diveAngle = Vector3.Angle(headForward, Vector3.down);
         if (diveAngle < 60f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);

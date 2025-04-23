@@ -17,9 +17,8 @@ public class VelocityDebugger : MonoBehaviour
         if (movement != null)
         {
             Vector3 liveVel = movement.CurrentVelocity;
-            Vector3 leftHandEuler = movement.leftHand.eulerAngles;
-            Vector3 rightHandEuler = movement.rightHand.eulerAngles;
-            output += $"\nLive: {liveVel.magnitude:F2} m/s\nVec: {liveVel.ToString("F2")}\nLHRotation Euler: {leftHandEuler.ToString("F2")}\nRHRotationEuler: {rightHandEuler.ToString("F2")}";
+            float diveAngle = movement.diveAngle;
+            output += $"\nLive: {liveVel.magnitude:F2} m/s\nVec: {liveVel.ToString("F2")}\n Dive Angle: {diveAngle.ToString("F2")}\n";
         }
 
         textMesh.text = output;

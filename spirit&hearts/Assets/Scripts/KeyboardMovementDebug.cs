@@ -12,9 +12,9 @@ public class KeyboardMovementDebug : MonoBehaviour
 
     void Update()
     {
-        if (movement == null || movement.Head == null) return;
+        if (movement == null || movement.head == null) return;
 
-        Transform head = movement.Head;
+        Transform head = movement.head;
         Vector3 currentEuler = head.localEulerAngles;
 
         // Handle pitch (X axis)
