@@ -15,11 +15,12 @@ public class DoveOnPlayer : MonoBehaviour
     public float hoverAmplitude = 0.1f;
     public float hoverFrequency = 1f;
     private bool isMoving = false;
+    private bool wasFlyingLastFrame = false;
+
     private Vector3 baseHoverPos;
     private float hoverTimer;
 
     // Flight variables
-    [Header("Flight variables")]
     private Vector3 flightOffset;
     private float flightChangeTimer;
     private float flightChangeInterval = 3f;
@@ -33,6 +34,13 @@ public class DoveOnPlayer : MonoBehaviour
 
     void Update()
     {
+        bool isFlying = movementScript.isGliding || movementScript.isFlapping;
+        if (wasFlyingLastFrame && !isFlying)
+        {
+            baseHoverPos = transform.localPosition;
+            hoverTimer = 0f;
+        }
+        wasFlyingLastFrame = isFlying;
         if (!movementScript.isGliding && !movementScript.isFlapping)
         {
             // Hover mode
