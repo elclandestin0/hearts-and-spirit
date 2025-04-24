@@ -4378,7 +4378,7 @@ LineRenderer:
   m_Positions: []
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 0.02
+    widthMultiplier: 0.01
     widthCurve:
       serializedVersion: 2
       m_Curve:
@@ -5082,8 +5082,6 @@ MonoBehaviour:
   leftHand: {fileID: 1081005571991583476}
   rightHand: {fileID: 8020489433396114304}
   head: {fileID: 9105205731498775214}
-  recordDuration: 120
-  recordRate: 60
 --- !u!1 &6523006222984370285
 GameObject:
   m_ObjectHideFlags: 0
@@ -6525,8 +6523,10 @@ MonoBehaviour:
   head: {fileID: 9105205731498775214}
   gravity: 9.8
   glideTime: 0
+  diveAngle: 0
   recorder: {fileID: 4714864065847065564}
   isGliding: 1
+  isFlapping: 0
 --- !u!114 &3219001295391380978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6951,7 +6951,7 @@ LineRenderer:
   m_Positions: []
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 0.02
+    widthMultiplier: 0.01
     widthCurve:
       serializedVersion: 2
       m_Curve:

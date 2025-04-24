@@ -613,6 +613,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1903195526727562137, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
+      propertyPath: m_GazeInteractor
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1914922226402654763, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: m_Name
       value: Player
@@ -631,6 +635,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5574356274160726731, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: isGliding
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5574356274160726731, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
+      propertyPath: isFlapping
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5978575486253525049, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
@@ -1653,8 +1661,8 @@ MonoBehaviour:
   movementScript: {fileID: 1696997819}
   moveDuration: 2
   waitDuration: 5
-  hoverAmplitude: 0.1
-  hoverFrequency: 2
+  hoverAmplitude: 0.01
+  hoverFrequency: 10
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

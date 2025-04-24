@@ -8,7 +8,7 @@ public class DoveOnPlayer : MonoBehaviour
     public Transform player;
     public Movement movementScript;
 
-    // Header variables
+    // Hover variables
     [Header("Hover variables")]
     public float moveDuration = 2f;
     public float waitDuration = 5f;
@@ -16,7 +16,6 @@ public class DoveOnPlayer : MonoBehaviour
     public float hoverFrequency = 1f;
     private bool isMoving = false;
     private Vector3 baseHoverPos;
-    private Quaternion baseHoverRot;
     private float hoverTimer;
 
     // Flight variables
@@ -24,10 +23,10 @@ public class DoveOnPlayer : MonoBehaviour
     private Vector3 flightOffset;
     private float flightChangeTimer;
     private float flightChangeInterval = 3f;
+
     void Start()
     {
-        baseHoverPos = transform.position;
-        baseHoverRot = transform.rotation;
+        baseHoverPos = transform.localPosition;
         StartCoroutine(WanderLoop());
         flightOffset = GetRandomViewOffset();
     }
@@ -41,7 +40,7 @@ public class DoveOnPlayer : MonoBehaviour
             {
                 hoverTimer += Time.deltaTime;
                 float hoverOffset = Mathf.Sin(hoverTimer * hoverFrequency) * hoverAmplitude;
-                transform.position = new Vector3(baseHoverPos.x, baseHoverPos.y + hoverOffset, baseHoverPos.z);
+                transform.localPosition = new Vector3(baseHoverPos.x, baseHoverPos.y + hoverOffset, baseHoverPos.z);
 
                 // Glance at player
                 Vector3 forwardDir = transform.forward;
@@ -62,7 +61,6 @@ public class DoveOnPlayer : MonoBehaviour
             {
                 flightOffset = GetRandomViewOffset();
                 flightChangeTimer = 0f;
-
                 Debug.Log($"[DOVE] New Flight Offset Chosen: {flightOffset}");
             }
 
@@ -72,11 +70,10 @@ public class DoveOnPlayer : MonoBehaviour
                 movementScript.head.right * (flightOffset.x * distance) +
                 movementScript.head.up * (flightOffset.y * distance);
 
-            Vector3 targetPos = movementScript.head.position + targetOffset;
-            Debug.Log($"[DOVE] Target World Pos: {targetPos}, Distance from Player: {distance}");
+            Vector3 targetWorldPos = movementScript.head.position + targetOffset;
+            Vector3 localTarget = player.InverseTransformPoint(targetWorldPos);
 
-            // Smooth move and rotation
-            transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 3f);
+            transform.localPosition = Vector3.Lerp(transform.localPosition, localTarget, Time.deltaTime * 3f);
             Quaternion targetRot = Quaternion.LookRotation(movementScript.head.forward);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
         }
@@ -89,43 +86,44 @@ public class DoveOnPlayer : MonoBehaviour
             if (!movementScript.isGliding && !movementScript.isFlapping && !isMoving)
             {
                 Vector3 playerPos = player.position;
-                Vector3 dovePos = transform.position;
-                float distance = Vector3.Distance(playerPos, dovePos);
+                Vector3 dovePos = transform.localPosition;
+                float distance = Vector3.Distance(Vector3.zero, dovePos); // local space
 
-                // Random horizontal direction
+                // Random local-space direction
                 Vector3 randomDir = Random.onUnitSphere;
                 randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.3f);
-                Vector3 targetPos = playerPos + randomDir.normalized * distance;
+                Vector3 targetLocalPos = randomDir.normalized * distance;
 
-                Quaternion lookDir = Quaternion.LookRotation((targetPos - dovePos).normalized);
-                yield return StartCoroutine(MoveToPosition(targetPos, lookDir, moveDuration));
+                Quaternion lookDir = Quaternion.LookRotation(player.TransformPoint(targetLocalPos) - transform.position);
+                yield return StartCoroutine(MoveToPosition(targetLocalPos, lookDir, moveDuration));
 
-                baseHoverPos = transform.position;
+                baseHoverPos = transform.localPosition;
                 hoverTimer = 0f;
 
                 yield return new WaitForSeconds(waitDuration);
             }
+
             yield return null;
         }
     }
 
-    IEnumerator MoveToPosition(Vector3 targetPos, Quaternion targetRot, float duration)
+    IEnumerator MoveToPosition(Vector3 targetLocalPos, Quaternion targetRot, float duration)
     {
         isMoving = true;
-        Vector3 startPos = transform.position;
+        Vector3 startLocalPos = transform.localPosition;
         Quaternion startRot = transform.rotation;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
             float t = elapsed / duration;
-            transform.position = Vector3.Lerp(startPos, targetPos, t);
+            transform.localPosition = Vector3.Lerp(startLocalPos, targetLocalPos, t);
             transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        transform.position = targetPos;
+        transform.localPosition = targetLocalPos;
         transform.rotation = targetRot;
         isMoving = false;
     }
