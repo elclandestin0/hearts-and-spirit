@@ -55,7 +55,7 @@ public class DoveOnPlayer : MonoBehaviour
                 Vector3 toPlayer = (player.position - transform.position).normalized;
                 Vector3 glanceDir = Vector3.Slerp(forwardDir, toPlayer, 0.4f);
                 Quaternion glanceRotation = Quaternion.LookRotation(glanceDir);
-                transform.rotation = Quaternion.Slerp(transform.rotation, glanceRotation, Time.deltaTime * 1.5f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, glanceRotation, Time.deltaTime * 5f);
             }
         }
         else
@@ -126,13 +126,13 @@ public class DoveOnPlayer : MonoBehaviour
         {
             float t = elapsed / duration;
             transform.localPosition = Vector3.Lerp(startLocalPos, targetLocalPos, t);
-            transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
+            // transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
         transform.localPosition = targetLocalPos;
-        transform.rotation = targetRot;
+        // transform.rotation = targetRot;
         isMoving = false;
     }
 
