@@ -404,7 +404,7 @@ GameObject:
   - component: {fileID: 407858433}
   m_Layer: 0
   m_Name: Terrain_(0.00, 0.00, -1000.00)
-  m_TagString: Untagged
+  m_TagString: Terrain
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
@@ -628,6 +628,10 @@ PrefabInstance:
     - target: {fileID: 3219001295391380978, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3401438547965301138, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5574356274160726731, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: gravity
@@ -976,6 +980,11 @@ MonoBehaviour:
   - {fileID: 0}
   autoStartOnPlay: 0
   autoSaveOnQuit: 0
+--- !u!1 &1144030894 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+  m_PrefabInstance: {fileID: 1579892789}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1260220054
 GameObject:
   m_ObjectHideFlags: 0
@@ -1317,7 +1326,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.93
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1347,6 +1356,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5477749408508380018, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_Name
       value: Dove
@@ -1365,15 +1378,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6907433562683826427, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.463
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6907433562683826427, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.253
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6907433562683826427, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.384
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6907433562683826427, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_ConstrainProportionsScale
@@ -1383,7 +1396,7 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: -9023757248522392384, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1579892792}
   m_SourcePrefab: {fileID: 100100000, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
@@ -1392,18 +1405,13 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
   m_PrefabInstance: {fileID: 1579892789}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1579892791 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: -9023757248522392384, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
-  m_PrefabInstance: {fileID: 1579892789}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1579892792
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1579892791}
+  m_GameObject: {fileID: 1144030894}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 485912b13998e4ba592abcca35113f33, type: 3}
@@ -1415,6 +1423,13 @@ MonoBehaviour:
   waitDuration: 5
   hoverAmplitude: 0.1
   hoverFrequency: 1
+  orbitRadius: 1
+  baseOrbitSpeed: 30
+  orbitSwitchInterval: 5
+  verticalBobAmplitude: 0.3
+  verticalBobFrequency: 2
+  positionSmoothing: 5
+  rotationSmoothing: 3
 --- !u!1 &1644943239
 GameObject:
   m_ObjectHideFlags: 0
@@ -1523,6 +1538,10 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3518878864086786494, guid: 219006d12eead471c96aea4c8da8898e, type: 3}
       propertyPath: m_Name
+      value: Terrain
+      objectReference: {fileID: 0}
+    - target: {fileID: 3518878864086786494, guid: 219006d12eead471c96aea4c8da8898e, type: 3}
+      propertyPath: m_TagString
       value: Terrain
       objectReference: {fileID: 0}
     - target: {fileID: 3990720384273302674, guid: 219006d12eead471c96aea4c8da8898e, type: 3}

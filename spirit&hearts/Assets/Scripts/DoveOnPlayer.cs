@@ -16,74 +16,122 @@ public class DoveOnPlayer : MonoBehaviour
     public float hoverFrequency = 1f;
     private bool isMoving = false;
     private bool wasFlyingLastFrame = false;
-
     private Vector3 baseHoverPos;
     private float hoverTimer;
 
-    // Flight variables
-    private Vector3 flightOffset;
-    private float flightChangeTimer;
-    private float flightChangeInterval = 3f;
+    // Flight flocking variables
+    [Header("Flight flocking variables")]
+    public float orbitRadius = 1.5f;
+    public float baseOrbitSpeed = 30f; // degrees per second
+    public float orbitSwitchInterval = 5f; // seconds
+    public float verticalBobAmplitude = 0.3f;
+    public float verticalBobFrequency = 2f;
+    public float positionSmoothing = 5f;
+    public float rotationSmoothing = 3f;
+    
+    private float orbitAngle = 0f;
+    private int orbitDirection = 1; // 1 or -1
+    private float orbitSwitchTimer = 0f;
 
     void Start()
     {
         baseHoverPos = transform.localPosition;
         StartCoroutine(WanderLoop());
-        flightOffset = GetRandomViewOffset();
     }
 
     void Update()
     {
         bool isFlying = movementScript.isGliding || movementScript.isFlapping;
+
         if (wasFlyingLastFrame && !isFlying)
         {
             baseHoverPos = transform.localPosition;
             hoverTimer = 0f;
         }
         wasFlyingLastFrame = isFlying;
-        if (!movementScript.isGliding && !movementScript.isFlapping)
-        {
-            // Hover mode
-            if (!isMoving)
-            {
-                hoverTimer += Time.deltaTime;
-                float hoverOffset = Mathf.Sin(hoverTimer * hoverFrequency) * hoverAmplitude;
-                transform.localPosition = new Vector3(baseHoverPos.x, baseHoverPos.y + hoverOffset, baseHoverPos.z);
 
-                // Glance at player
-                Vector3 forwardDir = transform.forward;
-                Vector3 toPlayer = (player.position - transform.position).normalized;
-                Vector3 glanceDir = Vector3.Slerp(forwardDir, toPlayer, 0.4f);
-                Quaternion glanceRotation = Quaternion.LookRotation(glanceDir);
-                transform.rotation = Quaternion.Slerp(transform.rotation, glanceRotation, Time.deltaTime * 5f);
-            }
+        if (!isFlying)
+        {
+            HoverMode();
         }
         else
         {
-            // Flying mode — place dove on a shoulder-view orbit box
-            float distance = Mathf.Max(Vector3.Distance(player.position, transform.position), 1.0f);
+            FlockingFlightMode();
+        }
+    }
 
-            // Change offset occasionally
-            flightChangeTimer += Time.deltaTime;
-            if (flightChangeTimer >= flightChangeInterval)
-            {
-                flightOffset = GetRandomViewOffset();
-                flightChangeTimer = 0f;
-                Debug.Log($"[DOVE] New Flight Offset Chosen: {flightOffset}");
-            }
+    private void HoverMode()
+    {
+        if (!isMoving)
+        {
+            hoverTimer += Time.deltaTime;
+            float hoverOffset = Mathf.Sin(hoverTimer * hoverFrequency) * hoverAmplitude;
+            transform.localPosition = new Vector3(baseHoverPos.x, baseHoverPos.y + hoverOffset, baseHoverPos.z);
 
-            // Project offset into world space from head direction
-            Vector3 targetOffset =
-                movementScript.head.forward * (flightOffset.z * distance) +
-                movementScript.head.right * (flightOffset.x * distance) +
-                movementScript.head.up * (flightOffset.y * distance);
+            // Glance at player
+            Vector3 forwardDir = transform.forward;
+            Vector3 toPlayer = (player.position - transform.position).normalized;
+            Vector3 glanceDir = Vector3.Slerp(forwardDir, toPlayer, 0.4f);
+            Quaternion glanceRotation = Quaternion.LookRotation(glanceDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, glanceRotation, Time.deltaTime * 5f);
+        }
+    }
 
-            Vector3 targetWorldPos = movementScript.head.position + targetOffset;
-            Vector3 localTarget = player.InverseTransformPoint(targetWorldPos);
+    private void FlockingFlightMode()
+    {
+        // Update orbit switching
+        // orbitSwitchTimer += Time.deltaTime;
+        // if (orbitSwitchTimer >= orbitSwitchInterval)
+        // {
+        //     orbitDirection *= -1; // Switch direction
+        //     orbitSwitchTimer = 0f;
+        // }
 
-            transform.localPosition = Vector3.Lerp(transform.localPosition, localTarget, Time.deltaTime * 3f);
-            Quaternion targetRot = Quaternion.LookRotation(movementScript.head.forward);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
+        // Orbit based on player speed
+        float playerSpeed = movementScript.CurrentVelocity.magnitude;
+        float orbitSpeed = baseOrbitSpeed + playerSpeed * 1f;
+
+        // Remove comment to test randomizing the direction
+        orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime;
+
+        // Reverse direction at the edges
+        if (orbitAngle >= 135f)
+        {
+            orbitAngle = 135f;
+            orbitDirection = -1;
+        }
+        else if (orbitAngle <= -45f)
+        {
+            orbitAngle = -45f;
+            orbitDirection = 1;
+        }
+
+        // Calculate orbit position
+        float radians = orbitAngle * Mathf.Deg2Rad;
+
+        // Build dynamic orbit axes
+        Vector3 right = movementScript.head.right;
+        Vector3 forward = movementScript.head.forward;
+
+        // Compute orbit offset relative to head orientation
+        Vector3 orbitOffset = (right * Mathf.Sin(radians) + forward * Mathf.Cos(radians)) * orbitRadius;
+
+        // Add vertical bobbing
+        orbitOffset.y += Mathf.Sin(Time.time * verticalBobFrequency) * verticalBobAmplitude;
+
+        // Calculate world-space target
+        Vector3 orbitCenter = movementScript.head.position;
+        Vector3 targetWorldPos = orbitCenter + orbitOffset;
+
+        // Smooth movement
+        transform.position = Vector3.Lerp(transform.position, targetWorldPos, Time.deltaTime * positionSmoothing);
+
+        // Smooth rotation facing forward
+        Vector3 forwardDir = Vector3.Slerp(transform.forward, movementScript.head.forward, 0.5f);
+        if (forwardDir != Vector3.zero)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(forwardDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSmoothing);
         }
     }
 
@@ -126,23 +174,11 @@ public class DoveOnPlayer : MonoBehaviour
         {
             float t = elapsed / duration;
             transform.localPosition = Vector3.Lerp(startLocalPos, targetLocalPos, t);
-            // transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
         transform.localPosition = targetLocalPos;
-        // transform.rotation = targetRot;
         isMoving = false;
-    }
-
-    // Get random view offset when flying
-    Vector3 GetRandomViewOffset()
-    {
-        float z = 0.7f; // always forward-ish
-        float x = Random.Range(-0.5f, 0.5f); // left or right
-        float y = Random.Range(-0.3f, 0.3f); // slightly up or down
-
-        return new Vector3(x, y, z);
     }
 }
