@@ -402,7 +402,7 @@ GameObject:
   - component: {fileID: 407858432}
   - component: {fileID: 407858434}
   - component: {fileID: 407858433}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Terrain_(0.00, 0.00, -1000.00)
   m_TagString: Terrain
   m_Icon: {fileID: 0}
@@ -1419,17 +1419,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 1696997818}
   movementScript: {fileID: 1696997819}
-  moveDuration: 2
-  waitDuration: 5
-  hoverAmplitude: 0.1
-  hoverFrequency: 1
+  transitionSmoothing: 5
+  rotationSmoothing: 3
   orbitRadius: 1
   baseOrbitSpeed: 30
   orbitSwitchInterval: 5
   verticalBobAmplitude: 0.3
   verticalBobFrequency: 2
-  positionSmoothing: 5
-  rotationSmoothing: 3
+  orbitChillSpeedThreshold: 5
+  followDistance: 2
+  followSideOffset: 0.5
+  followVerticalOffset: 0.5
+  dangerRange: 3
+  escapeDistance: 2
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 8
+  escapeDuration: 0.5
 --- !u!1 &1644943239
 GameObject:
   m_ObjectHideFlags: 0
@@ -1539,6 +1545,10 @@ PrefabInstance:
     - target: {fileID: 3518878864086786494, guid: 219006d12eead471c96aea4c8da8898e, type: 3}
       propertyPath: m_Name
       value: Terrain
+      objectReference: {fileID: 0}
+    - target: {fileID: 3518878864086786494, guid: 219006d12eead471c96aea4c8da8898e, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 3518878864086786494, guid: 219006d12eead471c96aea4c8da8898e, type: 3}
       propertyPath: m_TagString

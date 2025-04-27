@@ -1,184 +1,195 @@
 using System.Collections;
 using UnityEngine;
 
-public class DoveOnPlayer : MonoBehaviour
+public class DoveCompanion : MonoBehaviour
 {
-    // Player variables
-    [Header("Player variables")]
+    // == Player variables ==
+    [Header("Player Setup")]
     public Transform player;
     public Movement movementScript;
 
-    // Hover variables
-    [Header("Hover variables")]
-    public float moveDuration = 2f;
-    public float waitDuration = 5f;
-    public float hoverAmplitude = 0.1f;
-    public float hoverFrequency = 1f;
-    private bool isMoving = false;
-    private bool wasFlyingLastFrame = false;
-    private Vector3 baseHoverPos;
-    private float hoverTimer;
+    // == General Flight Settings ==
+    [Header("Flight Settings")]
+    public float transitionSmoothing = 5f;
+    public float rotationSmoothing = 3f;
 
-    // Flight flocking variables
-    [Header("Flight flocking variables")]
+    // == Orbit Mode Settings ==
+    [Header("Orbit Mode")]
     public float orbitRadius = 1.5f;
-    public float baseOrbitSpeed = 30f; // degrees per second
-    public float orbitSwitchInterval = 5f; // seconds
+    public float baseOrbitSpeed = 30f;
+    public float orbitSwitchInterval = 5f;
     public float verticalBobAmplitude = 0.3f;
     public float verticalBobFrequency = 2f;
-    public float positionSmoothing = 5f;
-    public float rotationSmoothing = 3f;
-    
+    public float orbitChillSpeedThreshold = 5f;
+
+    // == Follow Mode Settings ==
+    [Header("Follow Mode")]
+    public float followDistance = 2f;
+    public float followSideOffset = 0.5f;
+    public float followVerticalOffset = 0.5f;
+
+    // == Obstacle Avoidance Settings ==
+    [Header("Obstacle Avoidance")]
+    public float dangerRange = 10f;
+    public float escapeDistance = 2f;
+    public LayerMask obstacleLayers;
+    public float escapeDuration = 0.5f;
+
+    // == Internal State ==
+    private enum DoveState { Orbiting, Following, Escaping }
+    private DoveState currentState = DoveState.Orbiting;
+
     private float orbitAngle = 0f;
-    private int orbitDirection = 1; // 1 or -1
+    private int orbitDirection = 1;
     private float orbitSwitchTimer = 0f;
 
-    void Start()
-    {
-        baseHoverPos = transform.localPosition;
-        StartCoroutine(WanderLoop());
-    }
+    private Vector3 escapeTarget;
+    private bool isEscaping = false;
 
     void Update()
     {
-        bool isFlying = movementScript.isGliding || movementScript.isFlapping;
+        switch (currentState)
+        {
+            case DoveState.Orbiting:
+                Debug.Log("orbiting");
+                Orbit();
+                break;
+            case DoveState.Following:
+                Debug.Log("following");
+                Follow();
+                break;
+            case DoveState.Escaping:
+                Debug.Log("escaping");
+                Avoid();
+                break;
+        }
 
-        if (wasFlyingLastFrame && !isFlying)
-        {
-            baseHoverPos = transform.localPosition;
-            hoverTimer = 0f;
-        }
-        wasFlyingLastFrame = isFlying;
-
-        if (!isFlying)
-        {
-            HoverMode();
-        }
-        else
-        {
-            FlockingFlightMode();
-        }
+        ObstacleCheck();
     }
 
-    private void HoverMode()
+    private void Orbit()
     {
-        if (!isMoving)
-        {
-            hoverTimer += Time.deltaTime;
-            float hoverOffset = Mathf.Sin(hoverTimer * hoverFrequency) * hoverAmplitude;
-            transform.localPosition = new Vector3(baseHoverPos.x, baseHoverPos.y + hoverOffset, baseHoverPos.z);
-
-            // Glance at player
-            Vector3 forwardDir = transform.forward;
-            Vector3 toPlayer = (player.position - transform.position).normalized;
-            Vector3 glanceDir = Vector3.Slerp(forwardDir, toPlayer, 0.4f);
-            Quaternion glanceRotation = Quaternion.LookRotation(glanceDir);
-            transform.rotation = Quaternion.Slerp(transform.rotation, glanceRotation, Time.deltaTime * 5f);
-        }
-    }
-
-    private void FlockingFlightMode()
-    {
-        // Update orbit switching
-        // orbitSwitchTimer += Time.deltaTime;
-        // if (orbitSwitchTimer >= orbitSwitchInterval)
-        // {
-        //     orbitDirection *= -1; // Switch direction
-        //     orbitSwitchTimer = 0f;
-        // }
-
-        // Orbit based on player speed
         float playerSpeed = movementScript.CurrentVelocity.magnitude;
-        float orbitSpeed = baseOrbitSpeed + playerSpeed * 1f;
 
-        // Remove comment to test randomizing the direction
+        // Switch to Follow Mode if player is fast
+        if (playerSpeed > orbitChillSpeedThreshold)
+        {
+            currentState = DoveState.Following;
+            return;
+        }
+
+        // Orbit Switching Logic
+        orbitSwitchTimer += Time.deltaTime;
+        if (orbitSwitchTimer >= orbitSwitchInterval)
+        {
+            orbitDirection *= -1;
+            orbitSwitchTimer = 0f;
+        }
+
+        // Update orbit angle
+        float orbitSpeed = baseOrbitSpeed + playerSpeed * 10f;
         orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime;
+        orbitAngle = Mathf.Clamp(orbitAngle, -90f, 90f);
 
-        // Reverse direction at the edges
-        if (orbitAngle >= 135f)
-        {
-            orbitAngle = 135f;
-            orbitDirection = -1;
-        }
-        else if (orbitAngle <= -45f)
-        {
-            orbitAngle = -45f;
-            orbitDirection = 1;
-        }
-
-        // Calculate orbit position
-        float radians = orbitAngle * Mathf.Deg2Rad;
-
-        // Build dynamic orbit axes
+        // Build dynamic local axes
         Vector3 right = movementScript.head.right;
         Vector3 forward = movementScript.head.forward;
 
-        // Compute orbit offset relative to head orientation
+        // Calculate orbit offset
+        float radians = orbitAngle * Mathf.Deg2Rad;
         Vector3 orbitOffset = (right * Mathf.Sin(radians) + forward * Mathf.Cos(radians)) * orbitRadius;
-
-        // Add vertical bobbing
         orbitOffset.y += Mathf.Sin(Time.time * verticalBobFrequency) * verticalBobAmplitude;
 
-        // Calculate world-space target
         Vector3 orbitCenter = movementScript.head.position;
-        Vector3 targetWorldPos = orbitCenter + orbitOffset;
+        Vector3 targetPos = orbitCenter + orbitOffset;
 
-        // Smooth movement
-        transform.position = Vector3.Lerp(transform.position, targetWorldPos, Time.deltaTime * positionSmoothing);
+        // Move and rotate
+        MoveTowards(targetPos, movementScript.head.forward);
+    }
 
-        // Smooth rotation facing forward
-        Vector3 forwardDir = Vector3.Slerp(transform.forward, movementScript.head.forward, 0.5f);
-        if (forwardDir != Vector3.zero)
+    private void Follow()
+    {
+        float playerSpeed = movementScript.CurrentVelocity.magnitude;
+
+        // Return to orbit mode if slowing down
+        if (playerSpeed <= orbitChillSpeedThreshold)
         {
-            Quaternion targetRot = Quaternion.LookRotation(forwardDir);
+            currentState = DoveState.Orbiting;
+            return;
+        }
+
+        // Follow target position behind player
+        Vector3 followOffset =
+            -movementScript.head.forward * followDistance +
+             movementScript.head.right * followSideOffset +
+             Vector3.up * followVerticalOffset;
+
+        Vector3 targetPos = movementScript.head.position + followOffset;
+
+        // Move and rotate
+        MoveTowards(targetPos, movementScript.head.forward);
+    }
+
+    private void Avoid()
+    {
+        // Move toward escape target
+        MoveTowards(escapeTarget, movementScript.head.forward);
+    }
+
+    private void MoveTowards(Vector3 targetPos, Vector3 faceDirection)
+    {
+        transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * transitionSmoothing);
+
+        Vector3 moveDirection = targetPos - transform.position;
+        if (moveDirection != Vector3.zero)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(moveDirection);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSmoothing);
         }
     }
 
-    IEnumerator WanderLoop()
+    private void ObstacleCheck()
     {
-        while (true)
+        RaycastHit hit;
+        bool isHit = Physics.Raycast(transform.position, transform.forward, out hit, dangerRange, obstacleLayers);
+        // Draw the ray
+        if (isHit)
         {
-            if (!movementScript.isGliding && !movementScript.isFlapping && !isMoving)
-            {
-                Vector3 playerPos = player.position;
-                Vector3 dovePos = transform.localPosition;
-                float distance = Vector3.Distance(Vector3.zero, dovePos); // local space
-
-                // Random local-space direction
-                Vector3 randomDir = Random.onUnitSphere;
-                randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.3f);
-                Vector3 targetLocalPos = randomDir.normalized * distance;
-
-                Quaternion lookDir = Quaternion.LookRotation(player.TransformPoint(targetLocalPos) - transform.position);
-                yield return StartCoroutine(MoveToPosition(targetLocalPos, lookDir, moveDuration));
-
-                baseHoverPos = transform.localPosition;
-                hoverTimer = 0f;
-
-                yield return new WaitForSeconds(waitDuration);
-            }
-
-            yield return null;
+            Debug.DrawLine(transform.position, transform.position + transform.forward * dangerRange, Color.red);
+            AvoidObstacle(hit);
+        }
+        else
+        {
+            Debug.DrawLine(transform.position, transform.position + transform.forward * dangerRange, Color.green);
         }
     }
 
-    IEnumerator MoveToPosition(Vector3 targetLocalPos, Quaternion targetRot, float duration)
+    private void AvoidObstacle(RaycastHit hit)
     {
-        isMoving = true;
-        Vector3 startLocalPos = transform.localPosition;
-        Quaternion startRot = transform.rotation;
-        float elapsed = 0f;
+        // Reflect movement away from obstacle
+        Vector3 escapeDir = Vector3.Reflect(transform.forward, hit.normal);
+        escapeDir.y = Mathf.Abs(escapeDir.y); // Favor going upward
+        escapeTarget = transform.position + escapeDir.normalized * escapeDistance;
 
-        while (elapsed < duration)
+        if (!isEscaping)
+            StartCoroutine(EscapeAndReturn());
+    }
+
+    private IEnumerator EscapeAndReturn()
+    {
+        isEscaping = true;
+        DoveState previousState = currentState;
+        currentState = DoveState.Escaping;
+
+        float timer = 0f;
+        while (timer < escapeDuration)
         {
-            float t = elapsed / duration;
-            transform.localPosition = Vector3.Lerp(startLocalPos, targetLocalPos, t);
-            elapsed += Time.deltaTime;
+            timer += Time.deltaTime;
             yield return null;
         }
 
-        transform.localPosition = targetLocalPos;
-        isMoving = false;
+        // Return to previous behavior
+        currentState = previousState;
+        isEscaping = false;
     }
 }
