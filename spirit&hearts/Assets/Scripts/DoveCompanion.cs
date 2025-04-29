@@ -56,6 +56,9 @@ public class DoveCompanion : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         currentOrbitRadius = orbitRadius;
         targetOrbitRadius = orbitRadius;
+
+        // If flap detected from Movement.cs, HandleFlap()
+        movementScript.OnFlap += HandleFlap;
     }
 
     void Update()
@@ -63,27 +66,18 @@ public class DoveCompanion : MonoBehaviour
         switch (currentState)
         {
             case DoveState.Orbiting:
-                Debug.Log("orbiting");
                 Orbit();
                 break;
             case DoveState.Following:
-                Debug.Log("following");
                 Follow();
                 break;
             case DoveState.Escaping:
-                Debug.Log("escaping");
                 Avoid();
                 break;
         }
 
         // Animate based on movement state
         animator.SetBool("Gliding", movementScript.isGliding);
-        Debug.Log("isFlapping from Dove " + movementScript.isFlapping);
-        if (movementScript.isFlapping)
-        {
-            animator.SetTrigger("Flap");
-        }
-
 
         ObstacleCheck();
     }
@@ -93,11 +87,12 @@ public class DoveCompanion : MonoBehaviour
         float playerSpeed = movementScript.CurrentVelocity.magnitude;
 
         // Switch to Follow Mode if player is fast
-        if (playerSpeed > orbitChillSpeedThreshold)
-        {
-            currentState = DoveState.Following;
-            return;
-        }
+        // To-do: Unblock later when time to focus on this
+        // if (playerSpeed > orbitChillSpeedThreshold)
+        // {
+        //     currentState = DoveState.Following;
+        //     return;
+        // }
 
         // Update orbit angle
         float orbitSpeed = baseOrbitSpeed * playerSpeed;
@@ -224,4 +219,16 @@ public class DoveCompanion : MonoBehaviour
         currentState = previousState;
         isEscaping = false;
     }
+
+    private void HandleFlap()
+    {
+        Debug.Log("Handle flapping");
+        animator.SetTrigger("Flap");
+    }
+
+    void OnDestroy()
+    {
+        movementScript.OnFlap -= HandleFlap;
+    }
+
 }

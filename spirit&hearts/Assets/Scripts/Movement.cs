@@ -14,7 +14,7 @@ public class Movement : MonoBehaviour
     
     [Header("Recorder")]
     [SerializeField] private GhostFlightRecorder recorder;
-
+    
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1.43f;
@@ -33,7 +33,8 @@ public class Movement : MonoBehaviour
 
     // Publicly accessible variables for reference
     public Vector3 CurrentVelocity => velocity;
-
+    public delegate void FlapEvent();
+    public event FlapEvent OnFlap;
     // Logger variable(s)
     private static readonly Logger diveLogger = new Logger(Debug.unityLogger.logHandler);
 
@@ -71,7 +72,6 @@ public class Movement : MonoBehaviour
 
         float minFlapThreshold = 1.5f;
         bool isFlappingPosture = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold;
-        isFlapping = isFlappingPosture;
 
         float flapMagnitude = isFlappingPosture
             ? Mathf.Clamp01((leftSpeed + rightSpeed) / 2f / 5f)
@@ -82,13 +82,10 @@ public class Movement : MonoBehaviour
         {
             Debug.Log("🔵 Simulated Flap triggered by SPACE key!");
 
-            // Trigger posture detection
             isFlappingPosture = true;
-            isFlapping = isFlappingPosture;
-            Debug.Log("isFlapping from Movement.cs" + isFlapping);
-            flapMagnitude = Random.Range(3.0f, 4.0f); // store random magnitude
+            flapMagnitude = Random.Range(3.0f, 4.0f);
         }
-
+        
 
         if (isFlappingPosture)
         {
@@ -101,8 +98,10 @@ public class Movement : MonoBehaviour
             );
 
             glideTime = 0f;
+            
+            // Fire the flap event
+            OnFlap?.Invoke();
             isFlappingPosture = false;
-            isFlapping = isFlappingPosture;
         }
 
         // 🪂 Glide posture logic
