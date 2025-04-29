@@ -17,7 +17,6 @@ public class DoveCompanion : MonoBehaviour
     [Header("Orbit Mode")]
     public float orbitRadius = 1.5f;
     public float baseOrbitSpeed = 30f;
-    public float orbitSwitchInterval = 5f;
     public float verticalBobAmplitude = 0.3f;
     public float verticalBobFrequency = 2f;
     public float orbitChillSpeedThreshold = 5f;
@@ -39,9 +38,9 @@ public class DoveCompanion : MonoBehaviour
     private enum DoveState { Orbiting, Following, Escaping }
     private DoveState currentState = DoveState.Orbiting;
 
-    private float orbitAngle = 0f;
-    private int orbitDirection = 1;
-    private float orbitSwitchTimer = 0f;
+    [Header("Debug variables")]
+    public float orbitAngle = 0f;
+    public int orbitDirection = 1;
 
     private Vector3 escapeTarget;
     private bool isEscaping = false;
@@ -78,18 +77,16 @@ public class DoveCompanion : MonoBehaviour
             return;
         }
 
-        // Orbit Switching Logic
-        orbitSwitchTimer += Time.deltaTime;
-        if (orbitSwitchTimer >= orbitSwitchInterval)
+        // Update orbit angle
+        float orbitSpeed = baseOrbitSpeed * playerSpeed;
+        orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime;
+        orbitAngle = Mathf.Clamp(orbitAngle, -30f, 30f);
+
+        if (orbitAngle >= 30 || orbitAngle <= -30)
         {
             orbitDirection *= -1;
-            orbitSwitchTimer = 0f;
         }
 
-        // Update orbit angle
-        float orbitSpeed = baseOrbitSpeed + playerSpeed * 10f;
-        orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime;
-        orbitAngle = Mathf.Clamp(orbitAngle, -90f, 90f);
 
         // Build dynamic local axes
         Vector3 right = movementScript.head.right;
