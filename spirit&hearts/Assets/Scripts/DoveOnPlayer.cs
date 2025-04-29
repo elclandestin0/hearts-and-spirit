@@ -20,6 +20,11 @@ public class DoveCompanion : MonoBehaviour
     public float verticalBobAmplitude = 0.3f;
     public float verticalBobFrequency = 2f;
     public float orbitChillSpeedThreshold = 5f;
+    public float currentOrbitRadius;
+    public float targetOrbitRadius;
+    public float orbitRadiusChangeTimer;
+    public float orbitRadiusChangeInterval = 3f; // how often we change target
+
 
     // == Follow Mode Settings ==
     [Header("Follow Mode")]
@@ -38,12 +43,18 @@ public class DoveCompanion : MonoBehaviour
     private enum DoveState { Orbiting, Following, Escaping }
     private DoveState currentState = DoveState.Orbiting;
 
-    [Header("Debug variables")]
-    public float orbitAngle = 0f;
-    public int orbitDirection = 1;
+    // [Header("Debug variables")]
+    private float orbitAngle = 0f;
+    private int orbitDirection = 1;
 
     private Vector3 escapeTarget;
     private bool isEscaping = false;
+
+    void Start()
+    {
+        currentOrbitRadius = orbitRadius;
+        targetOrbitRadius = orbitRadius;
+    }
 
     void Update()
     {
@@ -93,10 +104,23 @@ public class DoveCompanion : MonoBehaviour
         Vector3 forward = movementScript.head.forward;
 
         // Calculate orbit offset
-        float radians = orbitAngle * Mathf.Deg2Rad;
-        Vector3 orbitOffset = (right * Mathf.Sin(radians) + forward * Mathf.Cos(radians)) * orbitRadius;
-        orbitOffset.y += Mathf.Sin(Time.time * verticalBobFrequency) * verticalBobAmplitude;
+        orbitRadiusChangeTimer += Time.deltaTime;
+        if (orbitRadiusChangeTimer >= orbitRadiusChangeInterval)
+        {
+            targetOrbitRadius = Random.Range(orbitRadius - 5f, orbitRadius);
+            orbitRadiusChangeTimer = 0f;
+        }
 
+        // Smoothly blend current radius toward new target
+        currentOrbitRadius = Mathf.Lerp(currentOrbitRadius, targetOrbitRadius, Time.deltaTime * 1f);
+
+        float radians = orbitAngle * Mathf.Deg2Rad;
+        Vector3 orbitOffset = (right * Mathf.Sin(radians) + forward * Mathf.Cos(radians)) * Random.Range(orbitRadius - 2f, orbitRadius);
+        
+        // Vertical Bobbing
+        orbitOffset.y += Mathf.Sin(Time.time * verticalBobFrequency) * verticalBobAmplitude;
+        
+        // Center and targetPos calculation
         Vector3 orbitCenter = movementScript.head.position;
         Vector3 targetPos = orbitCenter + orbitOffset;
 
@@ -117,7 +141,7 @@ public class DoveCompanion : MonoBehaviour
 
         // Follow target position behind player
         Vector3 followOffset =
-            -movementScript.head.forward * followDistance +
+            movementScript.head.forward * followDistance +
              movementScript.head.right * followSideOffset +
              Vector3.up * followVerticalOffset;
 

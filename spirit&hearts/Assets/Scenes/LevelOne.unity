@@ -1198,7 +1198,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.93
+      value: 1.41
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1292,14 +1292,17 @@ MonoBehaviour:
   player: {fileID: 1696997818}
   movementScript: {fileID: 1696997819}
   transitionSmoothing: 5
-  rotationSmoothing: 3
+  rotationSmoothing: 1
   orbitRadius: 10
-  baseOrbitSpeed: 30
-  orbitSwitchInterval: 5
+  baseOrbitSpeed: 0.5
   verticalBobAmplitude: 0.3
   verticalBobFrequency: 2
   orbitChillSpeedThreshold: 40
-  followDistance: 2
+  currentOrbitRadius: 0
+  targetOrbitRadius: 0
+  orbitRadiusChangeTimer: 0
+  orbitRadiusChangeInterval: 3
+  followDistance: 1
   followSideOffset: 0.5
   followVerticalOffset: 0.5
   dangerRange: 3
