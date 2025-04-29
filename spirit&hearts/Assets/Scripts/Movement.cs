@@ -71,10 +71,24 @@ public class Movement : MonoBehaviour
 
         float minFlapThreshold = 1.5f;
         bool isFlappingPosture = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold;
+        isFlapping = isFlappingPosture;
 
         float flapMagnitude = isFlappingPosture
             ? Mathf.Clamp01((leftSpeed + rightSpeed) / 2f / 5f)
             : 0f;
+
+        // 🖐️ Simulated Flap (Debugging without VR)
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("🔵 Simulated Flap triggered by SPACE key!");
+
+            // Trigger posture detection
+            isFlappingPosture = true;
+            isFlapping = isFlappingPosture;
+            Debug.Log("isFlapping from Movement.cs" + isFlapping);
+            flapMagnitude = Random.Range(3.0f, 4.0f); // store random magnitude
+        }
+
 
         if (isFlappingPosture)
         {
@@ -87,26 +101,9 @@ public class Movement : MonoBehaviour
             );
 
             glideTime = 0f;
+            isFlappingPosture = false;
+            isFlapping = isFlappingPosture;
         }
-
-        // 🖐️ Simulated Flap (Debugging without VR)
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Debug.Log("🔵 Simulated Flap triggered by SPACE key!");
-
-            float simulatedFlapMagnitude = Random.Range(3.0f, 4.0f); // simulate a strong flap
-            velocity += FlightPhysics.CalculateFlapVelocity(
-                head.forward, 
-                simulatedFlapMagnitude, 
-                flapStrength, 
-                forwardPropulsionStrength
-            );
-
-            glideTime = 0f; // Reset glide decay because a flap happened
-        }
-
-        
-
 
         // 🪂 Glide posture logic
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
