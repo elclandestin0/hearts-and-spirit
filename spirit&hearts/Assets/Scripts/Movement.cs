@@ -76,7 +76,7 @@ public class Movement : MonoBehaviour
             ? Mathf.Clamp01((leftSpeed + rightSpeed) / 2f / 5f)
             : 0f;
 
-        if (isFlappingPosture && isFlapping)
+        if (isFlappingPosture)
         {
             Debug.Log("Flapping");
             velocity += FlightPhysics.CalculateFlapVelocity(
@@ -88,6 +88,24 @@ public class Movement : MonoBehaviour
 
             glideTime = 0f;
         }
+
+        // 🖐️ Simulated Flap (Debugging without VR)
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("🔵 Simulated Flap triggered by SPACE key!");
+
+            float simulatedFlapMagnitude = Random.Range(3.0f, 4.0f); // simulate a strong flap
+            velocity += FlightPhysics.CalculateFlapVelocity(
+                head.forward, 
+                simulatedFlapMagnitude, 
+                flapStrength, 
+                forwardPropulsionStrength
+            );
+
+            glideTime = 0f; // Reset glide decay because a flap happened
+        }
+
+        
 
 
         // 🪂 Glide posture logic

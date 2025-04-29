@@ -1426,7 +1426,7 @@ MonoBehaviour:
   orbitSwitchInterval: 5
   verticalBobAmplitude: 0.3
   verticalBobFrequency: 2
-  orbitChillSpeedThreshold: 5
+  orbitChillSpeedThreshold: 30
   followDistance: 2
   followSideOffset: 0.5
   followVerticalOffset: 0.5
@@ -1434,7 +1434,7 @@ MonoBehaviour:
   escapeDistance: 2
   obstacleLayers:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 0
   escapeDuration: 0.5
 --- !u!1 &1644943239
 GameObject:
