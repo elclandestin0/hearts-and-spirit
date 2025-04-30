@@ -81,8 +81,12 @@ public class DoveCompanion : MonoBehaviour
         }
 
         // Animate based on movement state
-        if (!isFlappingLoop)
+        if (!isFlappingLoop) 
+        {
+            Debug.Log("[FLAP] Done flapping, now gliding.");
             animator.SetBool("Gliding", movementScript.isGliding);
+        }
+            
 
         ObstacleCheck();
     }
@@ -228,7 +232,7 @@ public class DoveCompanion : MonoBehaviour
     private void HandleFlap()
     {
         flapQueue++;
-
+        Debug.Log("[FLAP] HandleFlap()");
         if (!isFlappingLoop)
             StartCoroutine(PlayQueuedFlaps());
     }
@@ -239,10 +243,15 @@ public class DoveCompanion : MonoBehaviour
 
         while (flapQueue > 0)
         {
+            Debug.Log("[FLAP] flapQueue: " + flapQueue);
+
+            // Trigger flap
+            animator.ResetTrigger("Flap"); // clear previous just in case
             animator.SetBool("Gliding", false);
             animator.SetTrigger("Flap");
 
-            float flapDuration = GetAnimationClipLength("Flapping");
+            // Wait for animation length (adjusted for speed)
+            float flapDuration = GetAdjustedClipLength("Flap");
             yield return new WaitForSeconds(flapDuration);
 
             flapQueue--;
@@ -251,15 +260,16 @@ public class DoveCompanion : MonoBehaviour
         isFlappingLoop = false;
     }
 
-    private float GetAnimationClipLength(string clipName)
+    private float GetAdjustedClipLength(string clipName)
     {
         foreach (var clip in animator.runtimeAnimatorController.animationClips)
         {
-            Debug.Log("Clip " + clip.name);
             if (clip.name == clipName)
-                return clip.length;
+            {
+                return clip.length; // avoid div by 0
+            }
         }
-        return 0.5f; // fallback
+        return 1f;
     }
 
     void OnDestroy()

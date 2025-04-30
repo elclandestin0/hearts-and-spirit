@@ -79,8 +79,6 @@ public class Movement : MonoBehaviour
         // 🖐️ Simulated Flap (Debugging without VR)
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log("🔵 Simulated Flap triggered by SPACE key!");
-
             isFlapping = true;
             isFlappingPosture = true;
             flapMagnitude = Random.Range(3.0f, 4.0f);
@@ -89,7 +87,6 @@ public class Movement : MonoBehaviour
 
         if (isFlapping)
         {
-            Debug.Log("Flapping");
             velocity += FlightPhysics.CalculateFlapVelocity(
                 headFwd,
                 flapMagnitude,
@@ -109,7 +106,6 @@ public class Movement : MonoBehaviour
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
         if ((inGlidePosture && velocity.magnitude > 0.1f) || isGliding)
         {
-            Debug.Log("Gliding");
             // Are both hands behind the head?
             Vector3 leftToHead = leftHand.position - head.position;
             Vector3 rightToHead = rightHand.position - head.position;
@@ -122,7 +118,6 @@ public class Movement : MonoBehaviour
 
             bool isManualDivePose = leftBehind && rightBehind;
 
-            Debug.Log($"[DIVE CHECK] LeftDot: {leftDot:F2}, RightDot: {rightDot:F2}");
 
             velocity = FlightPhysics.CalculateGlideVelocity(
                 velocity,
