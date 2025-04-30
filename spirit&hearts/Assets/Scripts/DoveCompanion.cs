@@ -24,7 +24,8 @@ public class DoveCompanion : MonoBehaviour
     public float targetOrbitRadius;
     public float orbitRadiusChangeTimer;
     public float orbitRadiusChangeInterval = 3f; // how often we change target
-
+    private float orbitAngle = 0f;
+    private int orbitDirection = 1;
 
     // == Follow Mode Settings ==
     [Header("Follow Mode")]
@@ -45,11 +46,14 @@ public class DoveCompanion : MonoBehaviour
 
     [Header("Animation")]
     public Animator animator;
-    private float orbitAngle = 0f;
-    private int orbitDirection = 1;
-
+    // Escape variables
     private Vector3 escapeTarget;
     private bool isEscaping = false;
+
+    // Flapping time
+    private int flapQueue = 0;
+    private bool isFlappingLoop = false;
+
 
     void Start()
     {
@@ -77,7 +81,8 @@ public class DoveCompanion : MonoBehaviour
         }
 
         // Animate based on movement state
-        animator.SetBool("Gliding", movementScript.isGliding);
+        if (!isFlappingLoop)
+            animator.SetBool("Gliding", movementScript.isGliding);
 
         ObstacleCheck();
     }
@@ -222,8 +227,39 @@ public class DoveCompanion : MonoBehaviour
 
     private void HandleFlap()
     {
-        Debug.Log("Handle flapping");
-        animator.SetTrigger("Flap");
+        flapQueue++;
+
+        if (!isFlappingLoop)
+            StartCoroutine(PlayQueuedFlaps());
+    }
+
+    private IEnumerator PlayQueuedFlaps()
+    {
+        isFlappingLoop = true;
+
+        while (flapQueue > 0)
+        {
+            animator.SetBool("Gliding", false);
+            animator.SetTrigger("Flap");
+
+            float flapDuration = GetAnimationClipLength("Flapping");
+            yield return new WaitForSeconds(flapDuration);
+
+            flapQueue--;
+        }
+
+        isFlappingLoop = false;
+    }
+
+    private float GetAnimationClipLength(string clipName)
+    {
+        foreach (var clip in animator.runtimeAnimatorController.animationClips)
+        {
+            Debug.Log("Clip " + clip.name);
+            if (clip.name == clipName)
+                return clip.length;
+        }
+        return 0.5f; // fallback
     }
 
     void OnDestroy()

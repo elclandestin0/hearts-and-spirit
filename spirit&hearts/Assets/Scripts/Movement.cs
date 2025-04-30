@@ -72,7 +72,6 @@ public class Movement : MonoBehaviour
 
         float minFlapThreshold = 1.5f;
         bool isFlappingPosture = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold;
-
         float flapMagnitude = isFlappingPosture
             ? Mathf.Clamp01((leftSpeed + rightSpeed) / 2f / 5f)
             : 0f;
@@ -82,12 +81,13 @@ public class Movement : MonoBehaviour
         {
             Debug.Log("🔵 Simulated Flap triggered by SPACE key!");
 
+            isFlapping = true;
             isFlappingPosture = true;
             flapMagnitude = Random.Range(3.0f, 4.0f);
         }
         
 
-        if (isFlappingPosture)
+        if (isFlapping)
         {
             Debug.Log("Flapping");
             velocity += FlightPhysics.CalculateFlapVelocity(
@@ -101,6 +101,7 @@ public class Movement : MonoBehaviour
             
             // Fire the flap event
             OnFlap?.Invoke();
+            isFlapping = false;
             isFlappingPosture = false;
         }
 
