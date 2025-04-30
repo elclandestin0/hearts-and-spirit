@@ -83,7 +83,19 @@ public class Movement : MonoBehaviour
             isFlappingPosture = true;
             flapMagnitude = Random.Range(3.0f, 4.0f);
         }
-        
+
+        // isGliding boolean control
+        if (Input.GetKey(KeyCode.M))
+        {
+            isGliding = true;
+        }
+
+        else 
+        {
+            isGliding = false;
+        }
+
+        // Add space held down for more than 1 second = activate isGliding to true
 
         if (isFlapping)
         {
@@ -132,7 +144,7 @@ public class Movement : MonoBehaviour
             );
         }
 
-        velocity += Vector3.down * gravity * Time.deltaTime;
+        velocity += isGliding ? Vector3.down * gravity * Time.deltaTime : Vector3.zero;
 
         // ✈️ Apply movement
         transform.position += velocity * Time.deltaTime;

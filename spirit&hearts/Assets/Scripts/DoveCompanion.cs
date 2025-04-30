@@ -13,7 +13,16 @@ public class DoveCompanion : MonoBehaviour
     public float transitionSmoothing = 5f;
     public float rotationSmoothing = 3f;
 
-    // == Orbit Mode Settings ==
+    [Header("Hovering")]
+    public float hoverAmplitude = 0.1f;
+    public float hoverFrequency = 1f;
+    public float moveDuration = 2f;
+    public float waitDuration = 5f;
+    private Vector3 baseHoverPos;
+    private float hoverTimer;
+    private bool isHovering = false;
+    private Vector3 currentHoverOffset;
+    
     [Header("Orbit Mode")]
     public float orbitRadius = 1.5f;
     public float baseOrbitSpeed = 30f;
@@ -63,6 +72,8 @@ public class DoveCompanion : MonoBehaviour
 
         // If flap detected from Movement.cs, HandleFlap()
         movementScript.OnFlap += HandleFlap;
+
+        StartCoroutine(WanderLoop());
     }
 
     void Update()
@@ -86,11 +97,11 @@ public class DoveCompanion : MonoBehaviour
             Debug.Log("[FLAP] Done flapping, now gliding.");
             animator.SetBool("Gliding", movementScript.isGliding);
         }
-            
-
         ObstacleCheck();
+        HoverIdle();
     }
 
+#region Orbit
     private void Orbit()
     {
         float playerSpeed = movementScript.CurrentVelocity.magnitude;
@@ -143,6 +154,20 @@ public class DoveCompanion : MonoBehaviour
         MoveTowards(targetPos, movementScript.head.forward);
     }
 
+    private void MoveTowards(Vector3 targetPos, Vector3 faceDirection)
+    {
+        transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * transitionSmoothing);
+
+        Vector3 moveDirection = targetPos - transform.position;
+        if (moveDirection != Vector3.zero)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(moveDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSmoothing);
+        }
+    }
+
+#endregion
+#region Following and avoiding
     private void Follow()
     {
         float playerSpeed = movementScript.CurrentVelocity.magnitude;
@@ -165,23 +190,10 @@ public class DoveCompanion : MonoBehaviour
         // Move and rotate
         MoveTowards(targetPos, movementScript.head.forward);
     }
-
     private void Avoid()
     {
         // Move toward escape target
         MoveTowards(escapeTarget, movementScript.head.forward);
-    }
-
-    private void MoveTowards(Vector3 targetPos, Vector3 faceDirection)
-    {
-        transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * transitionSmoothing);
-
-        Vector3 moveDirection = targetPos - transform.position;
-        if (moveDirection != Vector3.zero)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(moveDirection);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSmoothing);
-        }
     }
 
     private void ObstacleCheck()
@@ -228,7 +240,84 @@ public class DoveCompanion : MonoBehaviour
         currentState = previousState;
         isEscaping = false;
     }
+#endregion
+#region Hovering
+private IEnumerator WanderLoop()
+{
+    while (true)
+    {
+        bool isIdle = !movementScript.isGliding && !movementScript.isFlapping;
 
+        if (isIdle && !isHovering)
+        {
+            // Choose a persistent local offset
+            Vector3 randomDir = Random.onUnitSphere;
+            randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.3f);
+            Vector3 localOffset = randomDir.normalized * 4f;
+            currentHoverOffset = localOffset;
+            yield return StartCoroutine(HoverToDynamicOffset(localOffset, moveDuration));
+
+            baseHoverPos = transform.position;
+            hoverTimer = 0f;
+
+            yield return new WaitForSeconds(waitDuration);
+        }
+
+        yield return null;
+    }
+}
+    private void HoverIdle()
+    {
+        if (isHovering || movementScript.isGliding || movementScript.isFlapping)
+            return;
+
+        hoverTimer += Time.deltaTime;
+        float offset = Mathf.Sin(hoverTimer * hoverFrequency) * hoverAmplitude;
+
+        Vector3 liveHoverBase = player.position + currentHoverOffset;
+        Vector3 hoveredPos = liveHoverBase + new Vector3(0, offset, 0);
+        transform.position = hoveredPos;
+
+        // Gently look where the player is looking — from dove's perspective
+        Vector3 headFwd = movementScript.head.forward;
+        Vector3 fromDoveToLookTarget = (transform.position + headFwd * 2f) - transform.position;
+        Vector3 glance = Vector3.Slerp(transform.forward, fromDoveToLookTarget.normalized, 0.4f);
+        Quaternion rot = Quaternion.LookRotation(glance);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 2f);
+    }
+    
+    private IEnumerator HoverToDynamicOffset(Vector3 localOffset, float duration)
+    {
+        isHovering = true;
+
+        Vector3 startPos = transform.position;
+        Quaternion startRot = transform.rotation;
+
+        float t = 0f;
+
+        while (t < duration)
+        {
+            float blend = t / duration;
+
+            // Live target position follows the player as they move
+            Vector3 dynamicTarget = player.position + localOffset;
+            Vector3 pos = Vector3.Lerp(startPos, dynamicTarget, blend);
+            Quaternion rot = Quaternion.LookRotation((dynamicTarget - transform.position).normalized);
+
+            transform.position = pos;
+            transform.rotation = Quaternion.Slerp(startRot, rot, blend);
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        isHovering = false;
+    }
+
+
+#endregion
+
+    // Flap region
     private void HandleFlap()
     {
         flapQueue++;
