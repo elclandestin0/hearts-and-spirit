@@ -164,12 +164,11 @@ public class DoveCompanion : MonoBehaviour
         {
             Vector3 randomDir = Random.onUnitSphere;
             randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.5f);
-            Vector3 offset = randomDir.normalized * 3f;
+            Vector3 offset = randomDir.normalized * wanderDistance;
 
             currentHoverOffset = offset;
 
-            Vector3 targetPos = player.position + offset;
-            yield return StartCoroutine(SmoothHoverApproach(targetPos));
+            yield return StartCoroutine(SmoothHoverApproach(offset));
 
             isHoverIdle = true;
             float timer = 0f;
@@ -192,18 +191,24 @@ public class DoveCompanion : MonoBehaviour
         }
     }
 
-    private IEnumerator SmoothHoverApproach(Vector3 targetPos)
+    private IEnumerator SmoothHoverApproach(Vector3 offset)
     {
         float t = 0f;
         Vector3 start = transform.position;
+        Vector3 targetPos = player.position + offset;
+        float distanceToOffset = Vector3.Distance(transform.position, targetPos);
+        float offsetThreshold = 0.2f;
 
-        while (t < 1f && (!movementScript.isGliding || !movementScript.isFlapping))
+        while (t < 1f && (!movementScript.isGliding || !movementScript.isFlapping) && distanceToOffset < offsetThreshold)
         {
             t += Time.deltaTime / moveDuration;
             liveTargetPosition = Vector3.Lerp(start, targetPos, t);
 
             Quaternion targetRot = Quaternion.LookRotation((targetPos - transform.position).normalized);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
+            
+            targetPos = Vector3.Lerp(start, targetPos, t);
+            distanceToOffset = Vector3.Distance(transform.position, targetPos);
 
             yield return null;
         }

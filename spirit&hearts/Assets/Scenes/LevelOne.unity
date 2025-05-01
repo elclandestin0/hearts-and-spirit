@@ -1237,6 +1237,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -8391222552659086748, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: -5477749408508380018, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
@@ -1302,8 +1306,8 @@ MonoBehaviour:
   rotationSmoothing: 1
   hoverAmplitude: 0.1
   hoverFrequency: 1
-  moveDuration: 5
-  waitDuration: 3
+  moveDuration: 3
+  waitDuration: 5
   wanderDistance: 10
   orbitRadius: 30
   baseOrbitSpeed: 0.5
