@@ -97,7 +97,7 @@ public class DoveCompanion : MonoBehaviour
             animator.SetBool("Gliding", movementScript.isGliding);
         }
 
-        transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref doveVelocity, movementScript.isGliding || movementScript.isFlapping ? 1.0f : 0.3f);
+        transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref doveVelocity, movementScript.isGliding || movementScript.isFlapping ? 1.0f : 0.1f);
         ObstacleCheck();
     }
 #endregion
@@ -193,91 +193,29 @@ public class DoveCompanion : MonoBehaviour
 
     private IEnumerator SmoothHoverApproach(Vector3 offset)
     {
-        float t = 0f;
-        Vector3 start = transform.position;
-        Vector3 targetPos = player.position + offset;
-        float distanceToOffset = Vector3.Distance(transform.position, targetPos);
+        Vector3 velocity = Vector3.zero;
         float offsetThreshold = 0.2f;
 
-        while (t < 1f && (!movementScript.isGliding || !movementScript.isFlapping) && distanceToOffset < offsetThreshold)
+        while (!movementScript.isGliding && !movementScript.isFlapping)
         {
-            t += Time.deltaTime / moveDuration;
-            liveTargetPosition = Vector3.Lerp(start, targetPos, t);
+            Vector3 targetPos = player.position + offset;
+            float distance = Vector3.Distance(transform.position, targetPos);
 
-            Quaternion targetRot = Quaternion.LookRotation((targetPos - transform.position).normalized);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
-            
-            targetPos = Vector3.Lerp(start, targetPos, t);
-            distanceToOffset = Vector3.Distance(transform.position, targetPos);
-
-            yield return null;
-        }
-    }
-    private IEnumerator TransitionToOrbitCoroutine()
-    {
-        float timer = 0f;
-        float maxDuration = 1.5f;
-        Vector3 startPos = transform.position;
-
-        float playerSpeed = movementScript.CurrentVelocity.magnitude;
-        float adjustedDuration = Mathf.Max(maxDuration, 1f / (playerSpeed + 0.1f));
-
-        float orbitSpeed = baseOrbitSpeed * playerSpeed * 0.5f;
-        orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime;
-        orbitAngle = Mathf.Clamp(orbitAngle, -30f, 30f);
-        if (orbitAngle >= 30 || orbitAngle <= -30) orbitDirection *= -1;
-
-        Vector3 right = movementScript.head.right;
-        Vector3 forward = movementScript.head.forward;
-        float radians = orbitAngle * Mathf.Deg2Rad;
-        Vector3 orbitOffset = (right * Mathf.Sin(radians) + forward * Mathf.Cos(radians)) * orbitRadius;
-        orbitOffset.y += Mathf.Sin(Time.time * verticalBobFrequency) * verticalBobAmplitude;
-        Vector3 targetPos = movementScript.head.position + orbitOffset;
-
-        Debug.Log("[HOVER->ORBIT] Transitioning to orbit");
-
-        bool reachedTarget = false;
-
-        while (timer < 6.0f)
-        {
-            if (!movementScript.isGliding)
+            if (distance < offsetThreshold)
             {
-                Debug.Log("[ORBIT->HOVER] Gliding cancelled — return to Hover.");
-                transitioningToOrbit = false;
-                currentState = DoveState.Hovering;
+                Debug.Log("[HOVER] Reached hover target.");
                 yield break;
             }
 
-            liveTargetPosition = Vector3.SmoothDamp(transform.position, targetPos, ref doveVelocity, 5f);
+            liveTargetPosition = Vector3.SmoothDamp(transform.position, targetPos, ref velocity, 0.3f);
 
             Quaternion targetRot = Quaternion.LookRotation((targetPos - transform.position).normalized);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
 
-            timer += Time.deltaTime;
-
-            // Optional: consider checking distance here to end early
-            if (Vector3.Distance(transform.position, targetPos) < 0.1f)
-            {
-                reachedTarget = true;
-                break;
-            }
-
             yield return null;
         }
 
-        transitioningToOrbit = false;
-
-        if (movementScript.isGliding && reachedTarget)
-        {
-            currentState = DoveState.Orbiting;
-            Debug.Log("[HOVER->ORBIT] Orbiting.");
-        }
-        else
-        {
-            currentState = DoveState.Hovering;
-            Debug.Log("[ORBIT CANCELLED] Didn't reach orbit in time or glide stopped.");
-        }
-
+        Debug.Log("[HOVER] Aborted approach — player started moving.");
     }
 #endregion
 #region Following and avoiding
