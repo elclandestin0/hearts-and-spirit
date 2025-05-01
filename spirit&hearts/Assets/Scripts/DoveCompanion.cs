@@ -97,7 +97,19 @@ public class DoveCompanion : MonoBehaviour
             animator.SetBool("Gliding", movementScript.isGliding);
         }
 
-        transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref doveVelocity, movementScript.isGliding || movementScript.isFlapping ? 1.0f : 0.1f);
+        // ✅ With this:
+        if (currentState != DoveState.Hovering)
+        {
+            Vector3 moveDir = (liveTargetPosition - transform.position).normalized;
+            float speed = (movementScript.isFlapping || movementScript.isGliding ? 10.0f : 20.0f);
+            float distance = Vector3.Distance(transform.position, liveTargetPosition);
+            transform.position += moveDir * speed * Time.deltaTime;
+
+            // prevent overshoot
+            if (Vector3.Distance(transform.position, liveTargetPosition) > distance)
+                transform.position = liveTargetPosition;
+        }
+
         ObstacleCheck();
     }
 #endregion
@@ -168,8 +180,10 @@ public class DoveCompanion : MonoBehaviour
 
             currentHoverOffset = offset;
 
+            // Phase 1: magnitude-based smooth approach
             yield return StartCoroutine(SmoothHoverApproach(offset));
 
+            // Phase 2: idle bobbing
             isHoverIdle = true;
             float timer = 0f;
 
@@ -177,7 +191,9 @@ public class DoveCompanion : MonoBehaviour
             {
                 float offsetY = Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
                 Vector3 baseHover = player.position + currentHoverOffset;
-                liveTargetPosition = baseHover + new Vector3(0, offsetY, 0);
+                Vector3 bobTarget = baseHover + new Vector3(0, offsetY, 0);
+
+                transform.position = Vector3.SmoothDamp(transform.position, bobTarget, ref doveVelocity, 0.15f);
 
                 Vector3 lookDir = (player.position + movementScript.head.forward * 2f) - transform.position;
                 Quaternion rot = Quaternion.LookRotation(lookDir.normalized);
@@ -193,21 +209,23 @@ public class DoveCompanion : MonoBehaviour
 
     private IEnumerator SmoothHoverApproach(Vector3 offset)
     {
-        Vector3 velocity = Vector3.zero;
-        float offsetThreshold = 0.2f;
+        float distanceThreshold = 0.2f;
 
         while (!movementScript.isGliding && !movementScript.isFlapping)
         {
             Vector3 targetPos = player.position + offset;
             float distance = Vector3.Distance(transform.position, targetPos);
 
-            if (distance < offsetThreshold)
+            if (distance < distanceThreshold)
             {
                 Debug.Log("[HOVER] Reached hover target.");
                 yield break;
             }
 
-            liveTargetPosition = Vector3.SmoothDamp(transform.position, targetPos, ref velocity, 0.3f);
+            // 🟢 Magnitude-based movement
+            Vector3 moveDir = (targetPos - transform.position).normalized;
+            float speed = 3.5f; // or use player velocity magnitude
+            transform.position += moveDir * speed * Time.deltaTime;
 
             Quaternion targetRot = Quaternion.LookRotation((targetPos - transform.position).normalized);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
@@ -217,6 +235,8 @@ public class DoveCompanion : MonoBehaviour
 
         Debug.Log("[HOVER] Aborted approach — player started moving.");
     }
+
+
 #endregion
 #region Following and avoiding
     private void Follow()
