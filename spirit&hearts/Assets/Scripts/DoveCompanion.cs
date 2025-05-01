@@ -80,7 +80,7 @@ public class DoveCompanion : MonoBehaviour
         switch (currentState)
         {
             case DoveState.Orbiting:
-                if (!transitioningToOrbit) Orbit();
+                Orbit();
                 break;
             case DoveState.Hovering:
                 break;
@@ -97,7 +97,7 @@ public class DoveCompanion : MonoBehaviour
             animator.SetBool("Gliding", movementScript.isGliding);
         }
 
-        transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref doveVelocity, 0.3f);
+        transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref doveVelocity, movementScript.isGliding || movementScript.isFlapping ? 1.0f : 0.3f);
         ObstacleCheck();
     }
 #endregion
@@ -138,6 +138,26 @@ public class DoveCompanion : MonoBehaviour
     }
 #endregion
 #region Hovering
+    private void Hover()
+    {
+        bool isIdle = !movementScript.isGliding && !movementScript.isFlapping;
+
+        if (isIdle && currentState != DoveState.Hovering)
+        {
+            Debug.Log("[HOVER] Entering hover state");
+            currentState = DoveState.Hovering;
+            if (hoverRoutine != null) StopCoroutine(hoverRoutine);
+            hoverRoutine = StartCoroutine(IdleHoverLoop());
+        }
+        else if (!isIdle && currentState == DoveState.Hovering)
+        {
+            Debug.Log("[HOVER] Exiting hover, transitioning to orbit");
+            if (hoverRoutine != null) StopCoroutine(hoverRoutine);
+            currentState = DoveState.Orbiting;
+            hoverRoutine = null;
+            isHoverIdle = false;
+        }
+    }    
     private IEnumerator IdleHoverLoop()
     {
         while (true)
@@ -149,13 +169,12 @@ public class DoveCompanion : MonoBehaviour
             currentHoverOffset = offset;
 
             Vector3 targetPos = player.position + offset;
-            yield return StartCoroutine(SmoothHoverApproach(targetPos, 1.5f));
+            yield return StartCoroutine(SmoothHoverApproach(targetPos));
 
             isHoverIdle = true;
-            float hoverDuration = 4f;
             float timer = 0f;
 
-            while (timer < hoverDuration && isHoverIdle)
+            while (timer < waitDuration && isHoverIdle && (!movementScript.isGliding || !movementScript.isFlapping))
             {
                 float offsetY = Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
                 Vector3 baseHover = player.position + currentHoverOffset;
@@ -173,14 +192,14 @@ public class DoveCompanion : MonoBehaviour
         }
     }
 
-    private IEnumerator SmoothHoverApproach(Vector3 targetPos, float duration)
+    private IEnumerator SmoothHoverApproach(Vector3 targetPos)
     {
         float t = 0f;
         Vector3 start = transform.position;
 
-        while (t < 1f)
+        while (t < 1f && (!movementScript.isGliding || !movementScript.isFlapping))
         {
-            t += Time.deltaTime / duration;
+            t += Time.deltaTime / moveDuration;
             liveTargetPosition = Vector3.Lerp(start, targetPos, t);
 
             Quaternion targetRot = Quaternion.LookRotation((targetPos - transform.position).normalized);
@@ -189,28 +208,6 @@ public class DoveCompanion : MonoBehaviour
             yield return null;
         }
     }
-
-    private void Hover()
-    {
-        bool isIdle = !movementScript.isGliding && !movementScript.isFlapping;
-
-        if (isIdle && currentState != DoveState.Hovering)
-        {
-            Debug.Log("[HOVER] Entering hover state");
-            currentState = DoveState.Hovering;
-            if (hoverRoutine != null) StopCoroutine(hoverRoutine);
-            hoverRoutine = StartCoroutine(IdleHoverLoop());
-        }
-        else if (!isIdle && currentState == DoveState.Hovering)
-        {
-            Debug.Log("[HOVER] Exiting hover, transitioning to orbit");
-            if (hoverRoutine != null) StopCoroutine(hoverRoutine);
-            hoverRoutine = null;
-            isHoverIdle = false;
-            transitioningToOrbit = true;
-            StartCoroutine(TransitionToOrbitCoroutine());
-        }
-    }    
     private IEnumerator TransitionToOrbitCoroutine()
     {
         float timer = 0f;
@@ -234,16 +231,48 @@ public class DoveCompanion : MonoBehaviour
 
         Debug.Log("[HOVER->ORBIT] Transitioning to orbit");
 
-        while (timer < adjustedDuration)
+        bool reachedTarget = false;
+
+        while (timer < 6.0f)
         {
+            if (!movementScript.isGliding)
+            {
+                Debug.Log("[ORBIT->HOVER] Gliding cancelled — return to Hover.");
+                transitioningToOrbit = false;
+                currentState = DoveState.Hovering;
+                yield break;
+            }
+
+            liveTargetPosition = Vector3.SmoothDamp(transform.position, targetPos, ref doveVelocity, 5f);
+
+            Quaternion targetRot = Quaternion.LookRotation((targetPos - transform.position).normalized);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
+
             timer += Time.deltaTime;
-            liveTargetPosition = Vector3.Lerp(startPos, targetPos, timer / adjustedDuration);
+
+            // Optional: consider checking distance here to end early
+            if (Vector3.Distance(transform.position, targetPos) < 0.1f)
+            {
+                reachedTarget = true;
+                break;
+            }
+
             yield return null;
         }
 
         transitioningToOrbit = false;
-        currentState = DoveState.Orbiting;
-        Debug.Log("[HOVER->ORBIT] Arrived at orbit position.");
+
+        if (movementScript.isGliding && reachedTarget)
+        {
+            currentState = DoveState.Orbiting;
+            Debug.Log("[HOVER->ORBIT] Orbiting.");
+        }
+        else
+        {
+            currentState = DoveState.Hovering;
+            Debug.Log("[ORBIT CANCELLED] Didn't reach orbit in time or glide stopped.");
+        }
+
     }
 #endregion
 #region Following and avoiding
