@@ -623,6 +623,10 @@ PrefabInstance:
       propertyPath: m_Target
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 1903195526727562137, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
+      propertyPath: m_GazeInteractor
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1914922226402654763, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: m_Name
       value: Player
@@ -685,6 +689,9 @@ PrefabInstance:
     - {fileID: 2825014896380181976, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
     - {fileID: 8442727846607739383, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 7090588842696128010, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1579892794}
     - targetCorrespondingSourceObject: {fileID: 9105205731498775214, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1721036677}
@@ -1172,7 +1179,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 1452294456}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalScale.x
@@ -1188,15 +1195,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 190.20001
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 286.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 127.82
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1289,15 +1296,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 485912b13998e4ba592abcca35113f33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 1452294456}
+  player: {fileID: 2146259009}
   movementScript: {fileID: 643005119}
   transitionSmoothing: 3
   rotationSmoothing: 1
   hoverAmplitude: 0.1
   hoverFrequency: 1
-  moveDuration: 2
-  waitDuration: 5
-  orbitRadius: 20
+  moveDuration: 5
+  waitDuration: 3
+  wanderDistance: 10
+  orbitRadius: 30
   baseOrbitSpeed: 0.5
   verticalBobAmplitude: 0.3
   verticalBobFrequency: 2
@@ -1338,6 +1346,11 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!4 &1579892794 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+  m_PrefabInstance: {fileID: 1579892789}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1644943239
 GameObject:
   m_ObjectHideFlags: 0
@@ -1793,6 +1806,11 @@ Terrain:
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3
+--- !u!4 &2146259009 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2659945209513103479, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
+  m_PrefabInstance: {fileID: 587969649}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1804,4 +1822,3 @@ SceneRoots:
   - {fileID: 750616277}
   - {fileID: 138046329}
   - {fileID: 587969649}
-  - {fileID: 1579892789}
