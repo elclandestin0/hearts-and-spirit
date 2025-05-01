@@ -33,6 +33,7 @@ public class Movement : MonoBehaviour
 
     // Publicly accessible variables for reference
     public Vector3 CurrentVelocity => velocity;
+    public float MaxSpeed => maxDiveSpeed;
     public delegate void FlapEvent();
     public event FlapEvent OnFlap;
     // Logger variable(s)

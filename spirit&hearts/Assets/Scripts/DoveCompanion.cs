@@ -207,34 +207,51 @@ public class DoveCompanion : MonoBehaviour
         }
     }
 
-    private IEnumerator SmoothHoverApproach(Vector3 offset)
+private IEnumerator SmoothHoverApproach(Vector3 offset)
+{
+    float distanceThreshold = 0.2f;
+    while (!movementScript.isGliding && !movementScript.isFlapping)
     {
-        float distanceThreshold = 0.2f;
+        Vector3 targetPos = player.position + offset;
+        float distance = Vector3.Distance(transform.position, targetPos);
 
-        while (!movementScript.isGliding && !movementScript.isFlapping)
+        if (distance < distanceThreshold)
         {
-            Vector3 targetPos = player.position + offset;
-            float distance = Vector3.Distance(transform.position, targetPos);
-
-            if (distance < distanceThreshold)
-            {
-                Debug.Log("[HOVER] Reached hover target.");
-                yield break;
-            }
-
-            // 🟢 Magnitude-based movement
-            Vector3 moveDir = (targetPos - transform.position).normalized;
-            float speed = 3.5f; // or use player velocity magnitude
-            transform.position += moveDir * speed * Time.deltaTime;
-
-            Quaternion targetRot = Quaternion.LookRotation((targetPos - transform.position).normalized);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
-
-            yield return null;
+            Debug.Log("[HOVER] Reached hover target.");
+            yield break;
         }
 
-        Debug.Log("[HOVER] Aborted approach — player started moving.");
+        float playerSpeed = movementScript.CurrentVelocity.magnitude;
+        float maxPlayerSpeed = movementScript.MaxSpeed;
+
+        // Clamp playerSpeed ratio to [0,1] for lerping
+        float speedRatio = Mathf.Clamp01(playerSpeed / maxPlayerSpeed);
+
+        float speed;
+        if (distance > wanderDistance)
+        {
+            // Far away — approach fast
+            speed = Mathf.Lerp(20f, 60f, 1 - speedRatio); // Player slow → dove fast
+        }
+        else
+        {
+            // Close — approach gently
+            speed = Mathf.Lerp(15f, 5f, speedRatio); // Player fast → dove gentle
+        }
+
+        Vector3 moveDir = (targetPos - transform.position).normalized;
+        transform.position += moveDir * speed * Time.deltaTime;
+
+        Quaternion targetRot = Quaternion.LookRotation((targetPos - transform.position).normalized);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
+
+        yield return null;
     }
+
+    Debug.Log("[HOVER] Aborted approach — player started moving.");
+}
+
+
 
 
 #endregion
