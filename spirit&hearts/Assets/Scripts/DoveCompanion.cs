@@ -97,11 +97,13 @@ public class DoveCompanion : MonoBehaviour
             animator.SetBool("Gliding", movementScript.isGliding);
         }
 
-        // ✅ With this:
         if (currentState != DoveState.Hovering)
         {
             Vector3 moveDir = (liveTargetPosition - transform.position).normalized;
-            float speed = (movementScript.isFlapping || movementScript.isGliding ? 10.0f : 20.0f);
+            float maxPlayerSpeed = movementScript.MaxSpeed;
+            float playerSpeed = movementScript.CurrentVelocity.magnitude;
+            float speedRatio = Mathf.Clamp01(playerSpeed / maxPlayerSpeed);
+            float speed = Mathf.Lerp(playerSpeed / 0.25f, playerSpeed / 2f, 1 - speedRatio); // Player slow → dove fast
             float distance = Vector3.Distance(transform.position, liveTargetPosition);
             transform.position += moveDir * speed * Time.deltaTime;
 
@@ -147,6 +149,11 @@ public class DoveCompanion : MonoBehaviour
         Vector3 targetPos = orbitCenter + orbitOffset;
 
         liveTargetPosition = targetPos;
+
+        Vector3 lookPoint = movementScript.head.position + movementScript.head.forward * (wanderDistance * 2f);
+        Vector3 direction = (lookPoint - transform.position).normalized;
+        Quaternion targetRot = Quaternion.LookRotation(direction);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
     }
 #endregion
 #region Hovering
@@ -195,7 +202,7 @@ public class DoveCompanion : MonoBehaviour
 
                 transform.position = Vector3.SmoothDamp(transform.position, bobTarget, ref doveVelocity, 0.15f);
 
-                Vector3 lookDir = (player.position + movementScript.head.forward * 2f) - transform.position;
+                Vector3 lookDir = (player.position - movementScript.head.forward * 2f) - transform.position;
                 Quaternion rot = Quaternion.LookRotation(lookDir.normalized);
                 transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 2f);
 
@@ -231,12 +238,12 @@ private IEnumerator SmoothHoverApproach(Vector3 offset)
         if (distance > wanderDistance)
         {
             // Far away — approach fast
-            speed = Mathf.Lerp(20f, 60f, 1 - speedRatio); // Player slow → dove fast
+            speed = Mathf.Lerp(5f, 10f, 1 - speedRatio); // Player slow → dove fast
         }
         else
         {
             // Close — approach gently
-            speed = Mathf.Lerp(15f, 5f, speedRatio); // Player fast → dove gentle
+            speed = Mathf.Lerp(2.5f, 5f, speedRatio); // Player fast → dove gentle
         }
 
         Vector3 moveDir = (targetPos - transform.position).normalized;
