@@ -102,9 +102,9 @@ public class DoveCompanion : MonoBehaviour
             Vector3 moveDir = (liveTargetPosition - transform.position).normalized;
             float maxPlayerSpeed = movementScript.MaxSpeed;
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
-            float speedRatio = Mathf.Clamp01(playerSpeed / maxPlayerSpeed);
-            float speed = Mathf.Lerp(playerSpeed / 0.25f, playerSpeed / 2f, 1 - speedRatio); // Player slow → dove fast
             float distance = Vector3.Distance(transform.position, liveTargetPosition);
+            float speedRatio = Mathf.Clamp01(wanderDistance / distance);
+            float speed = Mathf.Lerp(playerSpeed / 0.8f, playerSpeed / 1.2f, speedRatio);
             transform.position += moveDir * speed * Time.deltaTime;
 
             // prevent overshoot
@@ -232,18 +232,18 @@ private IEnumerator SmoothHoverApproach(Vector3 offset)
         float maxPlayerSpeed = movementScript.MaxSpeed;
 
         // Clamp playerSpeed ratio to [0,1] for lerping
-        float speedRatio = Mathf.Clamp01(playerSpeed / maxPlayerSpeed);
+        float speedRatio = Mathf.Clamp01(wanderDistance / distance);
 
         float speed;
         if (distance > wanderDistance)
         {
             // Far away — approach fast
-            speed = Mathf.Lerp(5f, 10f, 1 - speedRatio); // Player slow → dove fast
+            speed = Mathf.Lerp(maxPlayerSpeed / 1.0f, maxPlayerSpeed / 10.0f, speedRatio);
         }
         else
         {
             // Close — approach gently
-            speed = Mathf.Lerp(2.5f, 5f, speedRatio); // Player fast → dove gentle
+            speed = maxPlayerSpeed / 10.0f; // Player fast → dove gentle
         }
 
         Vector3 moveDir = (targetPos - transform.position).normalized;
