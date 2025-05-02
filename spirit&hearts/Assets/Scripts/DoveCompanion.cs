@@ -50,19 +50,20 @@ public class DoveCompanion : MonoBehaviour
     public float escapeDistance = 2f;
     public LayerMask obstacleLayers;
     public float escapeDuration = 0.5f;
-
-    private enum DoveState { Orbiting, Hovering, Following, Escaping }
-    private DoveState currentState = DoveState.Orbiting;
-
     [Header("Animation")]
     public Animator animator;
+
+    // Internal variables
+    
+    private enum DoveState { Orbiting, Hovering, Following, Escaping }
+    private DoveState currentState = DoveState.Orbiting;
     private Vector3 escapeTarget;
     private bool isEscaping = false;
     private int flapQueue = 0;
     private bool isFlappingLoop = false;
-
     private Vector3 liveTargetPosition;
     private Vector3 doveVelocity = Vector3.zero;
+    private float lastKnownSpeed;
 
 #region Loop
     void Start()
@@ -99,17 +100,44 @@ public class DoveCompanion : MonoBehaviour
 
         if (currentState != DoveState.Hovering)
         {
-            Vector3 moveDir = (liveTargetPosition - transform.position).normalized;
-            float maxPlayerSpeed = movementScript.MaxSpeed;
+            float proximityThreshold = 0.1f;
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
             float distance = Vector3.Distance(transform.position, liveTargetPosition);
-            float speedRatio = Mathf.Clamp01(wanderDistance / distance);
-            float speed = Mathf.Lerp(playerSpeed, playerSpeed / 0.95f, speedRatio);
-            transform.position += moveDir * speed * Time.deltaTime;
 
-            // prevent overshoot
-            if (Vector3.Distance(transform.position, liveTargetPosition) > distance)
+            if (distance < proximityThreshold)
+            {
                 transform.position = liveTargetPosition;
+                return;
+            }
+
+            Vector3 moveDir = (liveTargetPosition - transform.position).normalized;
+
+            // If dove is far and in front of the player, make slower
+            // If dove is far and behind the player, make faster
+            // If dove is near the player, give regular speed
+            Vector3 toDove = (transform.position - movementScript.head.position).normalized;
+            Vector3 playerForward = movementScript.head.forward;
+
+            // Dot product: 1 = directly in front, -1 = directly behind
+            float facingDot = Vector3.Dot(playerForward, toDove);
+
+            // Calculate a weight based on player's attention
+            // -1 (behind): faster dove, +1 (front): slower dove
+            float attentionFactor = Mathf.InverseLerp(1f, -1f, facingDot); // converts dot range [1,-1] to [0,1]
+
+            // Boost if far, slow if close
+            float distanceRatio = Mathf.Clamp01(distance / wanderDistance);
+
+            // Final speed: modulate based on how far dove is AND where it is in relation to player gaze
+            float baseSpeed = Mathf.Lerp(playerSpeed / 1.1f, playerSpeed / 0.9f, distanceRatio);
+            float speed = Mathf.Lerp(baseSpeed * 0.75f, baseSpeed * 1.75f, attentionFactor);
+
+            // Move dove
+            float maxStep = distance / Time.deltaTime;
+            speed = Mathf.Min(speed, maxStep);
+            lastKnownSpeed = speed;
+            
+            transform.position += moveDir * speed * Time.deltaTime;
         }
 
         ObstacleCheck();
@@ -214,51 +242,58 @@ public class DoveCompanion : MonoBehaviour
         }
     }
 
-private IEnumerator SmoothHoverApproach(Vector3 offset)
-{
-    float distanceThreshold = 0.2f;
-    while (!movementScript.isGliding && !movementScript.isFlapping)
+    private IEnumerator SmoothHoverApproach(Vector3 offset)
     {
-        Vector3 targetPos = player.position + offset;
-        float distance = Vector3.Distance(transform.position, targetPos);
-
-        if (distance < distanceThreshold)
+        float distanceThreshold = 0.2f;
+        float blendTimer = 0f;
+        float speedBlendDuration = 0.5f;
+        float currentSpeed = 0f;
+        
+        while (!movementScript.isGliding && !movementScript.isFlapping)
         {
-            Debug.Log("[HOVER] Reached hover target.");
-            yield break;
+            Vector3 targetPos = player.position + offset;
+            float distance = Vector3.Distance(transform.position, targetPos);
+
+            if (distance < distanceThreshold)
+            {
+                Debug.Log("[HOVER] Reached hover target.");
+                yield break;
+            }
+
+            float playerSpeed = movementScript.CurrentVelocity.magnitude;
+            float maxPlayerSpeed = movementScript.MaxSpeed;
+
+            // Determine how "close" we are to the player
+            float distanceRatio = Mathf.Clamp01(wanderDistance / distance);
+
+            // Hover speed scales: max speed when far away, soft slow speed when close
+            float targetHoverSpeed = Mathf.Lerp(lastKnownSpeed, maxPlayerSpeed / 10.0f, distanceRatio);
+
+            // Smoothly blend from orbit speed to hover speed over short time
+            if (blendTimer < speedBlendDuration)
+            {
+                float t = blendTimer / speedBlendDuration;
+                currentSpeed = Mathf.Lerp(lastKnownSpeed, targetHoverSpeed, t);
+                blendTimer += Time.deltaTime;
+            }
+            else
+            {
+                currentSpeed = targetHoverSpeed;
+            }
+
+            // Move toward target
+            Vector3 moveDir = (targetPos - transform.position).normalized;
+            transform.position += moveDir * currentSpeed * Time.deltaTime;
+
+            // Look toward movement direction
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
+
+            yield return null;
         }
 
-        float playerSpeed = movementScript.CurrentVelocity.magnitude;
-        float maxPlayerSpeed = movementScript.MaxSpeed;
-
-        // Clamp playerSpeed ratio to [0,1] for lerping
-        float speedRatio = Mathf.Clamp01(wanderDistance / distance);
-
-        float speed;
-        if (distance > wanderDistance && movementScript.CurrentVelocity.magnitude < (maxPlayerSpeed / 4f))
-        {
-            speed = Mathf.Lerp(maxPlayerSpeed / 2.0f, maxPlayerSpeed / 4.0f, speedRatio);
-            Debug.Log("speed " + speed);
-        }
-        else
-        {
-            speed = maxPlayerSpeed / 10.0f;
-        }
-
-        Vector3 moveDir = (targetPos - transform.position).normalized;
-        transform.position += moveDir * speed * Time.deltaTime;
-
-        Quaternion targetRot = Quaternion.LookRotation((targetPos - transform.position).normalized);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
-
-        yield return null;
+        Debug.Log("[HOVER] Aborted approach — player started moving.");
     }
-
-    Debug.Log("[HOVER] Aborted approach — player started moving.");
-}
-
-
-
 
 #endregion
 #region Following and avoiding
