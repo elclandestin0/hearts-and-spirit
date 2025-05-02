@@ -145,6 +145,13 @@ public class Movement : MonoBehaviour
             );
         }
 
+        // If no longer gliding, take the last magnitude and move in the blended direction
+        else 
+        {
+            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
+            velocity = blendedDir * velocity.magnitude;
+        }
+
         velocity += isGliding ? Vector3.down * gravity * Time.deltaTime : Vector3.zero;
 
         // ✈️ Apply movement
