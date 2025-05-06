@@ -66,7 +66,7 @@ public class Movement : MonoBehaviour
         // 📏 Local space hand distance for posture
         float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
-
+        
         // 🐦 Flap detection
         float leftSpeed = -leftHandDelta.y;
         float rightSpeed = -rightHandDelta.y;
@@ -98,7 +98,7 @@ public class Movement : MonoBehaviour
 
         // Add space held down for more than 1 second = activate isGliding to true
 
-        if (isFlapping)
+        if (isFlappingPosture || isFlapping)
         {
             velocity += FlightPhysics.CalculateFlapVelocity(
                 headFwd,
@@ -112,12 +112,13 @@ public class Movement : MonoBehaviour
             // Fire the flap event
             OnFlap?.Invoke();
             isFlapping = false;
-            isFlappingPosture = false;
         }
 
         // 🪂 Glide posture logic
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
-        if ((inGlidePosture && velocity.magnitude > 0.1f) || isGliding)
+        isGliding = inGlidePosture;
+
+        if (inGlidePosture || isGliding)
         {
             // Are both hands behind the head?
             Vector3 leftToHead = leftHand.position - head.position;
