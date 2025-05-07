@@ -32,17 +32,21 @@ public static class FlightPhysics
         Vector3 currentDir = velocity.normalized;
         float currentSpeed = velocity.magnitude;
 
+        float downAngle = Vector3.Angle(headForward, Vector3.down);
+        float downCancel = Mathf.InverseLerp(60f, 20f, downAngle); // 0 = shallow, 1 = steep
+        float forwardBoostScale = 1f - downCancel;
+
         
         // 🔁 Blend current direction toward where the player is looking
         Vector3 blendedDir = Vector3.Slerp(currentDir, headForward.normalized, deltaTime * 2f);
         float blendedSpeed = Mathf.Lerp(currentSpeed, currentSpeed + glideStrength, deltaTime * 2f);
 
-        velocity = blendedDir * blendedSpeed;
+        velocity = blendedDir * blendedSpeed * forwardBoostScale;
 
         // 🌬️ Decaying glide push
         float glideDecay = 1f - (glideTime * 0.05f);
         float currentGlideStrength = glideStrength * glideDecay;
-        velocity += blendedDir * currentGlideStrength * deltaTime;
+        velocity += blendedDir * currentGlideStrength * deltaTime * forwardBoostScale;
 
         // 🕊️ Decaying lift that eventually loses to gravity
         float forwardSpeed = Vector3.Dot(velocity, headForward);
@@ -58,9 +62,10 @@ public static class FlightPhysics
 
         // 🦅 Dive mechanic
         diveAngle = Vector3.Angle(headForward, Vector3.down);
-        if (diveAngle < 50f && isManualDivePose)
+        if (diveAngle < 40f && isManualDivePose)
         {
-            float rawDive = Mathf.InverseLerp(50f, 10f, diveAngle);
+            Debug.Log("[DIVING]");
+            float rawDive = Mathf.InverseLerp(40f, 10f, diveAngle);
             float diveIntensity = Mathf.Lerp(0.001f, 1.0f, rawDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
             velocity += headForward.normalized * diveSpeed * deltaTime;
@@ -88,4 +93,3 @@ public static class FlightPhysics
         return velocity;
     }
 }
-// +447305934810

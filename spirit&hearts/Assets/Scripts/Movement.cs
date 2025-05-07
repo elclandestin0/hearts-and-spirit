@@ -112,6 +112,7 @@ public class Movement : MonoBehaviour
             // Fire the flap event
             OnFlap?.Invoke();
             isFlapping = false;
+            isFlappingPosture = isFlapping;
         }
 
         // 🪂 Glide posture logic
