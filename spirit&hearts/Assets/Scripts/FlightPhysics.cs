@@ -45,25 +45,24 @@ public static class FlightPhysics
         velocity += blendedDir * currentGlideStrength * deltaTime;
 
         // 🕊️ Decaying lift that eventually loses to gravity
-        // float forwardSpeed = Vector3.Dot(velocity, headForward);
-        // float lift = Mathf.Clamp01(forwardSpeed / maxSpeed);
-        // float upAngle = Vector3.Angle(headForward, Vector3.up);
-        // float liftFactor = Mathf.InverseLerp(90f, 10f, upAngle);
+        float forwardSpeed = Vector3.Dot(velocity, headForward);
+        float lift = Mathf.Clamp01(forwardSpeed / maxSpeed);
+        float upAngle = Vector3.Angle(headForward, Vector3.up);
+        float liftFactor = Mathf.InverseLerp(90f, 10f, upAngle);
 
         // // 🧮 Lift decay modifier based on glide time, stronger pull down over time
-        // float liftDecay = 1f - Mathf.Pow(glideTime, 1.2f) * 0.04f; // nonlinear decay
-        // float liftPower = lift * liftFactor * liftDecay * deltaTime;
+        float liftDecay = 1f - Mathf.Pow(glideTime, 1.2f) * 0.04f; // nonlinear decay
+        float liftPower = lift * liftFactor * liftDecay * deltaTime;
 
-        // velocity += Vector3.up * liftPower;
+        velocity += Vector3.up * liftPower;
 
         // 🦅 Dive mechanic
-        diveAngle = Vector3.Angle(headForward, Vector3.down);
         if (diveAngle < 90f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(90f, 10f, diveAngle);
             float diveIntensity = Mathf.Lerp(0.001f, 1.0f, rawDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
-            // velocity += headForward.normalized * diveSpeed * deltaTime;
+            velocity += headForward.normalized * diveSpeed * deltaTime;
             
             // 👇 Dive resets glide decay for future lift
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
@@ -74,7 +73,7 @@ public static class FlightPhysics
             glideTime += deltaTime;
         }
 
-        // 🛑 Cap forward speed
+        // 🛑 Cap forward speed -- Uncomment later
         float currentForwardSpeed = Vector3.Dot(velocity, headForward);
         float speedLimit = maxDiveSpeed;
 
@@ -85,7 +84,7 @@ public static class FlightPhysics
             Vector3 excess = forwardVelocity - (forwardDir * speedLimit);
             velocity -= excess;
         }
+
         return velocity;
     }
 }
-// +447305934810

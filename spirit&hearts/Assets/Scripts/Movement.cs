@@ -63,6 +63,9 @@ public class Movement : MonoBehaviour
         Vector3 leftHandDelta = (currentLeftRel - prevLeftPos) / Time.deltaTime;
         Vector3 rightHandDelta = (currentRightRel - prevRightPos) / Time.deltaTime;
 
+        // Calculate dive angle
+        diveAngle = Vector3.Angle(headFwd, Vector3.down);
+
         // 📏 Local space hand distance for posture
         float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
@@ -72,7 +75,9 @@ public class Movement : MonoBehaviour
         float rightSpeed = -rightHandDelta.y;
 
         float minFlapThreshold = 1.5f;
-        bool isFlappingPosture = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold;
+        bool wasCharging = prevLeftPos.y < leftHand.position.y && prevRightPos.y < rightHand.position.y;
+        bool isFlappingPosture = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold && wasCharging;
+
         float flapMagnitude = isFlappingPosture
             ? Mathf.Clamp01((leftSpeed + rightSpeed) / 2f / 5f)
             : 0f;
@@ -97,10 +102,9 @@ public class Movement : MonoBehaviour
         }
 
         // Add space held down for more than 1 second = activate isGliding to true
-
-        if (isFlapping)
+        if (isFlappingPosture)
         {
-            velocity += FlightPhysics.CalculateFlapVelocity(
+            velocity += 3 * FlightPhysics.CalculateFlapVelocity(
                 headFwd,
                 flapMagnitude,
                 flapStrength,
@@ -116,7 +120,6 @@ public class Movement : MonoBehaviour
 
         // 🪂 Glide posture logic
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
-        isGliding = inGlidePosture ? inGlidePosture : isGliding;
 
         if (inGlidePosture || isGliding)
         {
