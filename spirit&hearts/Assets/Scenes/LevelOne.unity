@@ -1162,6 +1162,14 @@ PrefabInstance:
       propertyPath: m_StartingInteractionOverridesMap.Array.data[0].groupMember
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 5574356274160726731, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: leftVelocity
+      value: 
+      objectReference: {fileID: 1844907168}
+    - target: {fileID: 5574356274160726731, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: rightVelocity
+      value: 
+      objectReference: {fileID: 1712203462}
     - target: {fileID: 6081524377079103080, guid: e640cac425ccd3741a6675169a576853, type: 3}
       propertyPath: m_Target
       value: 
@@ -1213,7 +1221,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8911686234491432662, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1844907168}
+    - targetCorrespondingSourceObject: {fileID: 5056737000188865645, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1712203462}
   m_SourcePrefab: {fileID: 100100000, guid: e640cac425ccd3741a6675169a576853, type: 3}
 --- !u!1 &1644943239
 GameObject:
@@ -1308,6 +1322,24 @@ Terrain:
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3
+--- !u!1 &1712203457 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5056737000188865645, guid: e640cac425ccd3741a6675169a576853, type: 3}
+  m_PrefabInstance: {fileID: 1598212829}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1712203462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1712203457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ca281b0d3c387f45bf9762b61364de1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frameMemory: 20
 --- !u!1001 &1790132230
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1373,6 +1405,24 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ad4e0fa29c360b341b2038f119b26444, type: 3}
+--- !u!1 &1844907163 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8911686234491432662, guid: e640cac425ccd3741a6675169a576853, type: 3}
+  m_PrefabInstance: {fileID: 1598212829}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1844907168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844907163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ca281b0d3c387f45bf9762b61364de1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frameMemory: 20
 --- !u!4 &1992633137 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2659945209513103479, guid: e640cac425ccd3741a6675169a576853, type: 3}
