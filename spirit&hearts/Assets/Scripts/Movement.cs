@@ -116,7 +116,7 @@ public class Movement : MonoBehaviour
 
         // 🪂 Glide posture logic
         bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
-        isGliding = inGlidePosture;
+        isGliding = inGlidePosture ? inGlidePosture : isGliding;
 
         if (inGlidePosture || isGliding)
         {
