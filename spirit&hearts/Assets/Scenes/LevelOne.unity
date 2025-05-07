@@ -1130,13 +1130,45 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 611022903682515945, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: m_Target
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1903195526727562137, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: m_GazeInteractor
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1914922226402654763, guid: e640cac425ccd3741a6675169a576853, type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 5574356274160726731, guid: e640cac425ccd3741a6675169a576853, type: 3}
-      propertyPath: isGliding
-      value: 0
+    - target: {fileID: 2828436778875228224, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: 'm_StartingGroupMembers.Array.data[0]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2828436778875228224, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: m_StartingInteractionOverridesMap.Array.data[0].groupMember
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3376757897257256834, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: m_LineOriginTransform
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3480061690101333766, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: 'm_StartingGroupMembers.Array.data[0]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3480061690101333766, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: m_StartingInteractionOverridesMap.Array.data[0].groupMember
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6081524377079103080, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: m_Target
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6742054759208079118, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: m_LineOriginTransform
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7090588842696128010, guid: e640cac425ccd3741a6675169a576853, type: 3}
       propertyPath: m_LocalPosition.x

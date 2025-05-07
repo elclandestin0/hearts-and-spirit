@@ -25,6 +25,7 @@ public class Movement : MonoBehaviour
     // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
     private Vector3 velocity = Vector3.zero;
     private Vector3 prevLeftPos, prevRightPos;
+    private bool wasMovingDown = false; // Track previous frame's downward motion
     // To-do: use later
     // private bool isGrounded = false;
     [Header("Debug variables")]
@@ -34,10 +35,12 @@ public class Movement : MonoBehaviour
     // Publicly accessible variables for reference
     public Vector3 CurrentVelocity => velocity;
     public float MaxSpeed => maxDiveSpeed;
+
+    // What the flap?
     public delegate void FlapEvent();
     public event FlapEvent OnFlap;
-    // Logger variable(s)
-    private static readonly Logger diveLogger = new Logger(Debug.unityLogger.logHandler);
+    private float lastFlapTime = -1f;
+    [SerializeField] private float minFlapInterval = 1.2f;
 
     void Start()
     {
@@ -70,58 +73,55 @@ public class Movement : MonoBehaviour
         float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
         
-        // 🐦 Flap detection
+        // Thresholds
+        float minFlapThreshold = 1f;
+        float maxFlapVelocity = 10f;
+
+        // Downward speed
         float leftSpeed = -leftHandDelta.y;
         float rightSpeed = -rightHandDelta.y;
+        float avgDownSpeed = (leftSpeed + rightSpeed) / 2f;
 
-        float minFlapThreshold = 1.5f;
-        bool wasCharging = prevLeftPos.y < leftHand.position.y && prevRightPos.y < rightHand.position.y;
-        bool isFlappingPosture = leftSpeed > minFlapThreshold && rightSpeed > minFlapThreshold && wasCharging;
+        // Flap zone: hands not behind head + above chest height
+        bool handsInFront = Vector3.Dot(leftHand.position - head.position, head.forward) > -0.2f &&
+                            Vector3.Dot(rightHand.position - head.position, head.forward) > -0.2f;
 
-        float flapMagnitude = isFlappingPosture
-            ? Mathf.Clamp01((leftSpeed + rightSpeed) / 2f / 5f)
-            : 0f;
+        bool handsHighEnough = leftHand.position.y > head.position.y * 0.9f &&
+                            rightHand.position.y > head.position.y * 0.9f;
 
-        // 🖐️ Simulated Flap (Debugging without VR)
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            isFlapping = true;
-            isFlappingPosture = true;
-            flapMagnitude = Random.Range(3.0f, 4.0f);
-        }
+        // Track flap motion state
+        bool isMovingDown = avgDownSpeed > minFlapThreshold && avgDownSpeed < maxFlapVelocity;
 
-        // isGliding boolean control
-        if (Input.GetKey(KeyCode.M))
-        {
-            isGliding = true;
-        }
-
-        else 
-        {
-            isGliding = false;
-        }
+        // Detect the start of a flap motion
+        bool isFlappingPosture = handsHighEnough && 
+            isMovingDown && 
+            !wasMovingDown; // Only trigger on the start of downward motion
+        
+        float flapMagnitude = 10f;
+        bool canFlap = Time.time - lastFlapTime >= minFlapInterval;
 
         // Add space held down for more than 1 second = activate isGliding to true
-        if (isFlappingPosture)
+        if (isFlappingPosture && canFlap)
         {
-            velocity += 3 * FlightPhysics.CalculateFlapVelocity(
-                headFwd,
+            velocity += FlightPhysics.CalculateFlapVelocity(
+                head.forward,
                 flapMagnitude,
                 flapStrength,
                 forwardPropulsionStrength
             );
 
             glideTime = 0f;
-            
-            // Fire the flap event
+            lastFlapTime = Time.time;  // ✅ Mark this flap
             OnFlap?.Invoke();
-            isFlapping = false;
         }
 
-        // 🪂 Glide posture logic
-        bool inGlidePosture = wingsOutstretched && flapMagnitude < 0.05f;
+        // Update previous frame's motion state
+        wasMovingDown = isMovingDown;
 
-        if (inGlidePosture || isGliding)
+        // 🪂 Glide posture logic
+        bool inGlidePosture = wingsOutstretched;
+
+        if (inGlidePosture)
         {
             // Are both hands behind the head?
             Vector3 leftToHead = leftHand.position - head.position;
@@ -152,8 +152,8 @@ public class Movement : MonoBehaviour
         // If no longer gliding, take the last magnitude and move in the blended direction
         else 
         {
-            // Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
-            // velocity = blendedDir * velocity.magnitude;
+            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
+            velocity = blendedDir * velocity.magnitude;
         }
 
         velocity += (isGliding || inGlidePosture) ? Vector3.down * gravity * Time.deltaTime : Vector3.zero;
