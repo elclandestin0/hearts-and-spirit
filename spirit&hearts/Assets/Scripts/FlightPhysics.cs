@@ -35,14 +35,14 @@ public static class FlightPhysics
         
         // 🔁 Blend current direction toward where the player is looking
         Vector3 blendedDir = Vector3.Slerp(currentDir, headForward.normalized, deltaTime * 1.5f);
-        // float blendedSpeed = Mathf.Lerp(currentSpeed, currentSpeed + glideStrength, deltaTime * 2f);
+        float blendedSpeed = Mathf.Lerp(currentSpeed, currentSpeed + glideStrength, deltaTime * 2f);
 
-        velocity = blendedDir * velocity.magnitude;
+        velocity = blendedDir * blendedSpeed;
 
         // 🌬️ Decaying glide push
-        // float glideDecay = 1f - (glideTime * 0.05f);
-        // float currentGlideStrength = glideStrength * glideDecay;
-        // velocity += blendedDir * currentGlideStrength * deltaTime;
+        float glideDecay = 1f - (glideTime * 0.05f);
+        float currentGlideStrength = glideStrength * glideDecay;
+        velocity += blendedDir * currentGlideStrength * deltaTime;
 
         // 🕊️ Decaying lift that eventually loses to gravity
         // float forwardSpeed = Vector3.Dot(velocity, headForward);

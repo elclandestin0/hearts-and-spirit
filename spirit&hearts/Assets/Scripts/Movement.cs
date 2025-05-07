@@ -153,7 +153,7 @@ public class Movement : MonoBehaviour
             // velocity = blendedDir * velocity.magnitude;
         }
 
-        velocity += (isGliding || inGlidePosture) ? Vector3.zero : Vector3.zero;
+        velocity += (isGliding || inGlidePosture) ? Vector3.down * gravity * Time.deltaTime : Vector3.zero;
 
         // ✈️ Apply movement
         transform.position += velocity * Time.deltaTime;
