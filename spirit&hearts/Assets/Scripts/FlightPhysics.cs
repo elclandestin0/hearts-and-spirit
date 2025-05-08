@@ -46,7 +46,7 @@ public static class FlightPhysics
 
         // 🕊️ Decaying lift that eventually loses to gravity
         float forwardSpeed = Vector3.Dot(velocity, headForward);
-        float lift = Mathf.Clamp01(forwardSpeed / maxSpeed);
+        float lift = Mathf.Clamp01(forwardSpeed / maxDiveSpeed);
         float upAngle = Vector3.Angle(headForward, Vector3.up);
         float liftFactor = Mathf.InverseLerp(90f, 10f, upAngle);
 
@@ -60,7 +60,8 @@ public static class FlightPhysics
         if (diveAngle < 90f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(90f, 10f, diveAngle);
-            float diveIntensity = Mathf.Lerp(0.001f, 1.0f, rawDive);
+            float easedDive = Mathf.Pow(rawDive, 1.5f); // soften early acceleration
+            float diveIntensity = Mathf.Lerp(0.001f, 1.0f, easedDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
             velocity += headForward.normalized * diveSpeed * deltaTime;
             
@@ -71,18 +72,6 @@ public static class FlightPhysics
         {
             // ⏱️ Accumulate glide time
             glideTime += deltaTime;
-        }
-
-        // 🛑 Cap forward speed -- Uncomment later
-        float currentForwardSpeed = Vector3.Dot(velocity, headForward);
-        float speedLimit = maxDiveSpeed;
-
-        if (currentForwardSpeed > speedLimit)
-        {
-            Vector3 forwardDir = headForward.normalized;
-            Vector3 forwardVelocity = forwardDir * currentForwardSpeed;
-            Vector3 excess = forwardVelocity - (forwardDir * speedLimit);
-            velocity -= excess;
         }
 
         return velocity;

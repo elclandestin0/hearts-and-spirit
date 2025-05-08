@@ -20,7 +20,7 @@ public class Movement : MonoBehaviour
     private readonly float forwardPropulsionStrength = 1.43f;
     private readonly float glideStrength = 2.5f;
     private readonly float maxSpeed = 30f;
-    private readonly float maxDiveSpeed = 80f;
+    private readonly float maxDiveSpeed = 110f;
     private readonly float minHandSpread = 1.0f;
     // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
     private Vector3 velocity = Vector3.zero;
@@ -64,8 +64,10 @@ public class Movement : MonoBehaviour
 
         SavePreviousFramePositions();
         RecordMotion();
+        DrawTheLines();
+        CapSpeed();
     }
-    
+
     private Vector3 currentLeftRel, currentRightRel;
     private Vector3 leftHandDelta, rightHandDelta;
     private Quaternion leftRot, rightRot;
@@ -105,12 +107,33 @@ public class Movement : MonoBehaviour
 
         bool isMovingDown = avgDownSpeed > minFlapThreshold && avgDownSpeed < maxFlapVelocity;
         bool enoughTimePassed = Time.time - lastFlapTime >= 0.2f;
+        float flapMagnitude = 2.0f;
+
+        // return flap multiplier
+        float speed = velocity.magnitude;
+        float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(30f, maxDiveSpeed, speed));
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("Flap");
+            Vector3 flapFinalCalculation = flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
+                head.forward,
+                2.0f,
+                flapStrength,
+                forwardPropulsionStrength
+            );
+            velocity += flapFinalCalculation;
+            Debug.Log("Flap strength " + flapStrengthMultiplier);
+            Debug.Log("Flap final calculation " + flapFinalCalculation);
+            glideTime = 0f;
+            lastFlapTime = Time.time;
+        }
 
         if (!isMovingDown || !enoughTimePassed) return;
 
         // 🏋️‍♂️ Map down speed → strength multiplier (1x to 3x)
-        float flapStrengthMultiplier = Mathf.InverseLerp(minFlapThreshold, 2.5f, avgDownSpeed);
-        float flapMagnitude = Mathf.Lerp(1f, 3f, flapStrengthMultiplier);
+        flapStrengthMultiplier = Mathf.InverseLerp(minFlapThreshold, 2.5f, avgDownSpeed);
+        flapMagnitude = Mathf.Lerp(1f, 3f, flapStrengthMultiplier);
 
         velocity += FlightPhysics.CalculateFlapVelocity(
             head.forward,
@@ -129,6 +152,11 @@ public class Movement : MonoBehaviour
         float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
         isGliding = wingsOutstretched;
+
+        if (Input.GetKey(KeyCode.M))
+        {
+            isGliding = true;
+        }
 
         if (!isGliding) return;
 
@@ -198,5 +226,24 @@ public class Movement : MonoBehaviour
         }
     }
 
+    private void DrawTheLines()
+    {
+        Debug.DrawLine(head.position, head.position + velocity.normalized * 5f, Color.cyan, 0f, false);
+        Debug.DrawLine(head.position, head.position + headFwd * 3f, Color.red, 0f, false);
+    }
 
+    private void CapSpeed() 
+    {
+        // 🛑 Cap forward speed -- Uncomment later
+        float currentForwardSpeed = Vector3.Dot(velocity, head.forward);
+        float speedLimit = maxDiveSpeed;
+
+        if (currentForwardSpeed > speedLimit)
+        {
+            Vector3 forwardDir = head.forward.normalized;
+            Vector3 forwardVelocity = forwardDir * currentForwardSpeed;
+            Vector3 excess = forwardVelocity - (forwardDir * speedLimit);
+            velocity -= excess;
+        }
+    }
 }
