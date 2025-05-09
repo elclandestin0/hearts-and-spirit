@@ -7,33 +7,29 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: dove
-  m_Shader: {fileID: -6465566751694194690, guid: 03fc5d67683e1dd4eb37ec1ad4178155, type: 3}
+  m_Name: Spotlight
+  m_Shader: {fileID: 4800000, guid: 0406db5a14f94604a8c57ccfbc9f3b46, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
+  m_ValidKeywords:
+  - _SURFACE_TYPE_TRANSPARENT
+  m_InvalidKeywords:
+  - _FLIPBOOKBLENDING_OFF
+  m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_DoubleSidedGI: 1
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
   disabledShaderPasses:
-  - MOTIONVECTORS
+  - DepthOnly
+  - SHADOWCASTER
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _BaseColor:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _BaseMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _BaseTexture:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: affa059594145a843b81788037b4ee21, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -53,7 +49,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: affa059594145a843b81788037b4ee21, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMask:
@@ -70,10 +66,6 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _PaletteGrid:
-        m_Texture: {fileID: 2800000, guid: e9da0706cff2a664d8dc64d2732a3160, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
@@ -101,67 +93,69 @@ Material:
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _Blend: 0
+    - _Blend: 2
     - _BlendModePreserveSpecular: 1
+    - _BlendOp: 0
     - _BumpScale: 1
+    - _CameraFadingEnabled: 0
+    - _CameraFarFadeDistance: 2
+    - _CameraNearFadeDistance: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _Cull: 2
-    - _CustomLightIntensity: 1
+    - _ColorMode: 0
+    - _Cull: 0
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
-    - _DstBlend: 0
-    - _DstBlendAlpha: 0
+    - _DistortionBlend: 0.5
+    - _DistortionEnabled: 0
+    - _DistortionStrength: 1
+    - _DistortionStrengthScaled: 0.1
+    - _DstBlend: 1
+    - _DstBlendAlpha: 1
     - _EmissionFresnelIntensity: 1
     - _EmissionFresnelPower: 2
     - _EmissionIntensity: 1
     - _EnvironmentReflections: 1
-    - _FresnelIntensity: 0.68
-    - _FresnelPower: 1.73
+    - _FlipbookBlending: 0
+    - _FlipbookMode: 0
+    - _FresnelIntensity: 2
+    - _FresnelPower: 2.18
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _LightDistance: 1
-    - _LightIntensity: 1.223
-    - _Lit: 1
-    - _Metallic: 0.424
-    - _Night: 0
+    - _LightIntensity: 0.915
+    - _Metallic: 0.441
+    - _Mode: 0
     - _OcclusionStrength: 1
-    - _Palette: 3
     - _Parallax: 0.005
-    - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _ShadowStrength: 0.704
-    - _SmoothShading: 0.343
+    - _ShadowStrength: 0.423
+    - _SmoothShading: 0.132
     - _Smoothness: 0.181
     - _SmoothnessTextureChannel: 0
+    - _SoftParticlesEnabled: 0
+    - _SoftParticlesFarFadeDistance: 1
+    - _SoftParticlesNearFadeDistance: 0
     - _SpecularHighlights: 1
-    - _SpecularIntensity: 0.961
-    - _SrcBlend: 1
+    - _SpecularIntensity: 1.679
+    - _SrcBlend: 5
     - _SrcBlendAlpha: 1
-    - _Surface: 0
-    - _TimeSlider: 1
-    - _UseCustomLight: 0
+    - _Surface: 1
     - _WorkflowMode: 1
-    - _ZWrite: 1
+    - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 1, g: 0.9481132, b: 0.9481132, a: 1}
-    - _Color: {r: 0.9622642, g: 0.9622642, b: 0.9622642, a: 1}
-    - _CustomLightDirection: {r: 0, g: 0, b: 0, a: 0}
-    - _DayHighLight: {r: 0.9921569, g: 0.99607843, b: 0.9921569, a: 1}
-    - _DayShadow: {r: 0.6117647, g: 0.5411765, b: 0.5333334, a: 1}
+    - _BaseColor: {r: 0.62264144, g: 0.43462816, b: 0, a: 0.4392157}
+    - _BaseColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
+    - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
+    - _Color: {r: 0.62264144, g: 0.4346281, b: 0, a: 0.4392157}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FresnelColor: {r: 0.25465754, g: 0.72955966, b: 0.7024963, a: 1}
-    - _LitColor: {r: 1, g: 0.7884164, b: 0.4669811, a: 1}
-    - _LitHighlight: {r: 1, g: 0.7900001, b: 0, a: 1}
-    - _LitShadow: {r: 0.7924528, g: 0.34185082, b: 0, a: 0}
-    - _NightHighLight: {r: 0.46666664, g: 0.5882353, b: 0.6941177, a: 1}
-    - _NightShadow: {r: 0.32156855, g: 0.38823527, b: 0.5803921, a: 1}
-    - _ShadowColor: {r: 0.7484276, g: 0.7214854, b: 0.6613464, a: 1}
+    - _ShadowColor: {r: 0.8742138, g: 0.81722695, b: 0.6900241, a: 1}
+    - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _SpecularColor: {r: 0.84276724, g: 0.56921893, b: 0.14046112, a: 1}
+    - _SpecularColor: {r: 0.9685534, g: 0.88202596, b: 0.6670226, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &3350862945490442546
