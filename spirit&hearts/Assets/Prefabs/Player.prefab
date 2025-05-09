@@ -3535,6 +3535,9 @@ MonoBehaviour:
   recorder: {fileID: 4714864065847065564}
   isGliding: 0
   isFlapping: 0
+  minFlapInterval: 1.2
+  leftVelocity: {fileID: 0}
+  rightVelocity: {fileID: 0}
 --- !u!114 &3219001295391380978
 MonoBehaviour:
   m_ObjectHideFlags: 0

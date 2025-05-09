@@ -66,6 +66,7 @@ public class Movement : MonoBehaviour
         RecordMotion();
         DrawTheLines();
         CapSpeed();
+        CheckSurfaceImpact();
     }
 
     private Vector3 currentLeftRel, currentRightRel;
@@ -99,9 +100,6 @@ public class Movement : MonoBehaviour
         float rightDown = -rightVelocity.SmoothedVelocity.y;
         float avgDownSpeed = (leftDown + rightDown) / 2f * 0.5f; // ✂️ Halved for balance
 
-        Debug.Log("Left hand speed: " + leftDown);
-        Debug.Log("Right hand speed: " + rightDown);
-
         float minFlapThreshold = 1.0f;
         float maxFlapVelocity = 10f;
 
@@ -115,7 +113,6 @@ public class Movement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log("Flap");
             Vector3 flapFinalCalculation = flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
                 head.forward,
                 2.0f,
@@ -123,8 +120,6 @@ public class Movement : MonoBehaviour
                 forwardPropulsionStrength
             );
             velocity += flapFinalCalculation;
-            Debug.Log("Flap strength " + flapStrengthMultiplier);
-            Debug.Log("Flap final calculation " + flapFinalCalculation);
             glideTime = 0f;
             lastFlapTime = Time.time;
         }
@@ -187,14 +182,31 @@ public class Movement : MonoBehaviour
     private void ApplyGravityIfNeeded()
     {
         if (isGliding)
-            velocity += Vector3.down * gravity * Time.deltaTime;
+        {
+            // Slower descent when fast
+            float speedFactor = Mathf.InverseLerp(0f, maxDiveSpeed, velocity.magnitude);
+            float gravityScale = Mathf.Lerp(1.0f, 0.4f, speedFactor);
+
+            velocity += Vector3.down * gravity * gravityScale * Time.deltaTime;
+
+            // 🌀 Optional: smooth lift when fast
+            ApplyAirPocketEffect();
+        }
         else
         {
-            // Optional: blend toward forward if not gliding
             Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
             velocity = blendedDir * velocity.magnitude;
         }
     }
+
+    private void ApplyAirPocketEffect()
+    {
+        // Simulate a short-lived upward force at high velocity (like catching a thermal)
+        float speedFactor = Mathf.InverseLerp(30f, maxDiveSpeed, velocity.magnitude); // high speed = closer to 1
+        float liftBonus = Mathf.Lerp(0f, 3f, speedFactor); // up to 2 units/sec^2 of upward push
+        velocity += Vector3.up * liftBonus * Time.deltaTime;
+    }
+
 
     private void ApplyMovement()
     {
@@ -203,7 +215,10 @@ public class Movement : MonoBehaviour
 
     private void ApplyDrag()
     {
-        velocity *= 0.995f;
+        // Higher speed → slower drag
+        float speedFactor = Mathf.InverseLerp(0f, maxDiveSpeed, velocity.magnitude);
+        float dragStrength = Mathf.Lerp(0.995f, 0.99f, speedFactor); // stronger flaps decay slower
+        velocity *= dragStrength;
     }
 
     private void SavePreviousFramePositions()
@@ -246,4 +261,31 @@ public class Movement : MonoBehaviour
             velocity -= excess;
         }
     }
+
+    private void CheckSurfaceImpact()
+    {
+        Vector3 rayOrigin = head.position;
+        float rayLength = 1f;
+
+        Debug.DrawRay(rayOrigin, headFwd * rayLength, Color.cyan, 0f, false);
+
+        if (Physics.Raycast(rayOrigin, headFwd, out RaycastHit hit, rayLength))
+        {
+            Debug.Log("Hit: " + hit.collider.name);
+
+            Vector3 impactNormal = hit.normal;
+            float speed = velocity.magnitude;
+
+            float approachDot = Vector3.Dot(velocity.normalized, -impactNormal);
+            if (approachDot > 0.5f)
+            {
+                Vector3 bounce = impactNormal * speed * 0.25f + Vector3.up * 2f;
+                velocity = bounce;
+
+                Debug.DrawRay(hit.point, bounce, Color.green, 1f);
+            }
+        }
+    }
+
+
 }

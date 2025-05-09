@@ -5,7 +5,7 @@ public static class FlightPhysics
     public static Vector3 CalculateFlapVelocity(
     Vector3 headForward,
     float flapMagnitude,
-    float flapStrength = 0.35f,
+    float flapStrength = 1f,
     float forwardThrust = 0.5f)
     {
         Vector3 velocity = Vector3.zero;
@@ -34,7 +34,7 @@ public static class FlightPhysics
 
         
         // 🔁 Blend current direction toward where the player is looking
-        Vector3 blendedDir = Vector3.Slerp(currentDir, headForward.normalized, deltaTime * 1.5f);
+        Vector3 blendedDir = Vector3.Slerp(currentDir, headForward.normalized, deltaTime * 2f);
         float blendedSpeed = Mathf.Lerp(currentSpeed, currentSpeed + glideStrength, deltaTime * 2f);
 
         velocity = blendedDir * blendedSpeed;
@@ -60,12 +60,11 @@ public static class FlightPhysics
         if (diveAngle < 90f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(90f, 10f, diveAngle);
-            float easedDive = Mathf.Pow(rawDive, 1.5f); // soften early acceleration
-            float diveIntensity = Mathf.Lerp(0.001f, 1.0f, easedDive);
+            float easedDive = Mathf.Pow(rawDive, 1.5f);
+            float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive); // cap at 60%
             float diveSpeed = diveIntensity * maxDiveSpeed;
-            velocity += headForward.normalized * diveSpeed * deltaTime;
-            
-            // 👇 Dive resets glide decay for future lift
+
+            velocity += headForward.normalized * diveSpeed * deltaTime * 0.5f; // further scaled
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
         } 
         else 
