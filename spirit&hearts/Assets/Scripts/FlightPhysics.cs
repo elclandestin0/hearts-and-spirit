@@ -37,8 +37,8 @@ public static class FlightPhysics
         
         // 🔁 Blend current direction toward where the player is looking
         float blendSpeed = (recentlyBounced && bounceTimer > 0f) ? 0.2f : 1.5f;
-        Vector3 blendedDir = Vector3.Slerp(currentDir, headForward.normalized, deltaTime * 2f);
-        float blendedSpeed = Mathf.Lerp(currentSpeed, currentSpeed + glideStrength, deltaTime * 2f);
+        Vector3 blendedDir = Vector3.Slerp(currentDir, headForward.normalized, deltaTime * blendSpeed);
+        float blendedSpeed = Mathf.Lerp(currentSpeed, currentSpeed + glideStrength, deltaTime * blendSpeed);
 
         velocity = blendedDir * blendedSpeed;
 
@@ -53,7 +53,7 @@ public static class FlightPhysics
         float upAngle = Vector3.Angle(headForward, Vector3.up);
         float liftFactor = Mathf.InverseLerp(90f, 10f, upAngle);
 
-        // // 🧮 Lift decay modifier based on glide time, stronger pull down over time
+        // 🧮 Lift decay modifier based on glide time, stronger pull down over time
         float liftDecay = 1f - Mathf.Pow(glideTime, 1.2f) * 0.04f; // nonlinear decay
         float liftPower = lift * liftFactor * liftDecay * deltaTime;
 

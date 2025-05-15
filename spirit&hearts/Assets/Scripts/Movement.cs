@@ -129,11 +129,11 @@ public class Movement : MonoBehaviour
     {
         float leftDown = -leftVelocity.SmoothedVelocity.y;
         float rightDown = -rightVelocity.SmoothedVelocity.y;
-        float avgDownSpeed = (leftDown + rightDown) / 2f * 0.5f; // ✂️ Halved for balance
 
+        // ✂️ Halved for balance
+        float avgDownSpeed = (leftDown + rightDown) / 2f * 0.5f;
         float minFlapThreshold = 0.5f;
         float maxFlapVelocity = 10f;
-        Debug.Log("Avg. down speed: " + avgDownSpeed);
         bool isMovingDown = avgDownSpeed > minFlapThreshold && avgDownSpeed < maxFlapVelocity;
         bool enoughTimePassed = Time.time - lastFlapTime >= 0.2f;
         float flapMagnitude = 2.0f;
@@ -143,7 +143,6 @@ public class Movement : MonoBehaviour
         float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(30f, maxDiveSpeed, speed));
 
         // Uncomment here for testing
-        // Why do I feel so much .. ?
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Vector3 flapFinalCalculation = flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
@@ -227,7 +226,7 @@ public class Movement : MonoBehaviour
         else
         {
             float blendSpeed = (recentlyBounced && bounceTimer > 0f) ? 0.2f : 1.5f;
-            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * blendSpeed);
+            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 0.2f);
             velocity = blendedDir * velocity.magnitude;
 
             bool handsRelaxed = Vector3.Distance(leftHand.position, rightHand.position) < 0.5f;
