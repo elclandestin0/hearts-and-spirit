@@ -17,10 +17,10 @@ public class Movement : MonoBehaviour
 
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
-    private readonly float forwardPropulsionStrength = 1.43f;
-    private readonly float glideStrength = 2.5f;
+    private readonly float forwardPropulsionStrength = 1f;
+    private readonly float glideStrength = 1f;
     private readonly float maxSpeed = 30f;
-    private readonly float maxDiveSpeed = 110f;
+    private readonly float maxDiveSpeed = 80f;
     private readonly float minHandSpread = 1.0f;
     // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
     private Vector3 velocity = Vector3.zero;
@@ -59,7 +59,7 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        CheckSurfaceImpact();
+        // CheckSurfaceImpact();
 
         // Handle bounce recovery (loss of control)
         if (inputLockedDuringBounce)
@@ -228,13 +228,7 @@ public class Movement : MonoBehaviour
             float blendSpeed = (recentlyBounced && bounceTimer > 0f) ? 0.2f : 1.5f;
             Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 0.2f);
             velocity = blendedDir * velocity.magnitude;
-
-            bool handsRelaxed = Vector3.Distance(leftHand.position, rightHand.position) < 0.5f;
-            
-            if (handsRelaxed)
-            {
-                velocity += Vector3.down * (gravity / 3) * Time.deltaTime * 1.5f;
-            }
+            velocity += Vector3.down * (gravity / 3) * Time.deltaTime * 1.5f;
         }
     }
 
