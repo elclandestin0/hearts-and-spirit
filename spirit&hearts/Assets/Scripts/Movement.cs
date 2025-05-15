@@ -43,6 +43,12 @@ public class Movement : MonoBehaviour
     public HandVelocityTracker leftVelocity;
     public HandVelocityTracker rightVelocity;
 
+    // Bounce
+    private bool recentlyBounced = false;
+    private float bounceTimer = 0f;
+    private float bounceDuration = 1f;
+    private float bounceDampFactor = 0.9f;
+    private bool inputLockedDuringBounce => recentlyBounced && bounceTimer > 0f;
 
     void Start()
     {
@@ -53,6 +59,30 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
+        CheckSurfaceImpact();
+
+        // Handle bounce recovery (loss of control)
+        if (inputLockedDuringBounce)
+        {
+            bounceTimer -= Time.deltaTime;
+
+            velocity *= 0.98f;
+
+            // Move character while in bounce phase
+            ApplyMovement();
+            ApplyDrag();
+            DrawDebugLines(); // optional visuals
+
+            // End bounce recovery
+            if (bounceTimer <= 0f)
+            {
+                recentlyBounced = false;
+            }
+
+            return;
+        }
+
+        // Normal flight update
         UpdateDeltaValues();
         UpdateDiveAngle();
 
@@ -64,16 +94,16 @@ public class Movement : MonoBehaviour
 
         SavePreviousFramePositions();
         RecordMotion();
-        DrawTheLines();
+        DrawDebugLines();
         CapSpeed();
-        CheckSurfaceImpact();
     }
+
 
     private Vector3 currentLeftRel, currentRightRel;
     private Vector3 leftHandDelta, rightHandDelta;
     private Quaternion leftRot, rightRot;
     private Quaternion headRot;
-    private Vector3 headFwd, headPos;
+    private Vector3 headFwd, headPos, headDown;
 
     private void UpdateDeltaValues()
     {
@@ -84,6 +114,7 @@ public class Movement : MonoBehaviour
 
         headPos = head.position;
         headFwd = head.forward;
+        headDown = -head.up;
         headRot = head.rotation;
         leftRot = leftHand.rotation;
         rightRot = rightHand.rotation;
@@ -100,22 +131,24 @@ public class Movement : MonoBehaviour
         float rightDown = -rightVelocity.SmoothedVelocity.y;
         float avgDownSpeed = (leftDown + rightDown) / 2f * 0.5f; // ✂️ Halved for balance
 
-        float minFlapThreshold = 1.0f;
+        float minFlapThreshold = 0.5f;
         float maxFlapVelocity = 10f;
-
+        Debug.Log("Avg. down speed: " + avgDownSpeed);
         bool isMovingDown = avgDownSpeed > minFlapThreshold && avgDownSpeed < maxFlapVelocity;
         bool enoughTimePassed = Time.time - lastFlapTime >= 0.2f;
         float flapMagnitude = 2.0f;
 
-        // return flap multiplier
+        // Return flap multiplier
         float speed = velocity.magnitude;
         float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(30f, maxDiveSpeed, speed));
 
+        // Uncomment here for testing
+        // Why do I feel so much .. ?
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Vector3 flapFinalCalculation = flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
                 head.forward,
-                2.0f,
+                flapMagnitude,
                 flapStrength,
                 forwardPropulsionStrength
             );
@@ -127,12 +160,9 @@ public class Movement : MonoBehaviour
         if (!isMovingDown || !enoughTimePassed) return;
 
         // 🏋️‍♂️ Map down speed → strength multiplier (1x to 3x)
-        flapStrengthMultiplier = Mathf.InverseLerp(minFlapThreshold, 2.5f, avgDownSpeed);
-        flapMagnitude = Mathf.Lerp(1f, 3f, flapStrengthMultiplier);
-
-        velocity += FlightPhysics.CalculateFlapVelocity(
+        velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
             head.forward,
-            flapMagnitude * flapStrengthMultiplier,
+            flapMagnitude,
             flapStrength,
             forwardPropulsionStrength
         );
@@ -175,7 +205,9 @@ public class Movement : MonoBehaviour
             Time.deltaTime,
             true,
             ref glideTime,
-            ref diveAngle
+            ref diveAngle,
+            recentlyBounced,
+            bounceTimer
         );
     }
 
@@ -194,16 +226,23 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
+            float blendSpeed = (recentlyBounced && bounceTimer > 0f) ? 0.2f : 1.5f;
+            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * blendSpeed);
             velocity = blendedDir * velocity.magnitude;
+
+            bool handsRelaxed = Vector3.Distance(leftHand.position, rightHand.position) < 0.5f;
+            
+            if (handsRelaxed)
+            {
+                velocity += Vector3.down * (gravity / 3) * Time.deltaTime * 1.5f;
+            }
         }
     }
 
     private void ApplyAirPocketEffect()
     {
-        // Simulate a short-lived upward force at high velocity (like catching a thermal)
-        float speedFactor = Mathf.InverseLerp(30f, maxDiveSpeed, velocity.magnitude); // high speed = closer to 1
-        float liftBonus = Mathf.Lerp(0f, 3f, speedFactor); // up to 2 units/sec^2 of upward push
+        float speedFactor = Mathf.InverseLerp(1f, maxDiveSpeed, velocity.magnitude);
+        float liftBonus = Mathf.Lerp(0f, 3f, speedFactor);
         velocity += Vector3.up * liftBonus * Time.deltaTime;
     }
 
@@ -236,12 +275,12 @@ public class Movement : MonoBehaviour
                 currentLeftRel, leftRot,
                 currentRightRel, rightRot,
                 leftHandDelta, rightHandDelta,
-                10f, velocity // You may want to compute actual flapMagnitude
+                10f, velocity
             );
         }
     }
 
-    private void DrawTheLines()
+    private void DrawDebugLines()
     {
         Debug.DrawLine(head.position, head.position + velocity.normalized * 5f, Color.cyan, 0f, false);
         Debug.DrawLine(head.position, head.position + headFwd * 3f, Color.red, 0f, false);
@@ -264,12 +303,29 @@ public class Movement : MonoBehaviour
 
     private void CheckSurfaceImpact()
     {
+        // Bounce check
+        if (recentlyBounced)
+        {
+            bounceTimer -= Time.deltaTime;
+            if (bounceTimer <= 0f)
+            {
+                recentlyBounced = false;
+            }
+        }
+
         Vector3 rayOrigin = head.position;
-        float rayLength = 1f;
+        float rayLength = 0.5f;
 
+        // Forward ray
         Debug.DrawRay(rayOrigin, headFwd * rayLength, Color.cyan, 0f, false);
+        Debug.DrawRay(rayOrigin, headDown * rayLength, Color.cyan, 0f, false);
 
-        if (Physics.Raycast(rayOrigin, headFwd, out RaycastHit hit, rayLength))
+        RaycastHit hit;
+        bool forwardHit = Physics.Raycast(rayOrigin, headFwd, out RaycastHit forward, rayLength);
+        bool downwardsHit = Physics.Raycast(rayOrigin, headDown, out RaycastHit downward, rayLength);
+        hit = forwardHit ? forward : downward;
+
+        if (forwardHit || downwardsHit)
         {
             Debug.Log("Hit: " + hit.collider.name);
 
@@ -279,13 +335,18 @@ public class Movement : MonoBehaviour
             float approachDot = Vector3.Dot(velocity.normalized, -impactNormal);
             if (approachDot > 0.5f)
             {
-                Vector3 bounce = impactNormal * speed * 0.25f + Vector3.up * 2f;
+                Vector3 bounce = impactNormal * speed * 2f;
                 velocity = bounce;
 
                 Debug.DrawRay(hit.point, bounce, Color.green, 1f);
+
+                // Trigger slow blending
+                recentlyBounced = true;
+                bounceTimer = bounceDuration;
             }
         }
     }
+
 
 
 }

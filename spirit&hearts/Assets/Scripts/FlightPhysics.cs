@@ -25,7 +25,9 @@ public static class FlightPhysics
         float deltaTime,
         bool isManualDivePose,
         ref float glideTime,
-        ref float diveAngle)
+        ref float diveAngle, 
+        bool recentlyBounced,
+        float bounceTimer)
     {
        Vector3 velocity = currentVelocity;
 
@@ -34,6 +36,7 @@ public static class FlightPhysics
 
         
         // 🔁 Blend current direction toward where the player is looking
+        float blendSpeed = (recentlyBounced && bounceTimer > 0f) ? 0.2f : 1.5f;
         Vector3 blendedDir = Vector3.Slerp(currentDir, headForward.normalized, deltaTime * 2f);
         float blendedSpeed = Mathf.Lerp(currentSpeed, currentSpeed + glideStrength, deltaTime * 2f);
 
