@@ -1,8 +1,13 @@
 using UnityEngine;
-
+using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.InputSystem;
 public class Movement : MonoBehaviour
 {
-    [Header("XR References")]
+    [Header("XR Input Actions")]
+    public InputActionReference leftGrip;
+    public InputActionReference rightGrip;
+
+    [Header("XR Transform References")]
     public Transform leftHand;
     public Transform rightHand;
     public Transform head;
@@ -42,6 +47,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private float minFlapInterval = 1.2f;
     public HandVelocityTracker leftVelocity;
     public HandVelocityTracker rightVelocity;
+    private bool wasMovingDownLastFrame = false;
 
     // Bounce
     private bool recentlyBounced = false;
@@ -81,7 +87,7 @@ public class Movement : MonoBehaviour
 
             return;
         }
-
+        DetectControllerInput();
         // Normal flight update
         UpdateDeltaValues();
         UpdateDiveAngle();
@@ -96,6 +102,7 @@ public class Movement : MonoBehaviour
         RecordMotion();
         DrawDebugLines();
         CapSpeed();
+
     }
 
 
@@ -105,6 +112,18 @@ public class Movement : MonoBehaviour
     private Quaternion headRot;
     private Vector3 headFwd, headPos, headDown;
 
+    private void DetectControllerInput() 
+    {
+        if (leftGrip != null && leftGrip.action.ReadValue<float>() > 0.5f)
+        {
+            Debug.Log("Left controller: grip held!");
+        }
+
+        if (rightGrip != null && rightGrip.action.ReadValue<float>() > 0.5f)
+        {
+            Debug.Log("Right controller: grip held!");
+        }
+    }
     private void UpdateDeltaValues()
     {
         currentLeftRel = leftHand.position;
@@ -130,46 +149,36 @@ public class Movement : MonoBehaviour
         float leftDown = -leftVelocity.SmoothedVelocity.y;
         float rightDown = -rightVelocity.SmoothedVelocity.y;
 
-        // ✂️ Halved for balance
         float avgDownSpeed = (leftDown + rightDown) / 2f * 0.5f;
         float minFlapThreshold = 0.5f;
         float maxFlapVelocity = 10f;
         bool isMovingDown = avgDownSpeed > minFlapThreshold && avgDownSpeed < maxFlapVelocity;
+
+        // Only flap if player just started moving down this frame
+        bool justStartedMovingDown = isMovingDown && !wasMovingDownLastFrame;
+
         bool enoughTimePassed = Time.time - lastFlapTime >= 0.2f;
         float flapMagnitude = 2.0f;
-
-        // Return flap multiplier
         float speed = velocity.magnitude;
         float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(30f, maxDiveSpeed, speed));
 
-        // Uncomment here for testing
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (justStartedMovingDown && enoughTimePassed)
         {
-            Vector3 flapFinalCalculation = flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
+            velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
                 head.forward,
                 flapMagnitude,
                 flapStrength,
                 forwardPropulsionStrength
             );
-            velocity += flapFinalCalculation;
+
             glideTime = 0f;
             lastFlapTime = Time.time;
+            OnFlap?.Invoke();
         }
 
-        if (!isMovingDown || !enoughTimePassed) return;
-
-        // 🏋️‍♂️ Map down speed → strength multiplier (1x to 3x)
-        velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
-            head.forward,
-            flapMagnitude,
-            flapStrength,
-            forwardPropulsionStrength
-        );
-
-        glideTime = 0f;
-        lastFlapTime = Time.time;
-        OnFlap?.Invoke();
+        wasMovingDownLastFrame = isMovingDown;
     }
+
 
     private void HandleGlideLogic()
     {
@@ -228,7 +237,7 @@ public class Movement : MonoBehaviour
             float blendSpeed = (recentlyBounced && bounceTimer > 0f) ? 0.2f : 1.5f;
             Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 0.2f);
             velocity = blendedDir * velocity.magnitude;
-            velocity += Vector3.down * (gravity / 3) * Time.deltaTime * 1.5f;
+            // velocity += Vector3.down * (gravity / 3) * Time.deltaTime * 1.5f;
         }
     }
 
@@ -238,7 +247,6 @@ public class Movement : MonoBehaviour
         float liftBonus = Mathf.Lerp(0f, 3f, speedFactor);
         velocity += Vector3.up * liftBonus * Time.deltaTime;
     }
-
 
     private void ApplyMovement()
     {
@@ -272,7 +280,6 @@ public class Movement : MonoBehaviour
             );
         }
     }
-
     private void DrawDebugLines()
     {
         Debug.DrawLine(head.position, head.position + velocity.normalized * 5f, Color.cyan, 0f, false);
@@ -293,7 +300,6 @@ public class Movement : MonoBehaviour
             velocity -= excess;
         }
     }
-
     private void CheckSurfaceImpact()
     {
         // Bounce check
@@ -339,7 +345,5 @@ public class Movement : MonoBehaviour
             }
         }
     }
-
-
 
 }
