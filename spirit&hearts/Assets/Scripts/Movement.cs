@@ -6,12 +6,13 @@ public class Movement : MonoBehaviour
     [Header("XR Input Actions")]
     public InputActionReference leftGrip;
     public InputActionReference rightGrip;
+    public InputActionReference rightStickAction;
 
     [Header("XR Transform References")]
     public Transform leftHand;
     public Transform rightHand;
     public Transform head;
-
+    public Transform rigRoot; // The object you want to rotate (usually XROrigin or a parent of the camera)
     [Header("Physics Controls")]
     [SerializeField] private float gravity = 9.8f; // m/s²
     [SerializeField] private float glideTime = 0f;
@@ -19,13 +20,12 @@ public class Movement : MonoBehaviour
 
     [Header("Recorder")]
     [SerializeField] private GhostFlightRecorder recorder;
-
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1f;
     private readonly float glideStrength = 1f;
     private readonly float maxSpeed = 30f;
-    private readonly float maxDiveSpeed = 80f;
+    private readonly float maxDiveSpeed = 120f;
     private readonly float minHandSpread = 1.0f;
     // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
     private Vector3 velocity = Vector3.zero;
@@ -35,6 +35,7 @@ public class Movement : MonoBehaviour
     [Header("Debug variables")]
     public bool isGliding = false;
     public bool isFlapping = false;
+    private bool isHovering = false;
 
     // Publicly accessible variables for reference
     public Vector3 CurrentVelocity => velocity;
@@ -112,18 +113,22 @@ public class Movement : MonoBehaviour
     private Quaternion headRot;
     private Vector3 headFwd, headPos, headDown;
 
-    private void DetectControllerInput() 
+    private void DetectControllerInput()
     {
-        if (leftGrip != null && leftGrip.action.ReadValue<float>() > 0.5f)
-        {
-            Debug.Log("Left controller: grip held!");
-        }
+        float leftGripValue = leftGrip != null ? leftGrip.action.ReadValue<float>() : 0f;
+        float rightGripValue = rightGrip != null ? rightGrip.action.ReadValue<float>() : 0f;
 
-        if (rightGrip != null && rightGrip.action.ReadValue<float>() > 0.5f)
+        bool leftHeld = leftGripValue > 0.5f;
+        bool rightHeld = rightGripValue > 0.5f;
+
+        isHovering = leftHeld && rightHeld;
+
+        if (isHovering)
         {
-            Debug.Log("Right controller: grip held!");
+            Debug.Log("🕊️ Hover Mode Activated!");
         }
     }
+
     private void UpdateDeltaValues()
     {
         currentLeftRel = leftHand.position;
@@ -146,6 +151,13 @@ public class Movement : MonoBehaviour
 
     private void HandleFlapDetection()
     {
+        // ✅ Ensure both hand objects are assigned and active
+        if (leftHand == null || rightHand == null) return;
+        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        {
+            isGliding = false;
+            return;
+        }
         float leftDown = -leftVelocity.SmoothedVelocity.y;
         float rightDown = -rightVelocity.SmoothedVelocity.y;
 
@@ -162,6 +174,13 @@ public class Movement : MonoBehaviour
         float speed = velocity.magnitude;
         float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(30f, maxDiveSpeed, speed));
 
+        // Super weak flaps when hovering
+        if (isHovering)
+        {
+            flapStrengthMultiplier *= 0.2f; // Very weak flaps
+        }
+
+        // Calculate flap every 0.2 seconds
         if (justStartedMovingDown && enoughTimePassed)
         {
             velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
@@ -170,7 +189,6 @@ public class Movement : MonoBehaviour
                 flapStrength,
                 forwardPropulsionStrength
             );
-
             glideTime = 0f;
             lastFlapTime = Time.time;
             OnFlap?.Invoke();
@@ -182,6 +200,13 @@ public class Movement : MonoBehaviour
 
     private void HandleGlideLogic()
     {
+        // ✅ Ensure both hand objects are assigned and active
+        if (leftHand == null || rightHand == null) return;
+        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        {
+            isGliding = false;
+            return;
+        }
         float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
         isGliding = wingsOutstretched;
@@ -217,6 +242,15 @@ public class Movement : MonoBehaviour
             recentlyBounced,
             bounceTimer
         );
+
+        if (isHovering)
+        {
+            float currentSpeed = velocity.magnitude;
+            float targetSpeed = Mathf.Min(currentSpeed, 3f); // never raise speed
+            float smoothedSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 4f); // adjust 4f for faster/slower smoothing
+
+            velocity = velocity.normalized * smoothedSpeed;
+        }
     }
 
     private void ApplyGravityIfNeeded()
