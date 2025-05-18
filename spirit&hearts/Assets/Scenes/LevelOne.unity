@@ -934,8 +934,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   recorders:
   - {fileID: 1019560680}
-  autoStartOnPlay: 1
-  autoSaveOnQuit: 1
+  autoStartOnPlay: 0
+  autoSaveOnQuit: 0
 --- !u!114 &1019560680 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4714864065847065564, guid: e640cac425ccd3741a6675169a576853, type: 3}
@@ -1243,6 +1243,10 @@ PrefabInstance:
       value: 4.9
       objectReference: {fileID: 0}
     - target: {fileID: 5574356274160726731, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: rigRoot
+      value: 
+      objectReference: {fileID: 1769844411}
+    - target: {fileID: 5574356274160726731, guid: e640cac425ccd3741a6675169a576853, type: 3}
       propertyPath: leftGrip
       value: 
       objectReference: {fileID: 6558622148059887818, guid: c348712bda248c246b8c49b3db54643f, type: 3}
@@ -1266,6 +1270,10 @@ PrefabInstance:
       propertyPath: triggerAction
       value: 
       objectReference: {fileID: -4289430672226363583, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+    - target: {fileID: 5574356274160726731, guid: e640cac425ccd3741a6675169a576853, type: 3}
+      propertyPath: rightStickAction
+      value: 
+      objectReference: {fileID: -8666952849799569744, guid: c348712bda248c246b8c49b3db54643f, type: 3}
     - target: {fileID: 7090588842696128010, guid: e640cac425ccd3741a6675169a576853, type: 3}
       propertyPath: m_LocalPosition.x
       value: 190.2

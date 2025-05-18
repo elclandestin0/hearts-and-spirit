@@ -1,0 +1,5 @@
+android {
+    packagingOptions {
+        pickFirst '**/libopenxr_loader.so'
+    }
+}

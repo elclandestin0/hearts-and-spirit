@@ -27,6 +27,13 @@ public class Movement : MonoBehaviour
     private readonly float maxSpeed = 30f;
     private readonly float maxDiveSpeed = 120f;
     private readonly float minHandSpread = 1.0f;
+    private float snapAngle = 45f;
+    private float turnThreshold = 0.8f;
+    private float turnCooldown = 0.5f;
+
+    private float turnCooldownTimer = 0f;
+    private bool canSnapTurn => turnCooldownTimer <= 0f;
+
     // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
     private Vector3 velocity = Vector3.zero;
     private Vector3 prevLeftPos, prevRightPos;
@@ -92,7 +99,6 @@ public class Movement : MonoBehaviour
         // Normal flight update
         UpdateDeltaValues();
         UpdateDiveAngle();
-
         HandleFlapDetection();
         HandleGlideLogic();
         ApplyGravityIfNeeded();
@@ -103,7 +109,6 @@ public class Movement : MonoBehaviour
         RecordMotion();
         DrawDebugLines();
         CapSpeed();
-
     }
 
 
@@ -126,6 +131,34 @@ public class Movement : MonoBehaviour
         if (isHovering)
         {
             Debug.Log("🕊️ Hover Mode Activated!");
+        }
+
+        DetectSnapTurn();
+    }
+
+    private void DetectSnapTurn()
+    { 
+        if (rightStickAction != null)
+        {
+            Vector2 rightStick = rightStickAction.action.ReadValue<Vector2>();
+            if (canSnapTurn)
+            {
+                if (rightStick.x > turnThreshold)
+                {
+                    rigRoot.Rotate(Vector3.up, snapAngle);
+                    turnCooldownTimer = turnCooldown;
+                }
+                else if (rightStick.x < -turnThreshold)
+                {
+                    rigRoot.Rotate(Vector3.up, -snapAngle);
+                    turnCooldownTimer = turnCooldown;
+                }
+            }
+        }
+
+        if (turnCooldownTimer > 0f)
+        {
+            turnCooldownTimer -= Time.deltaTime;
         }
     }
 
@@ -196,8 +229,6 @@ public class Movement : MonoBehaviour
 
         wasMovingDownLastFrame = isMovingDown;
     }
-
-
     private void HandleGlideLogic()
     {
         // ✅ Ensure both hand objects are assigned and active
@@ -252,7 +283,6 @@ public class Movement : MonoBehaviour
             velocity = velocity.normalized * smoothedSpeed;
         }
     }
-
     private void ApplyGravityIfNeeded()
     {
         if (isGliding)
@@ -320,7 +350,7 @@ public class Movement : MonoBehaviour
         Debug.DrawLine(head.position, head.position + headFwd * 3f, Color.red, 0f, false);
     }
 
-    private void CapSpeed() 
+    private void CapSpeed()
     {
         // 🛑 Cap forward speed -- Uncomment later
         float currentForwardSpeed = Vector3.Dot(velocity, head.forward);
