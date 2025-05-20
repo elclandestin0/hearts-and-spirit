@@ -64,6 +64,13 @@ public class Movement : MonoBehaviour
     private float bounceDampFactor = 0.9f;
     private bool inputLockedDuringBounce => recentlyBounced && bounceTimer > 0f;
 
+    // Dive->Lift 
+    private bool wasDiving = false;
+    private float lastDiveEndTime = -10f;
+    private float lastDiveTime = -1f;
+    private float postDiveLiftBoostDuration = 1f;
+
+
     void Start()
     {
         // Save initial world-space hand positions for motion delta
@@ -137,7 +144,7 @@ public class Movement : MonoBehaviour
     }
 
     private void DetectSnapTurn()
-    { 
+    {
         if (rightStickAction != null)
         {
             Vector2 rightStick = rightStickAction.action.ReadValue<Vector2>();
@@ -180,17 +187,46 @@ public class Movement : MonoBehaviour
     private void UpdateDiveAngle()
     {
         diveAngle = Vector3.Angle(headFwd, Vector3.down);
+
+        bool isCurrentlyDiving = diveAngle < 90f && isGliding && velocity.magnitude > 5f;
+        // Detect transition from dive → climb
+        if (wasDiving && !isCurrentlyDiving && headFwd.y > 0.0f)
+        {
+            Debug.Log("🕊️ Pull-up detected after dive!");
+            lastDiveEndTime = Time.time;
+            glideTime = 0f; // 🛫 Reset decay to boost climb
+            Debug.Log("🔄 Glide time reset to 0");
+        }
+
+        wasDiving = isCurrentlyDiving;
     }
 
     private void HandleFlapDetection()
     {
+        // Priority goes to debugging first on the laptop.
+        float flapMagnitude = 2.0f;
+        float speed = velocity.magnitude;
+        float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(30f, maxDiveSpeed, speed));
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
+                head.forward,
+                flapMagnitude,
+                flapStrength,
+                forwardPropulsionStrength
+            );
+            glideTime = 0f;
+            lastFlapTime = Time.time;
+            OnFlap?.Invoke();
+        }
+
         // ✅ Ensure both hand objects are assigned and active
-        // if (leftHand == null || rightHand == null) return;
-        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        // {
-        //     isGliding = false;
-        //     return;
-        // }
+        if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
+        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        {
+            isGliding = false;
+            return;
+        }
         float leftDown = -leftVelocity.SmoothedVelocity.y;
         float rightDown = -rightVelocity.SmoothedVelocity.y;
 
@@ -203,9 +239,6 @@ public class Movement : MonoBehaviour
         bool justStartedMovingDown = isMovingDown && !wasMovingDownLastFrame;
 
         bool enoughTimePassed = Time.time - lastFlapTime >= 0.2f;
-        float flapMagnitude = 2.0f;
-        float speed = velocity.magnitude;
-        float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(30f, maxDiveSpeed, speed));
 
         // Super weak flaps when hovering
         if (isHovering)
@@ -214,7 +247,7 @@ public class Movement : MonoBehaviour
         }
 
         // Calculate flap every 0.2 seconds
-        if (justStartedMovingDown && enoughTimePassed || Input.GetKeyDown(KeyCode.Space))
+        if (justStartedMovingDown && enoughTimePassed)
         {
             velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
                 head.forward,
@@ -273,6 +306,15 @@ public class Movement : MonoBehaviour
             recentlyBounced,
             bounceTimer
         );
+
+        // 🦇 Post-dive lift window (Arkham Knight style)
+        float timeSinceDive = Time.time - lastDiveEndTime;
+        if (timeSinceDive < postDiveLiftBoostDuration)
+        {
+            float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
+            float liftBonus = Mathf.Lerp(1.5f, 10f, liftPercent); // Adjust values as needed
+            velocity += Vector3.up * liftBonus * Time.deltaTime;
+        }
 
         if (isHovering)
         {
