@@ -69,6 +69,10 @@ public class Movement : MonoBehaviour
     private float lastDiveEndTime = -10f;
     private float lastDiveTime = -1f;
     private float postDiveLiftBoostDuration = 1f;
+    private float diveStartTime = -1f;
+    private float diveEndTime = -1f;
+    private float lastRecordedDiveSpeed = 0f;
+
 
 
     void Start()
@@ -187,15 +191,27 @@ public class Movement : MonoBehaviour
     private void UpdateDiveAngle()
     {
         diveAngle = Vector3.Angle(headFwd, Vector3.down);
-
         bool isCurrentlyDiving = diveAngle < 90f && isGliding && velocity.magnitude > 5f;
+
+        if (!wasDiving && isCurrentlyDiving)
+        {
+            diveStartTime = Time.time;
+            lastRecordedDiveSpeed = velocity.magnitude;
+        }
         // Detect transition from dive → climb
         if (wasDiving && !isCurrentlyDiving && headFwd.y > 0.0f)
         {
-            Debug.Log("🕊️ Pull-up detected after dive!");
+            diveEndTime = Time.time;
+            float diveDuration = diveEndTime - diveStartTime;
+            float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, lastRecordedDiveSpeed); // Normalize
+            float boostScale = 3f; // ← tune this value to taste
+
+            postDiveLiftBoostDuration = Mathf.Clamp(diveDuration * diveSpeedFactor * boostScale, 0.5f, 5f);
             lastDiveEndTime = Time.time;
-            glideTime = 0f; // 🛫 Reset decay to boost climb
-            Debug.Log("🔄 Glide time reset to 0");
+
+            Debug.Log($"🕊️ Pull-up after {diveDuration:F2}s dive");
+            Debug.Log($"⚡ Boost duration calculated: {postDiveLiftBoostDuration:F2}s");
+            glideTime = 0f;
         }
 
         wasDiving = isCurrentlyDiving;
@@ -293,6 +309,7 @@ public class Movement : MonoBehaviour
 
         bool isManualDivePose = leftBehind && rightBehind;
 
+        float timeSinceDive = Time.time - lastDiveEndTime;
         velocity = FlightPhysics.CalculateGlideVelocity(
             velocity,
             headFwd,
@@ -304,11 +321,11 @@ public class Movement : MonoBehaviour
             ref glideTime,
             ref diveAngle,
             recentlyBounced,
-            bounceTimer
+            bounceTimer,
+            timeSinceDive
         );
 
         // 🦇 Post-dive lift window (Arkham Knight style)
-        float timeSinceDive = Time.time - lastDiveEndTime;
         if (timeSinceDive < postDiveLiftBoostDuration)
         {
             float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
