@@ -70,7 +70,7 @@ public static class FlightPhysics
             float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive); // cap at 60%
             float diveSpeed = diveIntensity * maxDiveSpeed;
 
-            velocity += headForward.normalized * diveSpeed * deltaTime * 0.5f; // further scaled
+            velocity += headForward.normalized * diveSpeed * deltaTime; // further scaled
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
         } 
         else 

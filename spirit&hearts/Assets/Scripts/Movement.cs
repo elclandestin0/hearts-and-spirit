@@ -206,7 +206,7 @@ public class Movement : MonoBehaviour
             float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, lastRecordedDiveSpeed); // Normalize
             float boostScale = 3f; // ← tune this value to taste
 
-            postDiveLiftBoostDuration = Mathf.Clamp(diveDuration * diveSpeedFactor * boostScale, 0.5f, 5f);
+            postDiveLiftBoostDuration = Mathf.Clamp(diveDuration * diveSpeedFactor * boostScale, 0.5f, 10f);
             lastDiveEndTime = Time.time;
 
             Debug.Log($"🕊️ Pull-up after {diveDuration:F2}s dive");
@@ -329,7 +329,8 @@ public class Movement : MonoBehaviour
         if (timeSinceDive < postDiveLiftBoostDuration)
         {
             float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
-            float liftBonus = Mathf.Lerp(1.5f, 10f, liftPercent); // Adjust values as needed
+            float liftBonus = Mathf.Lerp(1.5f, 100f, liftPercent); // Adjust values as needed
+            Debug.Log(liftBonus);
             velocity += Vector3.up * liftBonus * Time.deltaTime;
         }
 
