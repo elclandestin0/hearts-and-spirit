@@ -23,7 +23,7 @@ public class Movement : MonoBehaviour
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1f;
-    private readonly float glideStrength = 1f;
+    private readonly float glideStrength = 1.5f;
     private readonly float maxSpeed = 30f;
     private readonly float maxDiveSpeed = 120f;
     private readonly float minHandSpread = 1.0f;
@@ -205,10 +205,8 @@ public class Movement : MonoBehaviour
             float diveDuration = diveEndTime - diveStartTime;
             float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, lastRecordedDiveSpeed); // Normalize
             float boostScale = 3f; // ← tune this value to taste
-
-            postDiveLiftBoostDuration = Mathf.Clamp(diveDuration * diveSpeedFactor * boostScale, 2.5f, 10f);
+            postDiveLiftBoostDuration = Mathf.Clamp(diveDuration * diveSpeedFactor * boostScale, 1f, 7.5f);
             lastDiveEndTime = Time.time;
-
             Debug.Log($"🕊️ Pull-up after {diveDuration:F2}s dive");
             Debug.Log($"⚡ Boost duration calculated: {postDiveLiftBoostDuration:F2}s");
             glideTime = 0f;
@@ -329,11 +327,29 @@ public class Movement : MonoBehaviour
         if (timeSinceDive < postDiveLiftBoostDuration)
         {
             float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
-            float liftBonus = Mathf.Lerp(1.5f, 100f, liftPercent); // Adjust values as needed
-            Debug.Log(liftBonus);
-            velocity += head.forward * liftBonus * Time.deltaTime;
-        }
+            float rawLiftBonus = Mathf.Lerp(1.5f, 100f, liftPercent);
 
+            float pitchY = head.forward.y;
+
+            if (pitchY < 0.2f)
+            {
+                // 🛫 Level flight — forward momentum
+                velocity += head.forward * rawLiftBonus * Time.deltaTime;
+                Debug.Log("🌀 Post-dive glide boost!");
+            }
+            else if (pitchY >= 0.2f && pitchY < 0.7f)
+            {
+                // 🪶 Climb — upward lift
+                float climbLiftFactor = Mathf.InverseLerp(0.2f, 0.7f, pitchY);
+                velocity += Vector3.up * rawLiftBonus * climbLiftFactor * Time.deltaTime;
+                Debug.Log("⏫ Post-dive climb!");
+            }
+            else
+            {
+                // 🚫 Stall
+                Debug.Log("🔻 Stalled! Over-pitched.");
+            }
+        }
         if (isHovering)
         {
             float currentSpeed = velocity.magnitude;

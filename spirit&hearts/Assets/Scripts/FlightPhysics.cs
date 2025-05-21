@@ -67,7 +67,7 @@ public static class FlightPhysics
         {
             float rawDive = Mathf.InverseLerp(90f, 10f, diveAngle);
             float easedDive = Mathf.Pow(rawDive, 1.5f);
-            float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive); // cap at 60%
+            float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
 
             velocity += headForward.normalized * diveSpeed * deltaTime; // further scaled
