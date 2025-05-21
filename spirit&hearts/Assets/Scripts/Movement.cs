@@ -199,14 +199,14 @@ public class Movement : MonoBehaviour
             lastRecordedDiveSpeed = velocity.magnitude;
         }
         // Detect transition from dive → climb
-        if (wasDiving && !isCurrentlyDiving && headFwd.y > 0.0f)
+        if (wasDiving && !isCurrentlyDiving && headFwd.y >= 0.0f)
         {
             diveEndTime = Time.time;
             float diveDuration = diveEndTime - diveStartTime;
             float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, lastRecordedDiveSpeed); // Normalize
             float boostScale = 3f; // ← tune this value to taste
 
-            postDiveLiftBoostDuration = Mathf.Clamp(diveDuration * diveSpeedFactor * boostScale, 0.5f, 10f);
+            postDiveLiftBoostDuration = Mathf.Clamp(diveDuration * diveSpeedFactor * boostScale, 2.5f, 10f);
             lastDiveEndTime = Time.time;
 
             Debug.Log($"🕊️ Pull-up after {diveDuration:F2}s dive");
@@ -331,7 +331,7 @@ public class Movement : MonoBehaviour
             float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
             float liftBonus = Mathf.Lerp(1.5f, 100f, liftPercent); // Adjust values as needed
             Debug.Log(liftBonus);
-            velocity += Vector3.up * liftBonus * Time.deltaTime;
+            velocity += head.forward * liftBonus * Time.deltaTime;
         }
 
         if (isHovering)
