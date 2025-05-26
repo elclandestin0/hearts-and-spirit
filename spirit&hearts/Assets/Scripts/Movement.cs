@@ -1,6 +1,11 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
+
+// TO-DO: We need to divide this script into multiple scripts.
+// Non-movement, glide movement and diving and everything else here.
+
+
 public class Movement : MonoBehaviour
 {
     [Header("XR Input Actions")]
@@ -74,6 +79,10 @@ public class Movement : MonoBehaviour
     private float diveEndTime = -1f;
     private float lastRecordedDiveSpeed = 0f;
     private Vector3 lastDiveForward = Vector3.zero;
+
+    // State machine
+    private enum AirborneState { None, Gliding, Diving }
+    private AirborneState airborneState = AirborneState.None;
 
     void Start()
     {
@@ -383,7 +392,7 @@ public class Movement : MonoBehaviour
             velocity += Vector3.down * gravity * gravityScale * Time.deltaTime;
 
             // 🌀 Optional: smooth lift when fast
-            ApplyAirPocketEffect();
+            // ApplyAirPocketEffect();
         }
         else
         {
