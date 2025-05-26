@@ -198,19 +198,26 @@ public class Movement : MonoBehaviour
             diveStartTime = Time.time;
             lastRecordedDiveSpeed = velocity.magnitude;
         }
+        
         // Detect transition from dive → climb
         if (wasDiving && !isCurrentlyDiving && headFwd.y >= 0.0f)
         {
             diveEndTime = Time.time;
             float diveDuration = diveEndTime - diveStartTime;
-            float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, lastRecordedDiveSpeed); // Normalize
-            float boostScale = 3f; // ← tune this value to taste
-            postDiveLiftBoostDuration = Mathf.Clamp(diveDuration * diveSpeedFactor * boostScale, 1f, 7.5f);
+            float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, lastRecordedDiveSpeed); // Normalize dive power
+
+            // Smooth duration ramp based on dive commitment
+            float easedDuration = Mathf.SmoothStep(0.25f, 1.0f, Mathf.InverseLerp(1f, 3f, diveDuration));
+            float boostDurationRaw = diveDuration * easedDuration * diveSpeedFactor * 1.5f;
+            postDiveLiftBoostDuration = Mathf.Clamp(boostDurationRaw, 0.5f, 7.5f);
+
             lastDiveEndTime = Time.time;
-            Debug.Log($"🕊️ Pull-up after {diveDuration:F2}s dive");
-            Debug.Log($"⚡ Boost duration calculated: {postDiveLiftBoostDuration:F2}s");
             glideTime = 0f;
+
+            Debug.Log($"🕊️ Dive duration: {diveDuration:F2}s");
+            Debug.Log($"⚡ Lift boost: {postDiveLiftBoostDuration:F2}s (eased={easedDuration:F2}, diveSpeedFactor={diveSpeedFactor:F2})");
         }
+
 
         wasDiving = isCurrentlyDiving;
     }
