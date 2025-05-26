@@ -72,8 +72,7 @@ public class Movement : MonoBehaviour
     private float diveStartTime = -1f;
     private float diveEndTime = -1f;
     private float lastRecordedDiveSpeed = 0f;
-
-
+    private Vector3 lastDiveForward = Vector3.zero;
 
     void Start()
     {
@@ -204,20 +203,20 @@ public class Movement : MonoBehaviour
         {
             diveEndTime = Time.time;
             float diveDuration = diveEndTime - diveStartTime;
-            float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, lastRecordedDiveSpeed); // Normalize dive power
+            float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, velocity.magnitude);
 
-            // Smooth duration ramp based on dive commitment
-            float easedDuration = Mathf.SmoothStep(0.25f, 1.0f, Mathf.InverseLerp(1f, 3f, diveDuration));
-            float boostDurationRaw = diveDuration * easedDuration * diveSpeedFactor * 1.5f;
-            postDiveLiftBoostDuration = Mathf.Clamp(boostDurationRaw, 0.5f, 7.5f);
+            float easedDuration = Mathf.SmoothStep(0.6f, 1.0f, Mathf.InverseLerp(1f, 3f, diveDuration));
+            float boostDurationRaw = diveDuration * easedDuration * diveSpeedFactor * 2.0f;
+            postDiveLiftBoostDuration = Mathf.Clamp(boostDurationRaw, 1.5f, 7.5f);
 
             lastDiveEndTime = Time.time;
             glideTime = 0f;
 
-            Debug.Log($"🕊️ Dive duration: {diveDuration:F2}s");
-            Debug.Log($"⚡ Lift boost: {postDiveLiftBoostDuration:F2}s (eased={easedDuration:F2}, diveSpeedFactor={diveSpeedFactor:F2})");
-        }
+            lastDiveForward = head.forward; // ✅ Store direction at dive exit
 
+            Debug.Log($"🕊️ Dive duration: {diveDuration:F2}s");
+            Debug.Log($"⚡ Lift boost: {postDiveLiftBoostDuration:F2}s (eased={easedDuration:F2}, speedFactor={diveSpeedFactor:F2}, boostDuration={boostDurationRaw:F2})");
+        }
 
         wasDiving = isCurrentlyDiving;
     }
@@ -315,6 +314,7 @@ public class Movement : MonoBehaviour
         bool isManualDivePose = leftBehind && rightBehind;
 
         float timeSinceDive = Time.time - lastDiveEndTime;
+
         velocity = FlightPhysics.CalculateGlideVelocity(
             velocity,
             headFwd,
@@ -330,38 +330,37 @@ public class Movement : MonoBehaviour
             timeSinceDive
         );
 
-        // 🦇 Post-dive lift window (Arkham Knight style)
+        // ✅ Only boost if duration is valid
         if (postDiveLiftBoostDuration > 0f && timeSinceDive < postDiveLiftBoostDuration)
         {
             float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
-            float rawLiftBonus = Mathf.Lerp(1.5f, 100f, liftPercent);
+
+            // Separate raw force values for forward and upward
+            float forwardBonus = Mathf.Lerp(10f, 40f, liftPercent);
+            float upwardBonus = Mathf.Lerp(1f, 10f, liftPercent);
 
             float pitchY = head.forward.y;
 
-            if (pitchY < 0.2f)
-            {
-                // 🛫 Level flight — forward momentum
-                velocity += head.forward * rawLiftBonus * Time.deltaTime;
-                Debug.Log("🌀 Post-dive glide boost!");
-            }
-            else if (pitchY >= 0.2f && pitchY < 0.7f)
-            {
-                // 🪶 Climb — upward lift
-                float climbLiftFactor = Mathf.InverseLerp(0.2f, 0.7f, pitchY);
-                velocity += Vector3.up * rawLiftBonus * climbLiftFactor * Time.deltaTime;
-                Debug.Log("⏫ Post-dive climb!");
-            }
-            else
-            {
-                // 🚫 Stall
-                Debug.Log("🔻 Stalled! Over-pitched.");
-            }
+            // Blended weights instead of hard if/else
+            float forwardWeight = Mathf.Clamp01(1f - Mathf.InverseLerp(0.2f, 0.4f, pitchY));
+            float climbWeight = Mathf.Clamp01(Mathf.InverseLerp(0.2f, 0.7f, pitchY));
+            float stallWeight = Mathf.Clamp01(Mathf.InverseLerp(0.7f, 0.9f, pitchY)); // stall fade-in
+
+            float forwardForce = forwardBonus * forwardWeight;
+            float upwardForce = upwardBonus * climbWeight * (1f - stallWeight);
+
+            Vector3 forwardBoost = lastDiveForward * forwardForce * Time.deltaTime;
+            Vector3 upwardBoost = Vector3.up * upwardForce * Time.deltaTime;
+
+            velocity += forwardBoost + upwardBoost;
         }
 
+        // ✅ Optionally reset boost duration after use
         if (timeSinceDive > postDiveLiftBoostDuration)
         {
             postDiveLiftBoostDuration = 0f;
         }
+
         if (isHovering)
         {
             float currentSpeed = velocity.magnitude;

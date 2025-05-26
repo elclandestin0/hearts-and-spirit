@@ -65,9 +65,9 @@ public static class FlightPhysics
         // 🦅 Dive mechanic
         if (diveAngle < 90f && isManualDivePose)
         {
-            float rawDive = Mathf.InverseLerp(90f, 10f, diveAngle);
+            float rawDive = Mathf.InverseLerp(90f, 0f, diveAngle);
             float easedDive = Mathf.Pow(rawDive, 1.5f);
-            float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive);
+            float diveIntensity = Mathf.Lerp(0.1f, 1f, easedDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
 
             velocity += headForward.normalized * diveSpeed * deltaTime; // further scaled
