@@ -16,6 +16,7 @@ public class Movement : MonoBehaviour
     [Header("Physics Controls")]
     [SerializeField] private float gravity = 9.8f; // m/s²
     [SerializeField] private float glideTime = 0f;
+    [SerializeField] private float glideStrength = 4.0f;
     public float diveAngle = 0f;
 
     [Header("Recorder")]
@@ -23,7 +24,6 @@ public class Movement : MonoBehaviour
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1f;
-    private readonly float glideStrength = 1.5f;
     private readonly float maxSpeed = 30f;
     private readonly float maxDiveSpeed = 120f;
     private readonly float minHandSpread = 1.0f;
@@ -68,7 +68,7 @@ public class Movement : MonoBehaviour
     private bool wasDiving = false;
     private float lastDiveEndTime = -10f;
     private float lastDiveTime = -1f;
-    private float postDiveLiftBoostDuration = 1f;
+    private float postDiveLiftBoostDuration = 0f;
     private float diveStartTime = -1f;
     private float diveEndTime = -1f;
     private float lastRecordedDiveSpeed = 0f;
@@ -198,7 +198,7 @@ public class Movement : MonoBehaviour
             diveStartTime = Time.time;
             lastRecordedDiveSpeed = velocity.magnitude;
         }
-        
+
         // Detect transition from dive → climb
         if (wasDiving && !isCurrentlyDiving && headFwd.y >= 0.0f)
         {
@@ -331,7 +331,7 @@ public class Movement : MonoBehaviour
         );
 
         // 🦇 Post-dive lift window (Arkham Knight style)
-        if (timeSinceDive < postDiveLiftBoostDuration)
+        if (postDiveLiftBoostDuration > 0f && timeSinceDive < postDiveLiftBoostDuration)
         {
             float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
             float rawLiftBonus = Mathf.Lerp(1.5f, 100f, liftPercent);
@@ -356,6 +356,11 @@ public class Movement : MonoBehaviour
                 // 🚫 Stall
                 Debug.Log("🔻 Stalled! Over-pitched.");
             }
+        }
+
+        if (timeSinceDive > postDiveLiftBoostDuration)
+        {
+            postDiveLiftBoostDuration = 0f;
         }
         if (isHovering)
         {
