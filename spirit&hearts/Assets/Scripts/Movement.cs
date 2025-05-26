@@ -17,6 +17,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private float gravity = 9.8f; // m/s²
     [SerializeField] private float glideTime = 0f;
     [SerializeField] private float glideStrength = 4.0f;
+    [SerializeField] private float diveAcceleratorSmoothness = 2.5f;
     public float diveAngle = 0f;
 
     [Header("Recorder")]
@@ -95,7 +96,7 @@ public class Movement : MonoBehaviour
             // Move character while in bounce phase
             ApplyMovement();
             ApplyDrag();
-            DrawDebugLines(); // optional visuals
+            DrawDebugLines();
 
             // End bounce recovery
             if (bounceTimer <= 0f)
@@ -327,7 +328,8 @@ public class Movement : MonoBehaviour
             ref diveAngle,
             recentlyBounced,
             bounceTimer,
-            timeSinceDive
+            timeSinceDive,
+            diveAcceleratorSmoothness
         );
 
         // ✅ Only boost if duration is valid
@@ -443,7 +445,7 @@ public class Movement : MonoBehaviour
         float currentForwardSpeed = Vector3.Dot(velocity, head.forward);
         float speedLimit = maxDiveSpeed;
 
-        if (currentForwardSpeed > speedLimit)
+        if (currentForwardSpeed > velocity.magnitude)
         {
             Vector3 forwardDir = head.forward.normalized;
             Vector3 forwardVelocity = forwardDir * currentForwardSpeed;
