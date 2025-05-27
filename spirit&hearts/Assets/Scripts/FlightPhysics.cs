@@ -25,11 +25,10 @@ public static class FlightPhysics
         float deltaTime,
         bool isManualDivePose,
         ref float glideTime,
-        ref float diveAngle,
+        ref float diveAngle, 
         bool recentlyBounced,
         float bounceTimer,
-        float timeSinceDiveEnd,
-        float diveAcceleratorSmoothness
+        float timeSinceDiveEnd // 👈 new param
     )
     {
         Vector3 velocity = currentVelocity;
@@ -70,20 +69,16 @@ public static class FlightPhysics
             float easedDive = Mathf.Pow(rawDive, 1.5f);
             float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
-            Vector3 diveAccel = headForward.normalized * diveSpeed;
-            velocity = Vector3.Lerp(velocity, diveAccel, deltaTime * diveAcceleratorSmoothness);
+
+            velocity += headForward.normalized * diveSpeed * deltaTime; // further scaled
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
-        }
+        } 
         else 
         {
             // ⏱️ Accumulate glide time
             glideTime += deltaTime;
         }
 
-        if (velocity.magnitude > maxDiveSpeed)
-        {
-            velocity = velocity.normalized * maxDiveSpeed;
-        }
         return velocity;
     }
 }

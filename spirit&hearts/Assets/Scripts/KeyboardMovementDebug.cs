@@ -10,10 +10,6 @@ public class KeyboardMovementDebug : MonoBehaviour
     public float minPitch = -80f;
     public float maxPitch = 80f;
 
-    [Header("Mouse / Touchpad")]
-    public bool enableMouseLook = true;
-    public float mouseSensitivity = 1.0f;
-
     void Update()
     {
         if (movement == null || movement.head == null) return;
@@ -21,26 +17,27 @@ public class KeyboardMovementDebug : MonoBehaviour
         Transform head = movement.head;
         Vector3 currentEuler = head.localEulerAngles;
 
-        float pitch = currentEuler.x > 180f ? currentEuler.x - 360f : currentEuler.x;
-        float yaw = currentEuler.y > 180f ? currentEuler.y - 360f : currentEuler.y;
+        // Handle pitch (X axis)
+        float pitch = currentEuler.x;
+        if (pitch > 180f) pitch -= 360f;
 
-        // Keyboard controls
-        if (Input.GetKey(KeyCode.W)) pitch -= pitchSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.S)) pitch += pitchSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.A)) yaw -= yawSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.D)) yaw += yawSpeed * Time.deltaTime;
-
-        // Touchpad (Mouse) look
-        if (enableMouseLook && Input.GetMouseButton(1)) // Hold Right-Click or Cmd+click
-        {
-            float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
-            float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
-
-            yaw += mouseX * yawSpeed * Time.deltaTime;
-            pitch -= mouseY * pitchSpeed * Time.deltaTime;
-        }
+        if (Input.GetKey(KeyCode.W))
+            pitch -= pitchSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.S))
+            pitch += pitchSpeed * Time.deltaTime;
 
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+
+        // Handle yaw (Y axis)
+        float yaw = currentEuler.y;
+        if (yaw > 180f) yaw -= 360f;
+
+        if (Input.GetKey(KeyCode.A))
+            yaw -= yawSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.D))
+            yaw += yawSpeed * Time.deltaTime;
+
+        // Apply rotation
         head.localEulerAngles = new Vector3(pitch, yaw, currentEuler.z);
     }
 }
