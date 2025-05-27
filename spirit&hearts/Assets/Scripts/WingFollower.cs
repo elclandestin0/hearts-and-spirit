@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class WingFollower : MonoBehaviour
 {
-    public Transform target; // controller (left/right hand)
+    public Transform target;
     public Vector3 positionOffset;
     public Vector3 rotationOffset;
 
