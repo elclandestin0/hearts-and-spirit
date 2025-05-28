@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
+
+// TO-DO: We need to divide this script into multiple scripts.
+// Non-movement, glide movement and diving and everything else here.
 public class Movement : MonoBehaviour
 {
     [Header("XR Input Actions")]
@@ -16,6 +19,8 @@ public class Movement : MonoBehaviour
     [Header("Physics Controls")]
     [SerializeField] private float gravity = 9.8f; // m/s²
     [SerializeField] private float glideTime = 0f;
+    [SerializeField] private float glideStrength = 4.0f;
+    [SerializeField] private float diveAcceleratorSmoothness = 2.5f;
     public float diveAngle = 0f;
 
     [Header("Recorder")]
@@ -23,7 +28,6 @@ public class Movement : MonoBehaviour
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1f;
-    private readonly float glideStrength = 1.5f;
     private readonly float maxSpeed = 30f;
     private readonly float maxDiveSpeed = 120f;
     private readonly float minHandSpread = 1.0f;
@@ -68,12 +72,15 @@ public class Movement : MonoBehaviour
     private bool wasDiving = false;
     private float lastDiveEndTime = -10f;
     private float lastDiveTime = -1f;
-    private float postDiveLiftBoostDuration = 1f;
+    private float postDiveLiftBoostDuration = 0f;
     private float diveStartTime = -1f;
     private float diveEndTime = -1f;
     private float lastRecordedDiveSpeed = 0f;
+    private Vector3 lastDiveForward = Vector3.zero;
 
-
+    // State machine
+    private enum AirborneState { None, Gliding, Diving }
+    private AirborneState airborneState = AirborneState.None;
 
     void Start()
     {
@@ -96,7 +103,7 @@ public class Movement : MonoBehaviour
             // Move character while in bounce phase
             ApplyMovement();
             ApplyDrag();
-            DrawDebugLines(); // optional visuals
+            DrawDebugLines();
 
             // End bounce recovery
             if (bounceTimer <= 0f)
@@ -198,18 +205,25 @@ public class Movement : MonoBehaviour
             diveStartTime = Time.time;
             lastRecordedDiveSpeed = velocity.magnitude;
         }
+
         // Detect transition from dive → climb
         if (wasDiving && !isCurrentlyDiving)
         {
             diveEndTime = Time.time;
             float diveDuration = diveEndTime - diveStartTime;
-            float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, lastRecordedDiveSpeed); // Normalize
-            float boostScale = 3f; // ← tune this value to taste
-            postDiveLiftBoostDuration = Mathf.Clamp(diveDuration * diveSpeedFactor * boostScale, 1f, 7.5f);
+            float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, velocity.magnitude);
+
+            float easedDuration = Mathf.SmoothStep(0.6f, 1.0f, Mathf.InverseLerp(1f, 3f, diveDuration));
+            float boostDurationRaw = diveDuration * easedDuration * diveSpeedFactor * 2.0f;
+            postDiveLiftBoostDuration = Mathf.Clamp(boostDurationRaw, 1.5f, 7.5f);
+
             lastDiveEndTime = Time.time;
-            Debug.Log($"🕊️ Pull-up after {diveDuration:F2}s dive");
-            Debug.Log($"⚡ Boost duration calculated: {postDiveLiftBoostDuration:F2}s");
             glideTime = 0f;
+
+            lastDiveForward = head.forward; // ✅ Store direction at dive exit
+
+            Debug.Log($"🕊️ Dive duration: {diveDuration:F2}s");
+            Debug.Log($"⚡ Lift boost: {postDiveLiftBoostDuration:F2}s (eased={easedDuration:F2}, speedFactor={diveSpeedFactor:F2}, boostDuration={boostDurationRaw:F2})");
         }
 
         wasDiving = isCurrentlyDiving;
@@ -220,7 +234,7 @@ public class Movement : MonoBehaviour
         // Priority goes to debugging first on the laptop.
         float flapMagnitude = 2.0f;
         float speed = velocity.magnitude;
-        float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(30f, maxDiveSpeed, speed));
+        float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(1f, maxDiveSpeed, speed));
         if (Input.GetKeyDown(KeyCode.Space))
         {
             velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
@@ -279,12 +293,12 @@ public class Movement : MonoBehaviour
     private void HandleGlideLogic()
     {
         // ✅ Ensure both hand objects are assigned and active
-        // if (leftHand == null || rightHand == null) return;
-        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        // {
-        //     isGliding = false;
-        //     return;
-        // }
+        if (leftHand == null || rightHand == null) return;
+        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        {
+            isGliding = false;
+            return;
+        }
         float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
         isGliding = wingsOutstretched;
@@ -308,11 +322,11 @@ public class Movement : MonoBehaviour
         bool isManualDivePose = leftBehind && rightBehind;
 
         float timeSinceDive = Time.time - lastDiveEndTime;
+
         velocity = FlightPhysics.CalculateGlideVelocity(
             velocity,
             headFwd,
             glideStrength,
-            maxSpeed,
             maxDiveSpeed,
             Time.deltaTime,
             true,
@@ -320,19 +334,23 @@ public class Movement : MonoBehaviour
             ref diveAngle,
             recentlyBounced,
             bounceTimer,
-            timeSinceDive
+            timeSinceDive,
+            diveStartTime
         );
 
-        // 🦇 Post-dive lift window (Arkham Knight style)
-        if (timeSinceDive < postDiveLiftBoostDuration)
+        // ✅ Only boost if duration is valid
+        if (postDiveLiftBoostDuration > 0f && timeSinceDive < postDiveLiftBoostDuration)
         {
             float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
-            float rawLiftBonus = Mathf.Lerp(1.5f, 100f, liftPercent);
+
+            // Separate raw force values for forward and upward
+            float forwardBonus = Mathf.Lerp(2f, 10f, liftPercent);
+            float upwardBonus = Mathf.Lerp(1f, 10f, liftPercent);
 
             float pitchY = head.forward.y;
 
             // Blended weights instead of hard if/else
-            float forwardWeight = Mathf.Clamp01(10f - Mathf.InverseLerp(0.8f, 4.2f, pitchY));
+            float forwardWeight = Mathf.Clamp01(5 - Mathf.InverseLerp(0.8f, 1.2f, pitchY));
             float climbWeight = Mathf.Clamp01(Mathf.InverseLerp(0.2f, 0.7f, pitchY));
             float stallWeight = Mathf.Clamp01(Mathf.InverseLerp(0.7f, 0.9f, pitchY)); // stall fade-in
 
@@ -344,6 +362,13 @@ public class Movement : MonoBehaviour
 
             velocity += forwardBoost;
         }
+
+        // ✅ Optionally reset boost duration after use
+        if (timeSinceDive > postDiveLiftBoostDuration)
+        {
+            postDiveLiftBoostDuration = 0f;
+        }
+
         if (isHovering)
         {
             float currentSpeed = velocity.magnitude;
@@ -364,7 +389,7 @@ public class Movement : MonoBehaviour
             velocity += Vector3.down * gravity * gravityScale * Time.deltaTime;
 
             // 🌀 Optional: smooth lift when fast
-            ApplyAirPocketEffect();
+            // ApplyAirPocketEffect();
         }
         else
         {
@@ -426,7 +451,7 @@ public class Movement : MonoBehaviour
         float currentForwardSpeed = Vector3.Dot(velocity, head.forward);
         float speedLimit = maxDiveSpeed;
 
-        if (currentForwardSpeed > speedLimit)
+        if (currentForwardSpeed > velocity.magnitude)
         {
             Vector3 forwardDir = head.forward.normalized;
             Vector3 forwardVelocity = forwardDir * currentForwardSpeed;
