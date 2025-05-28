@@ -62,15 +62,15 @@ public static class FlightPhysics
 
         velocity += Vector3.up * liftPower;
 
-        // 🦅 Dive mechanic
-        if (diveAngle < 90f && isManualDivePose)
+
+        if (diveAngle < 50f && isManualDivePose)
         {
-            float rawDive = Mathf.InverseLerp(90f, 10f, diveAngle);
+            float rawDive = Mathf.InverseLerp(50f, 10f, diveAngle);
             float easedDive = Mathf.Pow(rawDive, 1.5f);
             float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
-
-            velocity += headForward.normalized * diveSpeed * deltaTime; // further scaled
+            Vector3 diveAccel = headForward.normalized * diveSpeed;
+            velocity += diveAccel * deltaTime * diveAcceleratorSmoothness;
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
         } 
         else 
