@@ -18,7 +18,7 @@ public class DoveCompanion : MonoBehaviour
     public float hoverFrequency = 1f;
     public float moveDuration = 2f;
     public float waitDuration = 5f;
-    public float wanderDistance = 10f;
+    public float wanderDistance = 5f;
     private Vector3 baseHoverPos;
     private float hoverTimer;
     private bool isHovering = false;
@@ -27,7 +27,7 @@ public class DoveCompanion : MonoBehaviour
     private bool isHoverIdle = false;
 
     [Header("Orbit Mode")]
-    public float orbitRadius = 1.5f;
+    public float orbitRadius = 5f;
     public float baseOrbitSpeed = 30f;
     public float verticalBobAmplitude = 0.3f;
     public float verticalBobFrequency = 2f;
@@ -103,13 +103,6 @@ public class DoveCompanion : MonoBehaviour
             float proximityThreshold = 0.1f;
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
             float distance = Vector3.Distance(transform.position, liveTargetPosition);
-
-            if (distance < proximityThreshold)
-            {
-                transform.position = liveTargetPosition;
-                return;
-            }
-
             Vector3 moveDir = (liveTargetPosition - transform.position).normalized;
 
             // If dove is far and in front of the player, make slower
@@ -136,8 +129,18 @@ public class DoveCompanion : MonoBehaviour
             float maxStep = distance / Time.deltaTime;
             speed = Mathf.Min(speed, maxStep);
             lastKnownSpeed = speed;
-            
+
             transform.position += moveDir * speed * Time.deltaTime;
+            
+            float smoothingThreshold = 0.12f;
+            if (distance < proximityThreshold)
+            {
+                transform.position = Vector3.Lerp(transform.position, liveTargetPosition, Time.deltaTime / smoothingThreshold);
+            }
+            else
+            {
+                transform.position += moveDir * speed * Time.deltaTime;
+            }
         }
 
         ObstacleCheck();
@@ -183,8 +186,9 @@ public class DoveCompanion : MonoBehaviour
         Quaternion targetRot = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
     }
+
 #endregion
-#region Hovering
+    #region Hovering
     private void Hover()
     {
         bool isIdle = !movementScript.isGliding && !movementScript.isFlapping;
