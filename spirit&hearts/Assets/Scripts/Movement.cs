@@ -201,11 +201,12 @@ public class Movement : MonoBehaviour
         diveAngle = Vector3.Angle(headFwd, Vector3.down);
         bool isCurrentlyDiving = diveAngle < 50f && isGliding && velocity.magnitude > 5f;
 
+        if (isCurrentlyDiving) PlayDive();
+    
         if (!wasDiving && isCurrentlyDiving)
         {
             diveStartTime = Time.time;
             lastRecordedDiveSpeed = velocity.magnitude;
-            PlayDive();
         }
 
         // Detect transition from dive → climb
@@ -533,13 +534,18 @@ public class Movement : MonoBehaviour
         }
     }
 
-    private void PlayDive()
+private void PlayDive()
+{
+    if (diveGlideAudioSource != null)
     {
-        if (diveGlideAudioSource != null)
-        {
+        float targetVolume = Mathf.InverseLerp(0f, maxDiveSpeed, velocity.magnitude);
+        diveGlideAudioSource.volume = targetVolume;
+        Debug.Log("Volume audio source" + targetVolume);
+
+        if (!diveGlideAudioSource.isPlaying)
             diveGlideAudioSource.Play();
-        }
     }
+}
 
     private void StopDive()
     {
