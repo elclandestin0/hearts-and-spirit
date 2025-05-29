@@ -82,6 +82,7 @@ public class Movement : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private AudioSource flapAudioSource;
     [SerializeField] private AudioSource diveGlideAudioSource;
+    [SerializeField] private AudioClip flapClip;
     void Start()
     {
         // Save initial world-space hand positions for motion delta
@@ -204,6 +205,7 @@ public class Movement : MonoBehaviour
         {
             diveStartTime = Time.time;
             lastRecordedDiveSpeed = velocity.magnitude;
+            PlayDive();
         }
 
         // Detect transition from dive → climb
@@ -221,6 +223,7 @@ public class Movement : MonoBehaviour
             glideTime = 0f;
 
             lastDiveForward = head.forward; // ✅ Store direction at dive exit
+            StopDive();
 
             Debug.Log($"🕊️ Dive duration: {diveDuration:F2}s");
             Debug.Log($"⚡ Lift boost: {postDiveLiftBoostDuration:F2}s (eased={easedDuration:F2}, speedFactor={diveSpeedFactor:F2}, boostDuration={boostDurationRaw:F2})");
@@ -294,12 +297,12 @@ public class Movement : MonoBehaviour
     private void HandleGlideLogic()
     {
         // ✅ Ensure both hand objects are assigned and active
-        if (leftHand == null || rightHand == null) return;
-        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        {
-            isGliding = false;
-            return;
-        }
+        // if (leftHand == null || rightHand == null) return;
+        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        // {
+        //     isGliding = false;
+        //     return;
+        // }
         float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
         isGliding = wingsOutstretched;
@@ -508,19 +511,24 @@ public class Movement : MonoBehaviour
 
     private void PlayFlap()
     {
+        Debug.Log("Trying to play flap sound!");
         if (flapAudioSource == null) return;
-
+        Debug.Log("Flap audio source detected.");
         flapAudioSource.time = 0f;
-        flapAudioSource.Play();
+        flapAudioSource.PlayOneShot(flapClip);
+        Debug.Log("Playing.");
 
         StartCoroutine(StopAudioAfter(flapAudioSource, 0.9f)); // 900 ms = 0.9 seconds
     }
 
     private IEnumerator StopAudioAfter(AudioSource source, float seconds)
     {
+
+        Debug.Log("Waiting for 0.9 seconds...");
         yield return new WaitForSeconds(seconds);
         if (source.isPlaying)
         {
+            Debug.Log("Stop!");
             source.Stop();
         }
     }
@@ -530,6 +538,14 @@ public class Movement : MonoBehaviour
         if (diveGlideAudioSource != null)
         {
             diveGlideAudioSource.Play();
+        }
+    }
+
+    private void StopDive()
+    {
+        if (diveGlideAudioSource != null)
+        {
+            diveGlideAudioSource.Stop();
         }
     }
 }
