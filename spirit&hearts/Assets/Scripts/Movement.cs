@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 // TO-DO: We need to divide this script into multiple scripts.
 // Non-movement, glide movement and diving and everything else here.
@@ -77,11 +78,10 @@ public class Movement : MonoBehaviour
     private float diveEndTime = -1f;
     private float lastRecordedDiveSpeed = 0f;
     private Vector3 lastDiveForward = Vector3.zero;
-
-    // State machine
-    private enum AirborneState { None, Gliding, Diving }
-    private AirborneState airborneState = AirborneState.None;
-
+    
+    [Header("Audio")]
+    [SerializeField] private AudioSource flapAudioSource;
+    [SerializeField] private AudioSource diveGlideAudioSource;
     void Start()
     {
         // Save initial world-space hand positions for motion delta
@@ -246,6 +246,7 @@ public class Movement : MonoBehaviour
             glideTime = 0f;
             lastFlapTime = Time.time;
             OnFlap?.Invoke();
+            PlayFlap();
         }
 
         // ✅ Ensure both hand objects are assigned and active
@@ -505,4 +506,30 @@ public class Movement : MonoBehaviour
         }
     }
 
+    private void PlayFlap()
+    {
+        if (flapAudioSource == null) return;
+
+        flapAudioSource.time = 0f;
+        flapAudioSource.Play();
+
+        StartCoroutine(StopAudioAfter(flapAudioSource, 0.9f)); // 900 ms = 0.9 seconds
+    }
+
+    private IEnumerator StopAudioAfter(AudioSource source, float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        if (source.isPlaying)
+        {
+            source.Stop();
+        }
+    }
+
+    private void PlayDive()
+    {
+        if (diveGlideAudioSource != null)
+        {
+            diveGlideAudioSource.Play();
+        }
+    }
 }
