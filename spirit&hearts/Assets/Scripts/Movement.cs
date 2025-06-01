@@ -79,10 +79,14 @@ public class Movement : MonoBehaviour
     private float lastRecordedDiveSpeed = 0f;
     private Vector3 lastDiveForward = Vector3.zero;
     
+    
     [Header("Audio")]
     [SerializeField] private AudioSource flapAudioSource;
-    [SerializeField] private AudioSource diveGlideAudioSource;
+    [SerializeField] private AudioSource diveAudioSource;
+    [SerializeField] private AudioSource glideAudioSource;
     [SerializeField] private AudioClip flapClip;
+    [SerializeField] private float targetVolumeDive;
+    [SerializeField] private float targetVolumeGlide;
     void Start()
     {
         // Save initial world-space hand positions for motion delta
@@ -115,6 +119,7 @@ public class Movement : MonoBehaviour
             return;
         }
         DetectControllerInput();
+
         // Normal flight update
         UpdateDeltaValues();
         UpdateDiveAngle();
@@ -201,12 +206,15 @@ public class Movement : MonoBehaviour
         diveAngle = Vector3.Angle(headFwd, Vector3.down);
         bool isCurrentlyDiving = diveAngle < 50f && isGliding && velocity.magnitude > 5f;
 
-        if (isCurrentlyDiving) PlayDive();
-    
-        if (!wasDiving && isCurrentlyDiving)
+        if (isCurrentlyDiving)
         {
-            diveStartTime = Time.time;
-            lastRecordedDiveSpeed = velocity.magnitude;
+            PlayDive();
+            
+            if (!wasDiving) 
+            {
+                diveStartTime = Time.time;
+                lastRecordedDiveSpeed = velocity.magnitude;
+            }
         }
 
         // Detect transition from dive → climb
@@ -239,7 +247,14 @@ public class Movement : MonoBehaviour
         float flapMagnitude = 2.0f;
         float speed = velocity.magnitude;
         float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(1f, maxDiveSpeed, speed));
-        if (Input.GetKeyDown(KeyCode.Space))
+
+        // Enough time passed
+        bool enoughTimePassed = Time.time - lastFlapTime >= 0.665f;
+
+        Debug.Log(enoughTimePassed);
+        Debug.Log(lastFlapTime);
+        
+        if (Input.GetKeyDown(KeyCode.Space) && enoughTimePassed)
         {
             velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
                 head.forward,
@@ -252,7 +267,6 @@ public class Movement : MonoBehaviour
             OnFlap?.Invoke();
             PlayFlap();
         }
-
         // ✅ Ensure both hand objects are assigned and active
         if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
         if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
@@ -271,8 +285,6 @@ public class Movement : MonoBehaviour
         // Only flap if player just started moving down this frame
         bool justStartedMovingDown = isMovingDown && !wasMovingDownLastFrame;
 
-        bool enoughTimePassed = Time.time - lastFlapTime >= 0.2f;
-
         // Super weak flaps when hovering
         if (isHovering)
         {
@@ -280,7 +292,7 @@ public class Movement : MonoBehaviour
         }
 
         // Calculate flap every 0.2 seconds
-        if (justStartedMovingDown && enoughTimePassed)
+        if ((Input.GetKeyDown(KeyCode.Space) || justStartedMovingDown) && enoughTimePassed)
         {
             velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
                 head.forward,
@@ -291,6 +303,7 @@ public class Movement : MonoBehaviour
             glideTime = 0f;
             lastFlapTime = Time.time;
             OnFlap?.Invoke();
+            PlayFlap();
         }
 
         wasMovingDownLastFrame = isMovingDown;
@@ -313,7 +326,13 @@ public class Movement : MonoBehaviour
             isGliding = true;
         }
 
-        if (!isGliding) return;
+        if (!isGliding) 
+        {
+            StopGlide();
+            return;
+        }
+
+        PlayGlide();
 
         Vector3 leftToHead = leftHand.position - head.position;
         Vector3 rightToHead = rightHand.position - head.position;
@@ -512,15 +531,16 @@ public class Movement : MonoBehaviour
 
     private void PlayFlap()
     {
-        Debug.Log("Trying to play flap sound!");
-        if (flapAudioSource == null) return;
-        Debug.Log("Flap audio source detected.");
-        flapAudioSource.time = 0f;
-        flapAudioSource.PlayOneShot(flapClip);
-        Debug.Log("Playing.");
+        if (flapAudioSource == null || flapClip == null) return;
 
-        StartCoroutine(StopAudioAfter(flapAudioSource, 0.9f)); // 900 ms = 0.9 seconds
+        flapAudioSource.Stop(); // ensure it's reset
+        flapAudioSource.clip = flapClip;
+        flapAudioSource.time = 0.2f;
+        flapAudioSource.Play();
+
+        StartCoroutine(StopAudioAfter(flapAudioSource, 0.665f)); // 0.85 - 0.185
     }
+
 
     private IEnumerator StopAudioAfter(AudioSource source, float seconds)
     {
@@ -534,24 +554,47 @@ public class Movement : MonoBehaviour
         }
     }
 
-private void PlayDive()
-{
-    if (diveGlideAudioSource != null)
+    private void PlayDive()
     {
-        float targetVolume = Mathf.InverseLerp(0f, maxDiveSpeed, velocity.magnitude);
-        diveGlideAudioSource.volume = targetVolume;
-        Debug.Log("Volume audio source" + targetVolume);
+        if (diveAudioSource != null)
+        {
+            targetVolumeDive = Mathf.InverseLerp(0f, 60f, velocity.magnitude);
+            diveAudioSource.volume = targetVolumeDive;
+            Debug.Log("Volume audio source" + targetVolumeDive);
 
-        if (!diveGlideAudioSource.isPlaying)
-            diveGlideAudioSource.Play();
+            if (!diveAudioSource.isPlaying)
+                diveAudioSource.Play();
+        }
     }
-}
 
     private void StopDive()
     {
-        if (diveGlideAudioSource != null)
+        if (diveAudioSource != null)
         {
-            diveGlideAudioSource.Stop();
+            diveAudioSource.Stop();
+        }
+    }
+
+    private void PlayGlide()
+    {
+        if (glideAudioSource != null)
+        {
+            targetVolumeGlide = Mathf.InverseLerp(0f, 30f, velocity.magnitude);
+            glideAudioSource.volume = targetVolumeGlide;
+            Debug.Log("Volume audio source" + targetVolumeGlide);
+
+            if (!glideAudioSource.isPlaying)
+                glideAudioSource.Play();
+        }
+    }
+
+    private void StopGlide()
+    {
+        if (glideAudioSource != null)
+        {
+            glideAudioSource.Stop();
         }
     }
 }
+
+    

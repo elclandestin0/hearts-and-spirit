@@ -61,8 +61,7 @@ public static class FlightPhysics
         float liftPower = lift * liftFactor * liftDecay * deltaTime;
 
         velocity += Vector3.up * liftPower;
-
-
+        
         if (diveAngle < 50f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(50f, 10f, diveAngle);
@@ -72,7 +71,7 @@ public static class FlightPhysics
 
             // Gradually scale the dive force based on time spent diving
             float diveTime = Time.time - diveStartTime;
-            float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 3f); // 2f = seconds to ramp up
+            float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 2f); // 2f = seconds to ramp up
 
             Vector3 diveAccel = headForward.normalized * diveSpeed * diveRamp;
             velocity += diveAccel * deltaTime;
