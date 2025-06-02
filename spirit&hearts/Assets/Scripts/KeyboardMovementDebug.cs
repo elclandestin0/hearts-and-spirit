@@ -5,8 +5,8 @@ public class TouchpadLook : MonoBehaviour
     public Movement movement;
 
     [Header("Settings")]
-    public float pitchSpeed = 45f;
-    public float yawSpeed = 60f;
+    public float pitchSpeed = 500f;
+    public float yawSpeed = 500f;
     public float minPitch = -80f;
     public float maxPitch = 80f;
 
