@@ -883,19 +883,47 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1423045812}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 334820886544478239, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1423045812}
+    - target: {fileID: 334820886544478239, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      propertyPath: movementScript
+      value: 
+      objectReference: {fileID: 1423045813}
+    - target: {fileID: 1494651112638334692, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1494651112638334692, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: b5f2b5029d1f83246bd803d899cd1efc, type: 3}
+    - target: {fileID: 1494651112638334692, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: -7624672903241635627, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+    - target: {fileID: 1494651112638334692, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      propertyPath: 'm_Materials.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1472456709364558830, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+    - target: {fileID: 1494651112638334692, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      propertyPath: 'm_Materials.Array.data[3]'
+      value: 
+      objectReference: {fileID: -6478536213147159724, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
     - target: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 190.2
       objectReference: {fileID: 0}
     - target: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 742.1384
       objectReference: {fileID: 0}
     - target: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.55
+      value: 128.87
       objectReference: {fileID: 0}
     - target: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -903,15 +931,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -934,11 +962,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
---- !u!4 &606134894 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
-  m_PrefabInstance: {fileID: 606134893}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &628630526
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1739,7 +1762,7 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: 1d8dac67c961944688cd54b58103281c, type: 3}
     - target: {fileID: 5574356274160726731, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: glideStrength
-      value: 20
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5574356274160726731, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: diveAudioSource
@@ -1803,9 +1826,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2659945209513103479, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 701428830}
-    - targetCorrespondingSourceObject: {fileID: 2659945209513103479, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 606134894}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7740525132801318895, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       insertIndex: -1
@@ -2151,7 +2171,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: d67d6550ccd72409e986d7907f21387e, type: 3}
   m_Resource: {fileID: 8300000, guid: d67d6550ccd72409e986d7907f21387e, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -3000,4 +3020,5 @@ SceneRoots:
   - {fileID: 2104129771}
   - {fileID: 122162590}
   - {fileID: 908046223}
+  - {fileID: 606134893}
   - {fileID: 1084153556}
