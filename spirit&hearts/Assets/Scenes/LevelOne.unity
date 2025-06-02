@@ -1654,6 +1654,10 @@ PrefabInstance:
       propertyPath: pitchSpeed
       value: 500
       objectReference: {fileID: 0}
+    - target: {fileID: 4042240349486667434, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5574356274160726731, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: flapClip
       value: 
@@ -1688,7 +1692,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7090588842696128010, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 740
+      value: 828
       objectReference: {fileID: 0}
     - target: {fileID: 7090588842696128010, guid: 5d2686d57d0674ec1ad134c91ce5d77f, type: 3}
       propertyPath: m_LocalPosition.z

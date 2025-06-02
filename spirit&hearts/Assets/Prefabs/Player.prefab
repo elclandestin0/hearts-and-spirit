@@ -3669,6 +3669,8 @@ MonoBehaviour:
   rigRoot: {fileID: 2659945209513103479}
   gravity: 9.8
   glideTime: 0
+  glideStrength: 4
+  diveAcceleratorSmoothness: 2.5
   diveAngle: 0
   recorder: {fileID: 4714864065847065564}
   isGliding: 0
@@ -3676,6 +3678,12 @@ MonoBehaviour:
   minFlapInterval: 1.2
   leftVelocity: {fileID: 0}
   rightVelocity: {fileID: 0}
+  flapAudioSource: {fileID: 0}
+  diveAudioSource: {fileID: 0}
+  glideAudioSource: {fileID: 0}
+  flapClip: {fileID: 0}
+  targetVolumeDive: 0
+  targetVolumeGlide: 0
 --- !u!114 &3219001295391380978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3693,6 +3701,8 @@ MonoBehaviour:
   yawSpeed: 90
   minPitch: -80
   maxPitch: 80
+  enableMouseLook: 1
+  mouseSensitivity: 1
 --- !u!1 &7771895563360302118
 GameObject:
   m_ObjectHideFlags: 0
