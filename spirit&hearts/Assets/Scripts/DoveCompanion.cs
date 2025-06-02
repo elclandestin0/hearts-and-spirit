@@ -39,6 +39,8 @@ public class DoveCompanion : MonoBehaviour
     private float orbitAngle = 0f;
     private int orbitDirection = 1;
     private bool transitioningToOrbit = false;
+    private Vector3 smoothedOrbitOffset = Vector3.zero;
+    private Vector3 moveVelocity = Vector3.zero;
 
     [Header("Follow Mode")]
     public float followDistance = 2f;
@@ -133,11 +135,11 @@ public class DoveCompanion : MonoBehaviour
             float smoothingThreshold = 0.12f;
             if (distance < proximityThreshold)
             {
-                transform.position = Vector3.Lerp(transform.position, liveTargetPosition, Time.deltaTime / smoothingThreshold);
+                transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref moveVelocity, 2f);
             }
             else
             {
-                transform.position += moveDir * speed * Time.deltaTime;
+                transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref moveVelocity, 2f);
             }
         }
 
@@ -171,13 +173,16 @@ public class DoveCompanion : MonoBehaviour
         currentOrbitRadius = Mathf.Lerp(currentOrbitRadius, targetOrbitRadius, Time.deltaTime * 1f);
 
         float radians = orbitAngle * Mathf.Deg2Rad;
-        Vector3 orbitOffset = (right * Mathf.Sin(radians) + forward * Mathf.Cos(radians)) * Random.Range(orbitRadius - 2f, orbitRadius);
-        orbitOffset.y += Mathf.Sin(Time.time * verticalBobFrequency) * verticalBobAmplitude;
+        Vector3 targetOrbitOffset = (right * Mathf.Sin(radians) + forward * Mathf.Cos(radians)) * currentOrbitRadius;
+        targetOrbitOffset.y += Mathf.Sin(Time.time * verticalBobFrequency) * verticalBobAmplitude;
+
+        smoothedOrbitOffset = Vector3.Lerp(smoothedOrbitOffset, targetOrbitOffset, Time.deltaTime * 2f); // adjust smoothing factor here
 
         Vector3 orbitCenter = movementScript.head.position;
-        Vector3 targetPos = orbitCenter + orbitOffset;
+        Vector3 targetPos = orbitCenter + smoothedOrbitOffset;
 
         liveTargetPosition = targetPos;
+
 
         Vector3 lookPoint = movementScript.head.position + movementScript.head.forward * (wanderDistance * 10f);
         Vector3 direction = (lookPoint - transform.position).normalized;

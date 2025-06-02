@@ -808,6 +808,10 @@ PrefabInstance:
       propertyPath: movementScript
       value: 
       objectReference: {fileID: 1423045813}
+    - target: {fileID: 4486557319787573292, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: bbaf9b8a445e14dfb81f1faf83f92ff9, type: 2}
     - target: {fileID: 7486339063769867409, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 190.2
