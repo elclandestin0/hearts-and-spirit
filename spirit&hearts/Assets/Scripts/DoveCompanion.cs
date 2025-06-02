@@ -93,10 +93,8 @@ public class DoveCompanion : MonoBehaviour
                 break;
         }
 
-        if (!isFlappingLoop)
-        {
-            animator.SetBool("Gliding", movementScript.isGliding);
-        }
+        animator.SetBool("Gliding", movementScript.isGliding);
+
 
         if (currentState != DoveState.Hovering)
         {
@@ -363,17 +361,17 @@ public class DoveCompanion : MonoBehaviour
     private IEnumerator PlayQueuedFlaps()
     {
         isFlappingLoop = true;
-
+        Debug.Log("Flap Queue: " + flapQueue);
         while (flapQueue > 0)
         {
             animator.ResetTrigger("Flap");
-            animator.SetBool("Gliding", false);
             animator.SetTrigger("Flap");
 
             float flapDuration = GetAdjustedClipLength("Flap");
+            Debug.Log("Waiting for flap: " + flapDuration);
             yield return new WaitForSeconds(flapDuration);
-
             flapQueue--;
+            Debug.Log("Done waiting! Flap queue: " + flapQueue);
         }
 
         isFlappingLoop = false;

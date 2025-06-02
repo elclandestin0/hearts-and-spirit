@@ -22,19 +22,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 755.5
+      value: 190.2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 187
+      value: 742.1384
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 249.5
+      value: 128.87
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.8609553
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalRotation.x
@@ -42,7 +42,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.50868076
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       propertyPath: m_LocalRotation.z
@@ -104,6 +104,26 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8417361359673230750, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8417361359673230750, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: b5f2b5029d1f83246bd803d899cd1efc, type: 3}
+    - target: {fileID: 8417361359673230750, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: -7624672903241635627, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+    - target: {fileID: 8417361359673230750, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+      propertyPath: 'm_Materials.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1472456709364558830, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+    - target: {fileID: 8417361359673230750, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+      propertyPath: 'm_Materials.Array.data[3]'
+      value: 
+      objectReference: {fileID: -6478536213147159724, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -114,6 +134,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4486557319787573292}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5550680118480438876}
   m_SourcePrefab: {fileID: 100100000, guid: a84e05b85b65fc24a9a397c77726073e, type: 3}
 --- !u!1 &7831479489519582763 stripped
 GameObject:
@@ -182,3 +205,17 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5550680118480438876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7831479489519582763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2514af59c865a504095dfd353bb03794, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerColor: {r: 1, g: 0.92156863, b: 0.007843138, a: 1}
+  playerLightRange: 20

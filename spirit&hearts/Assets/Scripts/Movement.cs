@@ -154,7 +154,7 @@ public class Movement : MonoBehaviour
 
         if (isHovering)
         {
-            Debug.Log("🕊️ Hover Mode Activated!");
+            // DO stuff
         }
 
         DetectSnapTurn();
@@ -233,9 +233,6 @@ public class Movement : MonoBehaviour
 
             lastDiveForward = head.forward; // ✅ Store direction at dive exit
             StopDive();
-
-            Debug.Log($"🕊️ Dive duration: {diveDuration:F2}s");
-            Debug.Log($"⚡ Lift boost: {postDiveLiftBoostDuration:F2}s (eased={easedDuration:F2}, speedFactor={diveSpeedFactor:F2}, boostDuration={boostDurationRaw:F2})");
         }
 
         wasDiving = isCurrentlyDiving;
@@ -250,9 +247,6 @@ public class Movement : MonoBehaviour
 
         // Enough time passed
         bool enoughTimePassed = Time.time - lastFlapTime >= 0.665f;
-
-        Debug.Log(enoughTimePassed);
-        Debug.Log(lastFlapTime);
         
         if (Input.GetKeyDown(KeyCode.Space) && enoughTimePassed)
         {
@@ -509,8 +503,6 @@ public class Movement : MonoBehaviour
 
         if (forwardHit || downwardsHit)
         {
-            Debug.Log("Hit: " + hit.collider.name);
-
             Vector3 impactNormal = hit.normal;
             float speed = velocity.magnitude;
 
@@ -544,12 +536,9 @@ public class Movement : MonoBehaviour
 
     private IEnumerator StopAudioAfter(AudioSource source, float seconds)
     {
-
-        Debug.Log("Waiting for 0.9 seconds...");
         yield return new WaitForSeconds(seconds);
         if (source.isPlaying)
         {
-            Debug.Log("Stop!");
             source.Stop();
         }
     }
@@ -560,7 +549,6 @@ public class Movement : MonoBehaviour
         {
             targetVolumeDive = Mathf.InverseLerp(0f, 60f, velocity.magnitude);
             diveAudioSource.volume = targetVolumeDive;
-            Debug.Log("Volume audio source" + targetVolumeDive);
 
             if (!diveAudioSource.isPlaying)
                 diveAudioSource.Play();
@@ -581,7 +569,6 @@ public class Movement : MonoBehaviour
         {
             targetVolumeGlide = Mathf.InverseLerp(0f, 30f, velocity.magnitude);
             glideAudioSource.volume = targetVolumeGlide;
-            Debug.Log("Volume audio source" + targetVolumeGlide);
 
             if (!glideAudioSource.isPlaying)
                 glideAudioSource.Play();
