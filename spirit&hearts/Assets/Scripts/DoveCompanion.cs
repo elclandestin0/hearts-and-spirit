@@ -11,7 +11,7 @@ public class DoveCompanion : MonoBehaviour
     // == General Flight Settings ==
     [Header("Flight Settings")]
     public float transitionSmoothing = 5f;
-    public float rotationSmoothing = 3f;
+    public float rotationSmoothing = 1f;
 
     [Header("Hovering")]
     public float hoverAmplitude = 0.1f;
@@ -56,7 +56,6 @@ public class DoveCompanion : MonoBehaviour
     public Animator animator;
 
     // Internal variables
-    
     private enum DoveState { Orbiting, Hovering, Following, Escaping }
     private DoveState currentState = DoveState.Orbiting;
     private Vector3 escapeTarget;
@@ -133,14 +132,7 @@ public class DoveCompanion : MonoBehaviour
             transform.position += moveDir * speed * Time.deltaTime;
             
             float smoothingThreshold = 0.12f;
-            if (distance < proximityThreshold)
-            {
-                transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref moveVelocity, 2f);
-            }
-            else
-            {
-                transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref moveVelocity, 2f);
-            }
+            transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref moveVelocity, 2f);
         }
 
         ObstacleCheck();
@@ -187,7 +179,8 @@ public class DoveCompanion : MonoBehaviour
         Vector3 lookPoint = movementScript.head.position + movementScript.head.forward * (wanderDistance * 10f);
         Vector3 direction = (lookPoint - transform.position).normalized;
         Quaternion targetRot = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSmoothing);
+        
     }
 
 #endregion

@@ -502,7 +502,7 @@ public class Movement : MonoBehaviour
         hit = forwardHit ? forward : downward;
 
         if (forwardHit || downwardsHit)
-        {
+        {    
             Vector3 impactNormal = hit.normal;
             float speed = velocity.magnitude;
 

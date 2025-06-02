@@ -49,6 +49,7 @@ public static class FlightPhysics
         float glideDecay = 1f - (glideTime * 0.05f);
         float currentGlideStrength = glideStrength * glideDecay;
         velocity += blendedDir * currentGlideStrength * deltaTime;
+        velocity = Vector3.ClampMagnitude(velocity, maxDiveSpeed);
 
         // 🕊️ Decaying lift that eventually loses to gravity
         float forwardSpeed = Vector3.Dot(velocity, headForward);
@@ -61,7 +62,8 @@ public static class FlightPhysics
         float liftPower = lift * liftFactor * liftDecay * deltaTime;
 
         velocity += Vector3.up * liftPower;
-        
+        velocity = Vector3.ClampMagnitude(velocity, maxDiveSpeed);
+
         if (diveAngle < 50f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(50f, 10f, diveAngle);
@@ -73,8 +75,17 @@ public static class FlightPhysics
             float diveTime = Time.time - diveStartTime;
             float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 2f); // 2f = seconds to ramp up
 
+            // Clamping dive speed magnitude
             Vector3 diveAccel = headForward.normalized * diveSpeed * diveRamp;
-            velocity += diveAccel * deltaTime;
+            Vector3 diveBoost = diveAccel * deltaTime;
+            float maxDiveBoostPerFrame = 2.5f;
+
+            if (diveBoost.magnitude > maxDiveBoostPerFrame)
+                diveBoost = diveBoost.normalized * maxDiveBoostPerFrame;
+
+            velocity += diveBoost;
+
+            velocity = Vector3.ClampMagnitude(velocity, maxDiveSpeed);
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
         }
         else 
