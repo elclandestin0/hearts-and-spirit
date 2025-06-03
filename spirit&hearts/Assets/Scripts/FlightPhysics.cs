@@ -64,6 +64,7 @@ public static class FlightPhysics
         velocity += Vector3.up * liftPower;
         velocity = Vector3.ClampMagnitude(velocity, maxDiveSpeed);
 
+        // DIVE LOGIC
         if (diveAngle < 50f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(50f, 10f, diveAngle);
@@ -71,23 +72,22 @@ public static class FlightPhysics
             float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
 
-            // Gradually scale the dive force based on time spent diving
             float diveTime = Time.time - diveStartTime;
-            float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 2f); // 2f = seconds to ramp up
+            float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 2f);
 
-            // Clamping dive speed magnitude
             Vector3 diveAccel = headForward.normalized * diveSpeed * diveRamp;
             Vector3 diveBoost = diveAccel * deltaTime;
-            float maxDiveBoostPerFrame = 2.5f;
+            Debug.Log("diveBoost.magnitude: " + diveBoost.magnitude);
 
-            if (diveBoost.magnitude > maxDiveBoostPerFrame)
-                diveBoost = diveBoost.normalized * maxDiveBoostPerFrame;
-
+            Vector3 preVelocity = velocity;
             velocity += diveBoost;
+
+            float velocityDelta = (velocity - preVelocity).magnitude;
 
             velocity = Vector3.ClampMagnitude(velocity, maxDiveSpeed);
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
         }
+
         else 
         {
             // ⏱️ Accumulate glide time

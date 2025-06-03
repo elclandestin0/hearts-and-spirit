@@ -347,7 +347,7 @@ public class Movement : MonoBehaviour
             glideStrength,
             maxDiveSpeed,
             Time.deltaTime,
-            true,
+            isGliding,
             ref glideTime,
             ref diveAngle,
             recentlyBounced,
@@ -465,18 +465,13 @@ public class Movement : MonoBehaviour
 
     private void CapSpeed()
     {
-        // 🛑 Cap forward speed -- Uncomment later
-        float currentForwardSpeed = Vector3.Dot(velocity, head.forward);
-        float speedLimit = maxDiveSpeed;
-
-        if (currentForwardSpeed > velocity.magnitude)
+        if (velocity.magnitude > maxDiveSpeed)
         {
-            Vector3 forwardDir = head.forward.normalized;
-            Vector3 forwardVelocity = forwardDir * currentForwardSpeed;
-            Vector3 excess = forwardVelocity - (forwardDir * speedLimit);
-            velocity -= excess;
+            velocity = Vector3.ClampMagnitude(velocity, maxDiveSpeed);
         }
     }
+
+
     private void CheckSurfaceImpact()
     {
         // Bounce check
