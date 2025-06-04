@@ -64,7 +64,7 @@ public static class FlightPhysics
         velocity += Vector3.up * liftPower;
         velocity = Vector3.ClampMagnitude(velocity, maxDiveSpeed);
 
-        // DIVE LOGIC
+        // Dive logic
         if (diveAngle < 50f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(50f, 10f, diveAngle);
@@ -77,7 +77,6 @@ public static class FlightPhysics
 
             Vector3 diveAccel = headForward.normalized * diveSpeed * diveRamp;
             Vector3 diveBoost = diveAccel * deltaTime;
-            Debug.Log("diveBoost.magnitude: " + diveBoost.magnitude);
 
             Vector3 preVelocity = velocity;
             velocity += diveBoost;

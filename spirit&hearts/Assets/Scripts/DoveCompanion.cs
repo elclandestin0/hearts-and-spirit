@@ -48,7 +48,7 @@ public class DoveCompanion : MonoBehaviour
     public float followVerticalOffset = 0.5f;
 
     [Header("Obstacle Avoidance")]
-    public float dangerRange = 10f;
+    public float dangerRange = 100f;
     public float escapeDistance = 2f;
     public LayerMask obstacleLayers;
     public float escapeDuration = 0.5f;
@@ -56,7 +56,7 @@ public class DoveCompanion : MonoBehaviour
     public Animator animator;
 
     // Internal variables
-    private enum DoveState { Orbiting, Hovering, Following, Escaping }
+    private enum DoveState { Orbiting, Hovering, Following, Escaping, Navigating }
     private DoveState currentState = DoveState.Orbiting;
     private Vector3 escapeTarget;
     private bool isEscaping = false;
@@ -141,7 +141,6 @@ public class DoveCompanion : MonoBehaviour
 #region Orbit
     private void Orbit()
     {
-        Debug.Log("Orbiting");
         float playerSpeed = movementScript.CurrentVelocity.magnitude;
         float orbitSpeed = baseOrbitSpeed * playerSpeed * 0.5f;
         orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime;
@@ -191,14 +190,12 @@ public class DoveCompanion : MonoBehaviour
 
         if (isIdle && currentState != DoveState.Hovering)
         {
-            Debug.Log("[HOVER] Entering hover state");
             currentState = DoveState.Hovering;
             if (hoverRoutine != null) StopCoroutine(hoverRoutine);
             hoverRoutine = StartCoroutine(IdleHoverLoop());
         }
         else if (!isIdle && currentState == DoveState.Hovering)
         {
-            Debug.Log("[HOVER] Exiting hover, transitioning to orbit");
             if (hoverRoutine != null) StopCoroutine(hoverRoutine);
             currentState = DoveState.Orbiting;
             hoverRoutine = null;
@@ -256,7 +253,6 @@ public class DoveCompanion : MonoBehaviour
 
             if (distance < distanceThreshold)
             {
-                Debug.Log("[HOVER] Reached hover target.");
                 yield break;
             }
 
@@ -291,8 +287,6 @@ public class DoveCompanion : MonoBehaviour
 
             yield return null;
         }
-
-        Debug.Log("[HOVER] Aborted approach — player started moving.");
     }
 
 #endregion
@@ -322,19 +316,89 @@ public class DoveCompanion : MonoBehaviour
         liveTargetPosition = escapeTarget;
     }
 
+    // Obstacle check and navigating around obstacle
     private void ObstacleCheck()
     {
+        if (currentState != DoveState.Orbiting) return;
+        Debug.Log("Obstacle check");
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.2f; // slight vertical lift to avoid hitting ground immediately
+        Vector3 toTarget = (liveTargetPosition - rayOrigin).normalized;
+
         RaycastHit hit;
-        bool isHit = Physics.Raycast(transform.position, transform.forward, out hit, dangerRange, obstacleLayers);
-        if (isHit)
+
+        Debug.DrawRay(rayOrigin, toTarget * dangerRange, Color.green);
+
+        if (Physics.SphereCast(rayOrigin, radius: dangerRange, direction: toTarget, out hit, dangerRange, obstacleLayers))
         {
-            escapeTarget = transform.position + Vector3.Reflect(transform.forward, hit.normal).normalized * escapeDistance;
-            escapeTarget.y = Mathf.Max(escapeTarget.y, transform.position.y);
+            Debug.Log($"Obstacle detected: {hit.collider.name}");
 
             if (!isEscaping)
-                StartCoroutine(EscapeAndReturn());
+            {
+                Debug.Log("Navigating around obstacle");
+                Debug.DrawRay(rayOrigin, toTarget * dangerRange, Color.red);
+                StartCoroutine(NavigateAround(hit.normal));
+            }
         }
     }
+
+
+    private IEnumerator NavigateAround(Vector3 hitNormal)
+    {
+        isEscaping = true;
+        currentState = DoveState.Navigating;
+
+        float timer = 0f;
+        float navStepInterval = 0.3f;
+
+        while (true)
+        {
+            // Recalculate liveTargetPosition using orbit center + offset
+            Vector3 orbitCenter = movementScript.head.position;
+            Vector3 desiredOffset = smoothedOrbitOffset;
+            Vector3 desiredTarget = orbitCenter + desiredOffset;
+
+            Vector3 toTarget = desiredTarget - transform.position;
+
+            if (!Physics.Raycast(transform.position, toTarget.normalized, dangerRange, obstacleLayers))
+            {
+                // Path is now clear
+                currentState = DoveState.Orbiting;
+                isEscaping = false;
+                yield break;
+            }
+
+            // Pick a temporary side-step direction (perpendicular to obstacle normal)
+            Vector3 sideStep = Vector3.Cross(hitNormal, Vector3.up).normalized * escapeDistance;
+            sideStep.y = 0.2f; // small upward bias
+
+            Vector3 stepTarget = transform.position + sideStep;
+
+            // Move toward sidestep
+            float stepTime = 0f;
+            while (stepTime < navStepInterval)
+            {
+                Vector3 moveDir = (stepTarget - transform.position).normalized;
+                transform.position += moveDir * lastKnownSpeed * Time.deltaTime;
+
+                Quaternion rot = Quaternion.LookRotation(moveDir);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 2f);
+
+                stepTime += Time.deltaTime;
+                yield return null;
+            }
+
+            timer += navStepInterval;
+            if (timer > 3f)
+            {
+                Debug.LogWarning("[DOVE] Navigation timeout, reattempting orbit");
+                currentState = DoveState.Orbiting;
+                isEscaping = false;
+                yield break;
+            }
+        }
+    }
+
+
 
     private IEnumerator EscapeAndReturn()
     {
@@ -359,17 +423,14 @@ public class DoveCompanion : MonoBehaviour
     private IEnumerator PlayQueuedFlaps()
     {
         isFlappingLoop = true;
-        Debug.Log("Flap Queue: " + flapQueue);
         while (flapQueue > 0)
         {
             animator.ResetTrigger("Flap");
             animator.SetTrigger("Flap");
 
             float flapDuration = GetAdjustedClipLength("Flap");
-            Debug.Log("Waiting for flap: " + flapDuration);
             yield return new WaitForSeconds(flapDuration);
             flapQueue--;
-            Debug.Log("Done waiting! Flap queue: " + flapQueue);
         }
 
         isFlappingLoop = false;
