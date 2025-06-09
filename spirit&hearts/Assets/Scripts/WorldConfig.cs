@@ -21,21 +21,11 @@ public static class WorldConfig
     public static string GetLandmarkName(Vector2Int coord) =>
         Landmarks.TryGetValue(coord, out var name) ? name : null;
 
-    public static int ReflectCoord(int raw, int min, int max)
+    public static int WrapCoord(int raw, int min, int max)
     {
-        int range = max - min;
-
-        if (raw <= max && raw >= min)
-            return raw;
-
-        int over = Mathf.Abs(raw - max);
-        int under = Mathf.Abs(min - raw);
-
-        if (raw > max)
-            return max - (over % (range * 2 + 2));
-        if (raw < min)
-            return min + (under % (range * 2 + 2));
-
-        return raw;
+        int rangeSize = max - min + 1;
+        int wrapped = ((raw - min) % rangeSize + rangeSize) % rangeSize + min;
+        return wrapped;
     }
+
 }

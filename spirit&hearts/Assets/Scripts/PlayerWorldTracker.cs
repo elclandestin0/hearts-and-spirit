@@ -13,10 +13,10 @@ public static class PlayerWorldTracker
         int rawX = Mathf.FloorToInt(worldPosition.x / blockSize);
         int rawZ = Mathf.FloorToInt(worldPosition.z / blockSize);
 
-        int reflectedX = WorldConfig.ReflectCoord(rawX, WorldConfig.minX, WorldConfig.maxX);
-        int reflectedZ = WorldConfig.ReflectCoord(rawZ, WorldConfig.minZ, WorldConfig.maxZ);
+        int wrappedX = WorldConfig.WrapCoord(rawX, WorldConfig.minX, WorldConfig.maxX);
+        int wrappedZ = WorldConfig.WrapCoord(rawZ, WorldConfig.minZ, WorldConfig.maxZ);
 
-        Vector2Int newCoord = new Vector2Int(reflectedX, reflectedZ);
+        Vector2Int newCoord = new Vector2Int(wrappedX, wrappedZ);
 
         if (newCoord != lastCoord)
         {
@@ -24,6 +24,5 @@ public static class PlayerWorldTracker
             CurrentCoord = newCoord;
             OnZoneChanged?.Invoke(newCoord);
         }
-}
-
+    }
 }

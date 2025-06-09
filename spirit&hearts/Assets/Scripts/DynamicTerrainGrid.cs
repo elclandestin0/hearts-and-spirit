@@ -30,8 +30,8 @@ public class DynamicTerrainGrid : MonoBehaviour
         );
 
         Vector2Int reflectedCoord = new Vector2Int(
-            WorldConfig.ReflectCoord(rawCoord.x, WorldConfig.minX, WorldConfig.maxX),
-            WorldConfig.ReflectCoord(rawCoord.y, WorldConfig.minZ, WorldConfig.maxZ)
+            WorldConfig.WrapCoord(rawCoord.x, WorldConfig.minX, WorldConfig.maxX),
+            WorldConfig.WrapCoord(rawCoord.y, WorldConfig.minZ, WorldConfig.maxZ)
         );
 
         PlayerWorldTracker.UpdateCoord(player.position, blockSize);
@@ -53,8 +53,8 @@ public class DynamicTerrainGrid : MonoBehaviour
             {
                 Vector2Int rawCoord = new Vector2Int(rawCenterCoord.x + dx, rawCenterCoord.y + dz);
                 Vector2Int reflectedCoord = new Vector2Int(
-                    WorldConfig.ReflectCoord(rawCoord.x, WorldConfig.minX, WorldConfig.maxX),
-                    WorldConfig.ReflectCoord(rawCoord.y, WorldConfig.minZ, WorldConfig.maxZ)
+                    WorldConfig.WrapCoord(rawCoord.x, WorldConfig.minX, WorldConfig.maxX),
+                    WorldConfig.WrapCoord(rawCoord.y, WorldConfig.minZ, WorldConfig.maxZ)
                 );
 
                 newTileKeys.Add(rawCoord); // ✅ Track by RAW COORD
