@@ -10,6 +10,8 @@ public class ProceduralTerrainGenerator : MonoBehaviour
     public float scale = 0.01f;
     public float heightMultiplier = 100f;
     public AnimationCurve heightCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [Range(0f, 1f)] public float borderBlendPercent = 0.1f;
+
 
     [Header("Cave Settings")]
     public float holeScale = 0.01f;
@@ -50,8 +52,14 @@ public class ProceduralTerrainGenerator : MonoBehaviour
                 float worldX = (x + offset.x) * scale;
                 float worldZ = (z + offset.y) * scale;
                 float noise = Mathf.PerlinNoise(worldX, worldZ);
-                float y = heightCurve.Evaluate(noise) * heightMultiplier;
-                vertices[i] = new Vector3(x, y, z);
+                float borderX = Mathf.Min(x, width - x);
+                float borderZ = Mathf.Min(z, depth - z);
+                float borderDistance = Mathf.Min(borderX, borderZ);
+                float maxBlend = width * borderBlendPercent;
+                float blendFactor = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(borderDistance / maxBlend));
+                float blendedHeight = heightCurve.Evaluate(noise) * heightMultiplier * blendFactor;
+                
+                vertices[i] = new Vector3(x, blendedHeight, z);
                 uvs[i] = new Vector2((float)x / width, (float)z / depth);
             }
         }

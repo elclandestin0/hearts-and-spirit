@@ -305,12 +305,12 @@ public class Movement : MonoBehaviour
     private void HandleGlideLogic()
     {
         // ✅ Ensure both hand objects are assigned and active
-        if (leftHand == null || rightHand == null) return;
-        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        {
-            isGliding = false;
-            return;
-        }
+        // if (leftHand == null || rightHand == null) return;
+        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        // {
+        //     isGliding = false;
+        //     return;
+        // }
         float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
         isGliding = wingsOutstretched;
