@@ -43,36 +43,69 @@ public class ProceduralTerrainGenerator : MonoBehaviour
         Vector3[] vertices = new Vector3[(width + 1) * (depth + 1)];
         Vector2[] uvs = new Vector2[vertices.Length];
         int[] triangles = new int[width * depth * 6];
+        float[,] heights = new float[width + 1, depth + 1];
 
-        // Create vertices
-        for (int z = 0, i = 0; z <= depth; z++)
+        // STEP 1: Compute raw heights with noise, peak profile, and blending
+        for (int z = 0; z <= depth; z++)
         {
-            for (int x = 0; x <= width; x++, i++)
+            for (int x = 0; x <= width; x++)
             {
                 float worldX = (x + offset.x) * scale;
                 float worldZ = (z + offset.y) * scale;
+
                 float noise = Mathf.PerlinNoise(worldX, worldZ);
+                // float profileNoise = Mathf.PerlinNoise(worldX * 0.5f, worldZ * 0.5f);
+                // float peakPower = profileNoise < 0.33f ? 0.5f : (profileNoise < 0.66f ? 1.0f : 2.0f);
+                // float shapedNoise = Mathf.Pow(noise, peakPower);
+
                 float borderX = Mathf.Min(x, width - x);
                 float borderZ = Mathf.Min(z, depth - z);
                 float borderDistance = Mathf.Min(borderX, borderZ);
                 float maxBlend = width * borderBlendPercent;
                 float blendFactor = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(borderDistance / maxBlend));
-                float blendedHeight = heightCurve.Evaluate(noise) * heightMultiplier * blendFactor;
-                
-                vertices[i] = new Vector3(x, blendedHeight, z);
+
+                float baseHeight = 0.25f * heightMultiplier;
+                float blendedHeight = Mathf.Lerp(baseHeight, noise * heightMultiplier, blendFactor);
+
+                heights[x, z] = blendedHeight;
+            }
+        }
+
+        // STEP 2: Smooth height deltas between neighboring vertices
+        float maxDelta = 20f; // max allowed vertical difference
+        for (int z = 0; z <= depth; z++)
+        {
+            for (int x = 0; x <= width; x++)
+            {
+                float current = heights[x, z];
+
+                if (x > 0)
+                    current = Mathf.Clamp(current, heights[x - 1, z] - maxDelta, heights[x - 1, z] + maxDelta);
+
+                if (z > 0)
+                    current = Mathf.Clamp(current, heights[x, z - 1] - maxDelta, heights[x, z - 1] + maxDelta);
+
+                heights[x, z] = current;
+            }
+        }
+
+        // STEP 3: Generate vertices and UVs from final heightmap
+        for (int z = 0, i = 0; z <= depth; z++)
+        {
+            for (int x = 0; x <= width; x++, i++)
+            {
+                float y = heights[x, z];
+                vertices[i] = new Vector3(x, y, z);
                 uvs[i] = new Vector2((float)x / width, (float)z / depth);
             }
         }
 
-        // Create triangles with holes
+        // STEP 4: Generate triangles
         int tris = 0;
         for (int z = 0; z < depth; z++)
         {
             for (int x = 0; x < width; x++)
             {
-                if (IsHole(x, z) || IsHole(x + 1, z) || IsHole(x, z + 1) || IsHole(x + 1, z + 1))
-                    continue;
-
                 int i = z * (width + 1) + x;
 
                 triangles[tris + 0] = i;
@@ -87,16 +120,20 @@ public class ProceduralTerrainGenerator : MonoBehaviour
             }
         }
 
+        // STEP 5: Apply to mesh
         Mesh mesh = new Mesh();
         mesh.name = "Procedural Terrain";
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.uv = uvs;
         mesh.RecalculateNormals();
+        mesh.RecalculateTangents();
+        mesh.RecalculateBounds();
 
         meshFilter.sharedMesh = mesh;
         meshCollider.sharedMesh = mesh;
     }
+
 
     private bool IsHole(int x, int z)
     {

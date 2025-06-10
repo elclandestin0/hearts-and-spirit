@@ -7,9 +7,13 @@ public class DynamicTerrainGrid : MonoBehaviour
     public GameObject terrainBlockPrefab;
     public Transform player;
     public int blockSize = 200;
+    [Header("Optional")]
+    public GameObject cloudPlane;
 
     private Dictionary<Vector2Int, GameObject> activeTiles = new();
     private Vector2Int currentReflectedCenter;
+    private Vector2Int currentRawCenter;
+
 
     void Start()
     {
@@ -45,6 +49,7 @@ public class DynamicTerrainGrid : MonoBehaviour
 
     void UpdateGridAroundPlayer(Vector2Int rawCenterCoord)
     {
+        currentRawCenter = rawCenterCoord;
         HashSet<Vector2Int> newTileKeys = new();
 
         for (int dz = -1; dz <= 1; dz++)
@@ -61,7 +66,7 @@ public class DynamicTerrainGrid : MonoBehaviour
 
                 if (!activeTiles.ContainsKey(rawCoord))
                 {
-                    Vector3 position = new Vector3(rawCoord.x * blockSize, 0, rawCoord.y * blockSize);
+                    Vector3 position = new Vector3(rawCoord.x * blockSize, transform.position.y, rawCoord.y * blockSize);
                     GameObject tile = Instantiate(terrainBlockPrefab, position, Quaternion.identity, transform);
                     tile.name = $"Tile_{reflectedCoord.x}_{reflectedCoord.y}_at_{rawCoord.x}_{rawCoord.y}";
 
@@ -91,6 +96,16 @@ public class DynamicTerrainGrid : MonoBehaviour
         foreach (var key in toRemove)
         {
             activeTiles.Remove(key);
+        }
+
+        if (cloudPlane != null && activeTiles.ContainsKey(rawCenterCoord))
+        {
+            GameObject centerTile = activeTiles[rawCenterCoord];
+            Vector3 newPos = centerTile.transform.position;
+            newPos.y = cloudPlane.transform.position.y;
+            newPos.x += blockSize / 2;
+            newPos.z += blockSize / 2;
+            cloudPlane.transform.position = newPos;
         }
     }
 }
