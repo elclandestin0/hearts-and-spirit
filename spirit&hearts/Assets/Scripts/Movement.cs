@@ -434,7 +434,7 @@ public class Movement : MonoBehaviour
     {
         // Higher speed → slower drag
         float speedFactor = Mathf.InverseLerp(0f, maxDiveSpeed, velocity.magnitude);
-        float dragStrength = Mathf.Lerp(0.995f, 0.99f, speedFactor); // stronger flaps decay slower
+        float dragStrength = Mathf.Lerp(0.998f, 0.995f, speedFactor); // stronger flaps decay slower
         velocity *= dragStrength;
     }
 
