@@ -77,8 +77,15 @@ public class DynamicTerrainGrid : MonoBehaviour
                         gen.GenerateTerrain();
                     }
 
+                    var assetGen = tile.GetComponent<TileAssetGenerator>();
+                    if (assetGen != null)
+                    {
+                        assetGen.rawCoord = rawCoord;
+                        assetGen.GenerateIslands(); // auto-generate with deterministic values
+                    }
                     activeTiles.Add(rawCoord, tile);
                 }
+
             }
         }
 
