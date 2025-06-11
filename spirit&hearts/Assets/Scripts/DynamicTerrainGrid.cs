@@ -63,28 +63,37 @@ public class DynamicTerrainGrid : MonoBehaviour
                 );
 
                 newTileKeys.Add(rawCoord); // ✅ Track by RAW COORD
-
                 if (!activeTiles.ContainsKey(rawCoord))
                 {
                     Vector3 position = new Vector3(rawCoord.x * blockSize, transform.position.y, rawCoord.y * blockSize);
                     GameObject tile = Instantiate(terrainBlockPrefab, position, Quaternion.identity, transform);
                     tile.name = $"Tile_{reflectedCoord.x}_{reflectedCoord.y}_at_{rawCoord.x}_{rawCoord.y}";
 
+                    float maxHeight = 0f;
+
                     var gen = tile.GetComponent<ProceduralTerrainGenerator>();
                     if (gen != null)
                     {
                         gen.offset = new Vector2(reflectedCoord.x * blockSize, reflectedCoord.y * blockSize);
                         gen.GenerateTerrain();
+                        maxHeight = gen.GetMaxHeight();
                     }
 
                     var assetGen = tile.GetComponent<TileAssetGenerator>();
                     if (assetGen != null)
                     {
                         assetGen.rawCoord = rawCoord;
-                        assetGen.GenerateIslands(); // auto-generate with deterministic values
+
+                        // Adjust island height range based on terrain peak
+                        assetGen.heightRange.x = Mathf.Max(assetGen.heightRange.x, maxHeight + 10f);
+                        assetGen.heightRange.y = Mathf.Max(assetGen.heightRange.y, assetGen.heightRange.x + 50f);
+
+                        assetGen.GenerateIslands();
                     }
+
                     activeTiles.Add(rawCoord, tile);
                 }
+
 
             }
         }

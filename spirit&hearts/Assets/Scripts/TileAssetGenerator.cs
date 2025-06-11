@@ -8,7 +8,7 @@ public class TileAssetGenerator : MonoBehaviour
     public int worldSeed = 42;
     public int maxIslands = 4;
     public Vector2 scaleRange = new Vector2(0.8f, 1.5f);
-    public Vector2 heightRange = new Vector2(20f, 120f);
+    public Vector2 heightRange;
     public float tileSize = 1000f;
     public float padding = 300f;
 
@@ -43,17 +43,35 @@ public class TileAssetGenerator : MonoBehaviour
         for (int i = 0; i < islandCount; i++)
         {
             GameObject prefab = ChooseIslandType(rand, rawCoord, i);
-            Vector3 position = new Vector3(
-                rand.NextFloat(padding, tileSize - padding),
-                rand.NextFloat(heightRange.x, heightRange.y),
-                rand.NextFloat(padding, tileSize - padding)
-            );
-            float scale = rand.NextFloat(scaleRange.x, scaleRange.y);
+            Vector3 position;
 
+            if (i == 0 && WorldLandmarks.IsLandmarkTile(rawCoord))
+            {
+                position = new Vector3(
+                    (rawCoord.x + 0.5f) * tileSize,
+                    rand.NextFloat(heightRange.x, heightRange.y),
+                    (rawCoord.y + 0.5f) * tileSize
+                );
+            }
+            else
+            {
+                float minX = rawCoord.x * tileSize + padding;
+                float maxX = (rawCoord.x + 1) * tileSize - padding;
+                float minZ = rawCoord.y * tileSize + padding;
+                float maxZ = (rawCoord.y + 1) * tileSize - padding;
+
+                position = new Vector3(
+                    rand.NextFloat(minX, maxX),
+                    rand.NextFloat(heightRange.x, heightRange.y),
+                    rand.NextFloat(minZ, maxZ)
+                );
+            }
+
+            float scale = rand.NextFloat(scaleRange.x, scaleRange.y);
             GameObject island = Instantiate(prefab, transform);
             island.name = $"Island_{i}";
-            island.transform.localPosition = position;
-            island.transform.localScale = Vector3.one * scale;
+            island.transform.position = position;
+            island.transform.localScale = WorldLandmarks.IsLandmarkTile(rawCoord) ? Vector3.one : Vector3.one * scale;
         }
     }
 

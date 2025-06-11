@@ -132,4 +132,21 @@ public class ProceduralTerrainGenerator : MonoBehaviour
         meshFilter.sharedMesh = mesh;
         meshCollider.sharedMesh = mesh;
     }
+
+    public float GetMaxHeight()
+    {
+        if (meshFilter.sharedMesh == null)
+            return 0f;
+
+        float max = float.MinValue;
+        Vector3[] verts = meshFilter.sharedMesh.vertices;
+
+        for (int i = 0; i < verts.Length; i++)
+        {
+            if (verts[i].y > max)
+                max = verts[i].y;
+        }
+
+        return max;
+    }
 }
