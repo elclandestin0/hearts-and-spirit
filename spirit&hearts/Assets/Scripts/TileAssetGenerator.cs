@@ -49,7 +49,7 @@ public class TileAssetGenerator : MonoBehaviour
             {
                 position = new Vector3(
                     (rawCoord.x + 0.5f) * tileSize,
-                    rand.NextFloat(heightRange.x, heightRange.y),
+                    500f,
                     (rawCoord.y + 0.5f) * tileSize
                 );
             }
@@ -71,7 +71,7 @@ public class TileAssetGenerator : MonoBehaviour
             GameObject island = Instantiate(prefab, transform);
             island.name = $"Island_{i}";
             island.transform.position = position;
-            island.transform.localScale = WorldLandmarks.IsLandmarkTile(rawCoord) ? Vector3.one : Vector3.one * scale;
+            island.transform.localScale = WorldLandmarks.IsLandmarkTile(rawCoord) ? island.transform.localScale : Vector3.one * scale;
         }
     }
 
