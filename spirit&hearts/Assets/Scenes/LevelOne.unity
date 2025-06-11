@@ -435,6 +435,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2130433395076051474, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+      propertyPath: glideStrength
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 4934435829363447659, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: far clip plane
       value: 1500
@@ -1418,6 +1422,62 @@ Terrain:
   m_EnableHeightmapRayTracing: 1
   m_EnableTreesAndDetailsRayTracing: 0
   m_TreeMotionVectorModeOverride: 3
+--- !u!1 &1295565650
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1295565652}
+  - component: {fileID: 1295565651}
+  m_Layer: 0
+  m_Name: TileAssetGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1295565651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295565650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78fe271520d5d4d329da85c15504f798, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldSeed: 42
+  maxIslands: 4
+  scaleRange: {x: 0.8, y: 1.5}
+  heightRange: {x: 0, y: 0}
+  tileSize: 1000
+  padding: 300
+  terrainGen: {fileID: 6917822802004733307, guid: 2702eb11ed2a74a9d879edfd7dc7f8c4, type: 3}
+  navigationIslandPrefab: {fileID: 0}
+  ringIslandPrefab: {fileID: 0}
+  obstacleIslandPrefab: {fileID: 0}
+  landmarkIslandPrefab: {fileID: 0}
+  rawCoord: {x: 0, y: 0}
+--- !u!4 &1295565652
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295565650}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 545.8125, y: -12.284668, z: 431.2483}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1482911742
 GameObject:
   m_ObjectHideFlags: 0
@@ -1787,3 +1847,4 @@ SceneRoots:
   - {fileID: 690179510}
   - {fileID: 1008104722}
   - {fileID: 422952628}
+  - {fileID: 1295565652}

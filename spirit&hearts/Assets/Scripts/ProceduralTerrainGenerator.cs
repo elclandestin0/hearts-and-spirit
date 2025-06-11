@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [ExecuteAlways]
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
@@ -26,8 +27,49 @@ public class ProceduralTerrainGenerator : MonoBehaviour
 
     [HideInInspector] public Vector2 offset;
 
-    private MeshFilter meshFilter;
+    public MeshFilter meshFilter;
     private MeshCollider meshCollider;
+
+    public struct TerrainSpot
+    {
+        public Vector3 worldPos;
+        public float heightNorm; // 0–1 normalized
+        public float slope; // estimated
+    }
+
+
+    public List<TerrainSpot> GetClassifiedSpots()
+    {
+        List<TerrainSpot> spots = new();
+        if (meshFilter.sharedMesh == null) return spots;
+
+        Vector3[] verts = meshFilter.sharedMesh.vertices;
+        Vector3[] normals = meshFilter.sharedMesh.normals;
+
+        float maxY = float.MinValue;
+        float minY = float.MaxValue;
+
+        foreach (var v in verts)
+        {
+            if (v.y > maxY) maxY = v.y;
+            if (v.y < minY) minY = v.y;
+        }
+
+        for (int i = 0; i < verts.Length; i++)
+        {
+            float heightNorm = Mathf.InverseLerp(minY, maxY, verts[i].y);
+            float slope = 1f - Mathf.Abs(Vector3.Dot(normals[i], Vector3.up)); // 0 = flat, 1 = vertical
+
+            spots.Add(new TerrainSpot
+            {
+                worldPos = transform.TransformPoint(verts[i]),
+                heightNorm = heightNorm,
+                slope = slope
+            });
+        }
+
+        return spots;
+    }
 
     private void OnEnable()
     {

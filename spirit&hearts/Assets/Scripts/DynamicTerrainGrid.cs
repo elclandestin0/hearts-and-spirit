@@ -70,21 +70,21 @@ public class DynamicTerrainGrid : MonoBehaviour
                     tile.name = $"Tile_{reflectedCoord.x}_{reflectedCoord.y}_at_{rawCoord.x}_{rawCoord.y}";
 
                     float maxHeight = 0f;
+                    var terrainGen = tile.GetComponent<ProceduralTerrainGenerator>();
+                    var assetGen = tile.GetComponent<TileAssetGenerator>();
 
-                    var gen = tile.GetComponent<ProceduralTerrainGenerator>();
-                    if (gen != null)
+                    if (terrainGen != null)
                     {
-                        gen.offset = new Vector2(reflectedCoord.x * blockSize, reflectedCoord.y * blockSize);
-                        gen.GenerateTerrain();
-                        maxHeight = gen.GetMaxHeight();
+                        terrainGen.offset = new Vector2(reflectedCoord.x * blockSize, reflectedCoord.y * blockSize);
+                        terrainGen.GenerateTerrain();
+                        maxHeight = terrainGen.GetMaxHeight();
                     }
 
-                    var assetGen = tile.GetComponent<TileAssetGenerator>();
                     if (assetGen != null)
                     {
                         assetGen.rawCoord = rawCoord;
+                        assetGen.SetTerrainReference(terrainGen);
 
-                        // Adjust island height range based on terrain peak
                         assetGen.heightRange.x = Mathf.Max(assetGen.heightRange.x, maxHeight + 10f);
                         assetGen.heightRange.y = Mathf.Max(assetGen.heightRange.y, assetGen.heightRange.x + 50f);
 
