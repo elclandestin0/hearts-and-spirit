@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CloudBed
-  m_Shader: {fileID: -6465566751694194690, guid: 214090757c5ec6d41ab534b22d5b020d, type: 3}
+  m_Name: CloudsLayer1
+  m_Shader: {fileID: -6465566751694194690, guid: d7b387e9a316f66499efbda2e20d5258, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
@@ -17,23 +17,20 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: 2997
   stringTagMap:
     RenderType: Transparent
   disabledShaderPasses:
   - MOTIONVECTORS
   - DepthOnly
+  - SHADOWCASTER
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _BaseTexture:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 6763ae4730c97474c867cc2cf18d228f, type: 3}
+        m_Scale: {x: 3, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
@@ -56,8 +53,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 6763ae4730c97474c867cc2cf18d228f, type: 3}
+        m_Scale: {x: 3, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
@@ -73,6 +70,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture:
+        m_Texture: {fileID: 2800000, guid: 6763ae4730c97474c867cc2cf18d228f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -92,14 +93,13 @@ Material:
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _BaseSTR: -0.48
-    - _BaseScale: 0.04
-    - _BaseSpeed: 1
-    - _BaseTransparency: 1
+    - _BaseSTR: 39
+    - _BaseScale: 16
+    - _BaseSpeed: 0.01
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
-    - _CastShadows: 1
+    - _CastShadows: 0
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -107,51 +107,47 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
-    - _DstBlendAlpha: 0
+    - _DstBlendAlpha: 1
     - _EnvironmentReflections: 1
-    - _FadeDepth: 165.3
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _Height: 0.01
     - _Metallic: 0
-    - _NoisePower: 1
-    - _NoiseScale: 0.01
+    - _NoiseScale: 1
     - _OcclusionStrength: 1
+    - _PanSpeed: 0.0002
     - _Parallax: 0.005
     - _QueueControl: 0
-    - _QueueOffset: 0
+    - _QueueOffset: -3
     - _ReceiveShadows: 1
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _Speed: 35
+    - _Speed: 15
     - _SrcBlend: 5
     - _SrcBlendAlpha: 1
-    - _Stylize: 0.111
+    - _Stylize: 0.559
     - _Surface: 1
+    - _TilingTexture: 4
     - _WorkflowMode: 1
     - _ZTest: 4
     - _ZWrite: 0
     - _ZWriteControl: 0
+    - _transparency: 1
     m_Colors:
-    - _BaseColor: {r: 0.55695975, g: 0.62424356, b: 0.7924528, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DayHighLight: {r: 1, g: 1, b: 0.9386792, a: 1}
-    - _DayShadow: {r: 0.745283, g: 0.745283, b: 0.745283, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.7924528, g: 0.7924528, b: 0.7924528, a: 1}
+    - _DayHighLight: {r: 1, g: 1, b: 1, a: 1}
+    - _DayShadow: {r: 0.6117647, g: 0.5411765, b: 0.5333334, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FadeColor: {r: 1, g: 1, b: 1, a: 0}
-    - _FadeColorDay: {r: 1, g: 0.92879313, b: 0.8349056, a: 0}
-    - _FadeColorNight: {r: 0.622419, g: 0.6297718, b: 0.6698113, a: 0}
-    - _FadeGradient: {r: 0.21, g: 0.44, b: 0, a: 0}
-    - _NightHighLight: {r: 0.46431115, g: 0.54933006, b: 0.6981132, a: 1}
-    - _NightShadow: {r: 0.38937345, g: 0.4616411, b: 0.6603774, a: 1}
-    - _NoiseRemap: {r: 0, g: 1, b: -1, a: 1}
-    - _RotateProjection: {r: 1, g: 0, b: 1, a: 45}
+    - _FadeColorDay: {r: 0.759434, g: 0.8255079, b: 1, a: 0}
+    - _FadeColorNight: {r: 0.759434, g: 0.8255079, b: 1, a: 0}
+    - _NightHighLight: {r: 0.46666664, g: 0.5882353, b: 0.6941177, a: 1}
+    - _NightShadow: {r: 0.32156855, g: 0.38823527, b: 0.5803921, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &7198816561599988432
+--- !u!114 &8963119430741455732
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
