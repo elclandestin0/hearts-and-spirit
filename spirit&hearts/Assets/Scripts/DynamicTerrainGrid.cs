@@ -8,8 +8,7 @@ public class DynamicTerrainGrid : MonoBehaviour
     public Transform player;
     public int blockSize = 200;
     [Header("Optional")]
-    public GameObject cloudPlane;
-
+    public GameObject cloudPlane, skyDome, cloudsParticle;
     private Dictionary<Vector2Int, GameObject> activeTiles = new();
     private Vector2Int currentReflectedCenter;
     private Vector2Int currentRawCenter;
@@ -56,49 +55,61 @@ public class DynamicTerrainGrid : MonoBehaviour
         {
             for (int dx = -1; dx <= 1; dx++)
             {
-                Vector2Int rawCoord = new Vector2Int(rawCenterCoord.x + dx, rawCenterCoord.y + dz);
-                Vector2Int reflectedCoord = new Vector2Int(
+                Vector2Int rawCoord = new(rawCenterCoord.x + dx, rawCenterCoord.y + dz);
+                Vector2Int reflectedCoord = new(
                     WorldConfig.WrapCoord(rawCoord.x, WorldConfig.minX, WorldConfig.maxX),
                     WorldConfig.WrapCoord(rawCoord.y, WorldConfig.minZ, WorldConfig.maxZ)
                 );
 
-                newTileKeys.Add(rawCoord); // ✅ Track by RAW COORD
+                newTileKeys.Add(rawCoord);
+
                 if (!activeTiles.ContainsKey(rawCoord))
                 {
-                    Vector3 position = new Vector3(rawCoord.x * blockSize, transform.position.y, rawCoord.y * blockSize);
-                    GameObject tile = Instantiate(terrainBlockPrefab, position, Quaternion.identity, transform);
-                    tile.name = $"Tile_{reflectedCoord.x}_{reflectedCoord.y}_at_{rawCoord.x}_{rawCoord.y}";
-
-                    float maxHeight = 0f;
-                    var terrainGen = tile.GetComponent<ProceduralTerrainGenerator>();
-                    var assetGen = tile.GetComponent<TileAssetGenerator>();
-
-                    if (terrainGen != null)
-                    {
-                        terrainGen.offset = new Vector2(reflectedCoord.x * blockSize, reflectedCoord.y * blockSize);
-                        terrainGen.GenerateTerrain();
-                        maxHeight = terrainGen.GetMaxHeight();
-                    }
-
-                    if (assetGen != null)
-                    {
-                        assetGen.rawCoord = rawCoord;
-                        assetGen.SetTerrainReference(terrainGen);
-
-                        assetGen.heightRange.x = Mathf.Max(assetGen.heightRange.x, maxHeight + 10f);
-                        assetGen.heightRange.y = Mathf.Max(assetGen.heightRange.y, assetGen.heightRange.x + 50f);
-
-                        assetGen.GenerateIslands();
-                    }
-
+                    GameObject tile = InstantiateTile(rawCoord, reflectedCoord);
                     activeTiles.Add(rawCoord, tile);
                 }
-
-
             }
         }
 
-        // Clean up tiles no longer needed
+        CleanupOldTiles(newTileKeys);
+        MoveToCenter(cloudPlane, rawCenterCoord);
+        MoveToCenter(skyDome, rawCenterCoord);
+        MoveToCenter(cloudsParticle, rawCenterCoord);
+    }
+
+    GameObject InstantiateTile(Vector2Int rawCoord, Vector2Int reflectedCoord)
+    {
+        Vector3 position = new Vector3(rawCoord.x * blockSize, transform.position.y, rawCoord.y * blockSize);
+        GameObject tile = Instantiate(terrainBlockPrefab, position, Quaternion.identity, transform);
+        tile.name = $"Tile_{reflectedCoord.x}_{reflectedCoord.y}_at_{rawCoord.x}_{rawCoord.y}";
+
+        float maxHeight = 0f;
+
+        var terrainGen = tile.GetComponent<ProceduralTerrainGenerator>();
+        if (terrainGen != null)
+        {
+            terrainGen.offset = new Vector2(reflectedCoord.x * blockSize, reflectedCoord.y * blockSize);
+            terrainGen.GenerateTerrain();
+            maxHeight = terrainGen.GetMaxHeight();
+        }
+
+        var assetGen = tile.GetComponent<TileAssetGenerator>();
+        if (assetGen != null)
+        {
+            assetGen.rawCoord = rawCoord;
+            assetGen.SetTerrainReference(terrainGen);
+
+            assetGen.heightRange.x = Mathf.Max(assetGen.heightRange.x, maxHeight + 10f);
+            assetGen.heightRange.y = Mathf.Max(assetGen.heightRange.y, assetGen.heightRange.x + 50f);
+
+            assetGen.GenerateIslands();
+        }
+
+        return tile;
+    }
+
+    void CleanupOldTiles(HashSet<Vector2Int> newTileKeys)
+    {
         List<Vector2Int> toRemove = new();
         foreach (var kvp in activeTiles)
         {
@@ -113,15 +124,19 @@ public class DynamicTerrainGrid : MonoBehaviour
         {
             activeTiles.Remove(key);
         }
+    }
 
-        if (cloudPlane != null && activeTiles.ContainsKey(rawCenterCoord))
-        {
-            GameObject centerTile = activeTiles[rawCenterCoord];
-            Vector3 newPos = centerTile.transform.position;
-            newPos.y = cloudPlane.transform.position.y;
-            newPos.x += blockSize / 2;
-            newPos.z += blockSize / 2;
-            cloudPlane.transform.position = newPos;
-        }
+    void MoveToCenter(GameObject obj, Vector2Int centerCoord)
+    {
+        if (obj == null || !activeTiles.ContainsKey(centerCoord))
+            return;
+
+        GameObject centerTile = activeTiles[centerCoord];
+        Vector3 centerPos = centerTile.transform.position;
+        centerPos.y = obj.transform.position.y;
+        centerPos.x += blockSize / 2f;
+        centerPos.z += blockSize / 2f;
+
+        obj.transform.position = centerPos;
     }
 }
