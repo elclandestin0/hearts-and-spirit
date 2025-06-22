@@ -136,6 +136,7 @@ MonoBehaviour:
   roughnessFrequency: 0.2
   roughnessStrength: 5
   offset: {x: 0, y: 0}
+  meshFilter: {fileID: 0}
 --- !u!114 &-2495930135501569662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,11 +150,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldSeed: 42
-  maxIslands: 4
+  maxIslands: 10
   scaleRange: {x: 0.8, y: 1.5}
   heightRange: {x: 60, y: 120}
   tileSize: 1000
   padding: 300
+  terrainGen: {fileID: 0}
   navigationIslandPrefab: {fileID: 919132149155446097, guid: c557f11ee74ce984e84bde27d0cde21d, type: 3}
   ringIslandPrefab: {fileID: 919132149155446097, guid: 393c0072962f99940a2eae27897f4c84, type: 3}
   obstacleIslandPrefab: {fileID: 919132149155446097, guid: a88014c6740408d47845e4bfe70cfca4, type: 3}

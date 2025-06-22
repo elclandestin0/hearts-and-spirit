@@ -18,14 +18,49 @@ public class DynamicTerrainGrid : MonoBehaviour
 
     void Start()
     {
-        PreGenerateTiles();
+        // Step 1: Pre-generate and cache all terrain tiles
+        for (int z = WorldConfig.minZ; z <= WorldConfig.maxZ; z++)
+        {
+            for (int x = WorldConfig.minX; x <= WorldConfig.maxX; x++)
+            {
+                Vector2Int coord = new Vector2Int(x, z);
+                Vector3 pos = new Vector3(x * blockSize, 0f, z * blockSize);
 
+                GameObject tile = Instantiate(terrainPrefab, pos, Quaternion.identity);
+                tile.name = $"Mountain_{x}_{z}";
+                tile.SetActive(false);
+
+                var gen = tile.GetComponent<ProceduralTerrainGenerator>();
+                gen.offset = new Vector2(x * blockSize, z * blockSize);
+                gen.GenerateTerrain();
+
+                  var assetGen = tile.GetComponent<TileAssetGenerator>();
+                    if (assetGen != null)
+                    {
+                        assetGen.rawCoord = new Vector2Int(x, z);
+                        assetGen.SetTerrainReference(gen);
+
+                        // Optionally adjust height range if your mountains vary
+                        float maxHeight = gen.GetMaxHeight(); // if you have this method
+                        assetGen.heightRange.x = Mathf.Max(assetGen.heightRange.x, maxHeight + 10f);
+                        assetGen.heightRange.y = Mathf.Max(assetGen.heightRange.y, assetGen.heightRange.x + 50f);
+
+                        assetGen.GenerateIslands();
+                    }
+
+                preGeneratedTiles[coord] = tile;
+            }
+        }
+
+        // Step 2: Find player starting position and activate the 5x5 grid
         Vector2Int rawCoord = new Vector2Int(
             Mathf.FloorToInt(player.position.x / blockSize),
             Mathf.FloorToInt(player.position.z / blockSize)
         );
+
         UpdateGridAroundPlayer(rawCoord);
     }
+
 
     void Update()
     {

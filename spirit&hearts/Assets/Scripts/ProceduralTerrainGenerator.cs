@@ -75,15 +75,6 @@ public class ProceduralTerrainGenerator : MonoBehaviour
     {
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
-        GenerateTerrain();
-    }
-
-    private void OnValidate()
-    {
-        if (!Application.isPlaying && meshFilter != null)
-        {
-            GenerateTerrain();
-        }
     }
 
     [ContextMenu("Generate Terrain")]
