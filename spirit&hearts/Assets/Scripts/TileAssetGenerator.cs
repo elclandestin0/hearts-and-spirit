@@ -76,7 +76,7 @@ public class TileAssetGenerator : MonoBehaviour
             {
                 position = new Vector3(
                     (rawCoord.x + 0.5f) * tileSize,
-                    500f,
+                    800f,
                     (rawCoord.y + 0.5f) * tileSize
                 );
             }

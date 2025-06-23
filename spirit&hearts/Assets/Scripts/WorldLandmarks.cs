@@ -6,7 +6,7 @@ public static class WorldLandmarks
     public static readonly HashSet<Vector2Int> Landmarks = new()
     {
         new Vector2Int(0, 0),
-        new Vector2Int(3, 5),
+        new Vector2Int(3, 3),
         new Vector2Int(-2, 4)
     };
 

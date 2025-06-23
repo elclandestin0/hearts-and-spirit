@@ -30,6 +30,15 @@ public class ProceduralTerrainGenerator : MonoBehaviour
     public MeshFilter meshFilter;
     private MeshCollider meshCollider;
 
+    [Header("Curved Edge Settings")]
+    public bool enableCurvedEdges = true;
+    public float edgeCurvatureStrength = 20f;
+    [Header("Border Ridge Settings")]
+    public bool enableRidgeFusion = true;
+    public float ridgeBoostStrength = 15f;
+    public float ridgeWidthPercent = 0.15f; // How wide the ridge band is from edge
+    public float ridgeNoiseScale = 0.3f;     // Local variation in ridge height
+
     public struct TerrainSpot
     {
         public Vector3 worldPos;
@@ -123,6 +132,40 @@ public class ProceduralTerrainGenerator : MonoBehaviour
 
                 noiseHeight = Mathf.Pow(noiseHeight, peakSharpness); // spike the peaks
                 float height = noiseHeight * heightMultiplier * falloff;
+
+            if (enableRidgeFusion)
+            {
+                float edgeBand = width * ridgeWidthPercent;
+
+                // Distance from left/right and bottom/top edges
+                float distToLeft = Mathf.Abs(x);
+                float distToRight = Mathf.Abs(width - x);
+                float distToBottom = Mathf.Abs(z);
+                float distToTop = Mathf.Abs(depth - z);
+
+                // Midpoints (between tiles) – boost here
+                float edgeCenterBoost = 0f;
+
+                // Check if close to vertical mid-edge (left or right edge centers)
+                if (distToLeft < edgeBand || distToRight < edgeBand)
+                {
+                    float verticalCenterDist = Mathf.Abs(z - (depth / 2f)) / (depth / 2f); // 0 at center
+                    float vFalloff = Mathf.Clamp01(1f - verticalCenterDist);
+                    float vNoise = Mathf.PerlinNoise((x + offset.x + 2000f) * ridgeNoiseScale, (z + offset.y + 2000f) * ridgeNoiseScale);
+                    edgeCenterBoost += vFalloff * vNoise * ridgeBoostStrength * 0.5f;
+                }
+
+                // Check if close to horizontal mid-edge (top or bottom edge centers)
+                if (distToBottom < edgeBand || distToTop < edgeBand)
+                {
+                    float horizontalCenterDist = Mathf.Abs(x - (width / 2f)) / (width / 2f); // 0 at center
+                    float hFalloff = Mathf.Clamp01(1f - horizontalCenterDist);
+                    float hNoise = Mathf.PerlinNoise((x + offset.x + 3000f) * ridgeNoiseScale, (z + offset.y + 3000f) * ridgeNoiseScale);
+                    edgeCenterBoost += hFalloff * hNoise * ridgeBoostStrength * 0.5f;
+                }
+
+                height += edgeCenterBoost;
+            }
 
                 // Add localized roughness for rocky peaks
                 if (noiseHeight > 0.7f)
