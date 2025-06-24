@@ -11,13 +11,22 @@ public class TileAssetGenerator : MonoBehaviour
     public Vector2 heightRange;
     public float tileSize = 1000f;
     public float padding = 300f;
-    public ProceduralTerrainGenerator terrainGen;  
+    public ProceduralTerrainGenerator terrainGen;
 
     [Header("Prefabs")]
     public GameObject navigationIslandPrefab;
     public GameObject ringIslandPrefab;
     public GameObject obstacleIslandPrefab;
     public GameObject landmarkIslandPrefab;
+    public GameObject smallArchPrefab;
+    public GameObject smallDiagonalPrefab;
+    public GameObject smallDonutPrefab;
+    public GameObject smallDoublePrefab;
+    public GameObject smallFlatPrefab;
+    public GameObject smallPikesPrefab;
+    [Header("Light Funnel Assets")]
+    public GameObject[] funnelStepsPrefabs;
+    public GameObject[] lightPrefabs;
     [HideInInspector] public Vector2Int rawCoord;
 
     // Set Terrain Reference
@@ -42,7 +51,35 @@ public class TileAssetGenerator : MonoBehaviour
 
         var spots = terrainGen.GetClassifiedSpots();
 
-        // Tiered placements
+        // Clear old
+        foreach (Transform child in transform)
+        {
+            if (child.name.StartsWith("Island_") || child.name.StartsWith("FunnelStep") || child.name.StartsWith("LightSource"))
+                DestroyImmediate(child.gameObject);
+        }
+
+        bool isLandmark = WorldLandmarks.IsLandmarkTile(rawCoord);
+        bool isFunnel = WorldLandmarks.IsFunnelTile(rawCoord);
+
+        if (isLandmark)
+        {
+            GameObject island = Instantiate(landmarkIslandPrefab, transform);
+            island.name = $"Island_Landmark";
+            island.transform.position = new Vector3(
+                (rawCoord.x + 0.5f) * tileSize,
+                1000f,
+                (rawCoord.y + 0.5f) * tileSize
+            );
+            return;
+        }
+
+        if (isFunnel)
+        {
+            GenerateLightFunnel(rawCoord, spots);
+            return;
+        }
+
+        // Fallback: regular tile
         List<Vector3> rampSpots = new();
         List<Vector3> ringSpots = new();
         List<Vector3> obstacleSpots = new();
@@ -56,76 +93,118 @@ public class TileAssetGenerator : MonoBehaviour
             else if (s.heightNorm >= 0.95f && s.slope < 0.15f) chillSpots.Add(s.worldPos);
         }
 
-        // Clear old
-        foreach (Transform child in transform)
-        {
-            if (child.name.StartsWith("Island_"))
-                DestroyImmediate(child.gameObject);
-        }
-
-        // Deterministic seed
         int hash = rawCoord.x * 73856093 ^ rawCoord.y * 19349663 ^ worldSeed;
         System.Random rand = new System.Random(hash);
         int islandCount = rand.Next(1, maxIslands + 1);
+
         for (int i = 0; i < islandCount; i++)
         {
             GameObject prefab = ChooseIslandType(rand, rawCoord, i);
             Vector3 position = Vector3.zero;
 
-            if (i == 0 && WorldLandmarks.IsLandmarkTile(rawCoord))
-            {
-                position = new Vector3(
-                    (rawCoord.x + 0.5f) * tileSize,
-                    800f,
-                    (rawCoord.y + 0.5f) * tileSize
-                );
-            }
+            if (prefab == navigationIslandPrefab && rampSpots.Count > 0)
+                position = rampSpots[rand.Next(rampSpots.Count)];
+            else if (prefab == ringIslandPrefab && ringSpots.Count > 0)
+                position = ringSpots[rand.Next(ringSpots.Count)];
+            else if (prefab == obstacleIslandPrefab && obstacleSpots.Count > 0)
+                position = obstacleSpots[rand.Next(obstacleSpots.Count)];
+            else if (chillSpots.Count > 0)
+                position = chillSpots[rand.Next(chillSpots.Count)];
             else
             {
-                // Select from terrain-classified spots
-                if (prefab == navigationIslandPrefab && rampSpots.Count > 0)
-                    position = rampSpots[rand.Next(0, rampSpots.Count)];
-                else if (prefab == ringIslandPrefab && ringSpots.Count > 0)
-                    position = ringSpots[rand.Next(0, ringSpots.Count)];
-                else if (prefab == obstacleIslandPrefab && obstacleSpots.Count > 0)
-                    position = obstacleSpots[rand.Next(0, obstacleSpots.Count)];
-                else if (chillSpots.Count > 0)
-                    position = chillSpots[rand.Next(0, chillSpots.Count)];
-                else
-                {
-                    // Fallback: random position in tile
-                    float minX = rawCoord.x * tileSize + padding;
-                    float maxX = (rawCoord.x + 1) * tileSize - padding;
-                    float minZ = rawCoord.y * tileSize + padding;
-                    float maxZ = (rawCoord.y + 1) * tileSize - padding;
+                float minX = rawCoord.x * tileSize + padding;
+                float maxX = (rawCoord.x + 1) * tileSize - padding;
+                float minZ = rawCoord.y * tileSize + padding;
+                float maxZ = (rawCoord.y + 1) * tileSize - padding;
 
-                    position = new Vector3(
-                        rand.NextFloat(minX, maxX),
-                        rand.NextFloat(heightRange.x, heightRange.y),
-                        rand.NextFloat(minZ, maxZ)
-                    );
-                }
+                position = new Vector3(
+                    rand.NextFloat(minX, maxX),
+                    rand.NextFloat(heightRange.x, heightRange.y),
+                    rand.NextFloat(minZ, maxZ)
+                );
             }
 
-            float scale = rand.NextFloat(scaleRange.x, scaleRange.y);
             GameObject island = Instantiate(prefab, transform);
             island.name = $"Island_{i}";
-            island.transform.position = position;
-            island.transform.localScale = (i == 0 && WorldLandmarks.IsLandmarkTile(rawCoord))
-                ? island.transform.localScale
-                : Vector3.one * scale;
+
+            float y;
+            if (prefab == ringIslandPrefab)
+                y = rand.NextFloat(850f, 900f);
+            else if (prefab == navigationIslandPrefab)
+                y = rand.NextFloat(700f, 750f);
+            else
+                y = rand.NextFloat(750f, 850f);
+
+            island.transform.position = new Vector3(position.x, y, position.z);
+            float scale = rand.NextFloat(scaleRange.x, scaleRange.y);
+            island.transform.localScale = Vector3.one * scale * 4f;
+        }
+    }
+
+    private void GenerateLightFunnel(Vector2Int tileCoord, List<ProceduralTerrainGenerator.TerrainSpot> spots)
+    {
+        float minY = 700f, maxY = 950f;
+        int steps = 6;
+        float stepY = (maxY - minY) / steps;
+
+        float tileStartX = tileCoord.x * tileSize + padding;
+        float tileEndX = (tileCoord.x + 1) * tileSize - padding;
+        float tileStartZ = tileCoord.y * tileSize + padding;
+        float tileEndZ = (tileCoord.y + 1) * tileSize - padding;
+
+        List<Vector3> funnelPoints = new();
+        System.Random rand = new System.Random(tileCoord.x * 7919 ^ tileCoord.y * 1973 ^ worldSeed);
+
+        for (int i = 0; i < steps; i++)
+        {
+            float y = minY + i * stepY;
+
+            float t = i / (float)steps;
+
+            // Smooth curve through the tile (slight spiral offset)
+            float px = Mathf.Lerp(tileStartX, tileEndX, Mathf.PerlinNoise(t * 2f, tileCoord.y + 123));
+            float pz = Mathf.Lerp(tileStartZ, tileEndZ, Mathf.PerlinNoise(tileCoord.x + 321, t * 2f));
+
+            Vector3 p = new Vector3(px, y, pz);
+            funnelPoints.Add(p);
         }
 
+        // Instantiate the steps
+        for (int i = 0; i < funnelPoints.Count; i++)
+        {
+            var prefab = funnelStepsPrefabs[rand.Next(funnelStepsPrefabs.Length)];
+            var obj = Instantiate(prefab, funnelPoints[i], Quaternion.identity, this.transform);
+            obj.name = $"FunnelStep_{i}";
+            obj.transform.localScale = Vector3.one * 4f;
+        }
+
+        // Place the light source at the top
+        var top = funnelPoints[^1];
+        var lightPrefab = lightPrefabs[rand.Next(lightPrefabs.Length)];
+        var lightObj = Instantiate(lightPrefab, top + Vector3.up * 5f, Quaternion.identity, this.transform);
+        lightObj.name = $"LightSource";
     }
+
 
     private GameObject ChooseIslandType(System.Random rand, Vector2Int coord, int index)
     {
         if (index == 0 && WorldLandmarks.IsLandmarkTile(coord))
             return landmarkIslandPrefab;
 
-        int roll = rand.Next(0, 100);
-        if (roll < 40) return navigationIslandPrefab;
-        if (roll < 70) return ringIslandPrefab;
-        return obstacleIslandPrefab;
+        GameObject[] allPrefabs = new GameObject[]
+        {
+            navigationIslandPrefab,
+            ringIslandPrefab,
+            obstacleIslandPrefab,
+            smallArchPrefab,
+            smallDiagonalPrefab,
+            smallDonutPrefab,
+            smallDoublePrefab,
+            smallFlatPrefab,
+            smallPikesPrefab
+        };
+
+        return allPrefabs[rand.Next(0, allPrefabs.Length)];
     }
+
 }

@@ -137,6 +137,12 @@ MonoBehaviour:
   roughnessStrength: 5
   offset: {x: 0, y: 0}
   meshFilter: {fileID: 0}
+  enableCurvedEdges: 1
+  edgeCurvatureStrength: 20
+  enableRidgeFusion: 1
+  ridgeBoostStrength: 15
+  ridgeWidthPercent: 0.15
+  ridgeNoiseScale: 0.3
 --- !u!114 &-2495930135501569662
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -160,4 +166,21 @@ MonoBehaviour:
   ringIslandPrefab: {fileID: 919132149155446097, guid: 393c0072962f99940a2eae27897f4c84, type: 3}
   obstacleIslandPrefab: {fileID: 919132149155446097, guid: a88014c6740408d47845e4bfe70cfca4, type: 3}
   landmarkIslandPrefab: {fileID: 1533580197985484421, guid: c5f57e6012cf3461a8248940aa111e56, type: 3}
+  smallArchPrefab: {fileID: 919132149155446097, guid: 9a2375c76f32b8c45878e1b42132c107, type: 3}
+  smallDiagonalPrefab: {fileID: 919132149155446097, guid: c557f11ee74ce984e84bde27d0cde21d, type: 3}
+  smallDonutPrefab: {fileID: 919132149155446097, guid: 5a3b148f390b52c46a3779434e559546, type: 3}
+  smallDoublePrefab: {fileID: 919132149155446097, guid: 6029530282cd2ef49980202bacebe370, type: 3}
+  smallFlatPrefab: {fileID: 919132149155446097, guid: bd6093f6c8cd348478c98c1fb4d9ed8f, type: 3}
+  smallPikesPrefab: {fileID: 919132149155446097, guid: a88014c6740408d47845e4bfe70cfca4, type: 3}
+  funnelStepsPrefabs:
+  - {fileID: 919132149155446097, guid: 7ab4977417bc0c545a67f1a6728c3966, type: 3}
+  - {fileID: 919132149155446097, guid: c557f11ee74ce984e84bde27d0cde21d, type: 3}
+  - {fileID: 919132149155446097, guid: b65106bbd6cf5674fb656bf50ce571ca, type: 3}
+  - {fileID: 919132149155446097, guid: 5a3b148f390b52c46a3779434e559546, type: 3}
+  - {fileID: 919132149155446097, guid: 6029530282cd2ef49980202bacebe370, type: 3}
+  lightPrefabs:
+  - {fileID: 919132149155446097, guid: 927335aa6786a714899d02bca38d5cce, type: 3}
+  - {fileID: 919132149155446097, guid: effec766e8c048049ba68f27060bc43b, type: 3}
+  - {fileID: 919132149155446097, guid: 0200a4ccaec63ca47abe9c7d4e10d0b8, type: 3}
+  - {fileID: 919132149155446097, guid: 56ec72bd914694e4cb99b8aa5ec662e4, type: 3}
   rawCoord: {x: 0, y: 0}
