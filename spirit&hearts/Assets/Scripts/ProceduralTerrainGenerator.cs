@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -216,4 +217,29 @@ public class ProceduralTerrainGenerator : MonoBehaviour
 
         return max;
     }
+
+
+    [ContextMenu("Save Mesh As Asset")]
+    public void SaveMeshAsset()
+    {
+        #if UNITY_EDITOR
+            if (meshFilter.sharedMesh == null)
+            {
+                Debug.LogWarning("No mesh to save.");
+                return;
+            }
+
+            string path = $"Assets/SavedMountains/Terrain_{name}_{Random.Range(1000, 9999)}.asset";
+            Mesh meshToSave = Instantiate(meshFilter.sharedMesh);
+
+            AssetDatabase.CreateAsset(meshToSave, path);
+            AssetDatabase.SaveAssets();
+
+            meshFilter.sharedMesh = meshToSave;
+            meshCollider.sharedMesh = meshToSave;
+
+            Debug.Log($"Saved mesh to {path}");
+        #endif
+    }
+
 }

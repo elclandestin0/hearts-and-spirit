@@ -8,9 +8,9 @@ public class TileAssetGenerator : MonoBehaviour
     public int worldSeed = 42;
     public int maxIslands = 4;
     public Vector2 scaleRange = new Vector2(0.8f, 1.5f);
+    public Vector2 heightRange;
     public float tileSize = 1000f;
     public float padding = 300f;
-    public Vector2 heightRange;
     public ProceduralTerrainGenerator terrainGen;
 
     [Header("Prefabs")]
@@ -24,11 +24,9 @@ public class TileAssetGenerator : MonoBehaviour
     public GameObject smallDoublePrefab;
     public GameObject smallFlatPrefab;
     public GameObject smallPikesPrefab;
-
     [Header("Light Funnel Assets")]
     public GameObject[] funnelStepsPrefabs;
     public GameObject[] lightPrefabs;
-
     [Header("Cluster Config")]
     public int minIslandsPerCluster = 2;
     public int maxIslandsPerCluster = 4;
@@ -57,6 +55,8 @@ public class TileAssetGenerator : MonoBehaviour
             return;
         }
 
+        var spots = terrainGen.GetClassifiedSpots();
+
         foreach (Transform child in transform)
         {
             if (child.name.StartsWith("Island_") || child.name.StartsWith("FunnelStep") || child.name.StartsWith("LightSource"))
@@ -64,23 +64,20 @@ public class TileAssetGenerator : MonoBehaviour
         }
 
         var role = WorldMap.GetRole(rawCoord);
-        var spots = terrainGen.GetClassifiedSpots();
 
         switch (role)
         {
             case WorldTileRole.Landmark:
                 GenerateLandmarkTile();
                 break;
-
             case WorldTileRole.Funnel:
-                GenerateFunnelTile(spots);
+                GenerateLightFunnel(rawCoord, spots);
                 break;
-
             case WorldTileRole.Bridge:
                 GenerateBridgeTile(spots);
                 break;
-
             case WorldTileRole.Wander:
+            default:
                 GenerateWanderTile();
                 break;
         }
@@ -97,27 +94,62 @@ public class TileAssetGenerator : MonoBehaviour
         );
     }
 
-    private void GenerateFunnelTile(List<ProceduralTerrainGenerator.TerrainSpot> spots)
+    private void GenerateWanderTile()
     {
-        float minY = 700f, maxY = 950f;
-        int steps = 6;
-        float stepY = (maxY - minY) / steps;
+        // Empty for now
+    }
 
+    private void GenerateBridgeTile(List<ProceduralTerrainGenerator.TerrainSpot> spots)
+    {
+        System.Random rand = new System.Random(rawCoord.x * 73856093 ^ rawCoord.y * 19349663 ^ worldSeed);
+
+        Vector3 start = GetRandomPoint(spots, rand, 750f);
+        GameObject startObj = Instantiate(smallFlatPrefab, start, Quaternion.identity, transform);
+        startObj.name = "Bridge_Start";
+
+        Vector3 mid = start + new Vector3(rand.NextFloat(100f, 200f), rand.NextFloat(20f, 40f), rand.NextFloat(100f, 200f));
+        GameObject midObj = Instantiate(smallDoublePrefab, mid, Quaternion.identity, transform);
+        midObj.name = "Bridge_Mid";
+
+        Vector3 archPos = Vector3.Lerp(start, mid, 0.5f) + Vector3.up * 10f;
+        GameObject archPrefab = rand.NextDouble() > 0.5 ? smallArchPrefab : smallDonutPrefab;
+        GameObject arch = Instantiate(archPrefab, archPos, Quaternion.identity, transform);
+        arch.name = "Bridge_Connector";
+    }
+
+    private Vector3 GetRandomPoint(List<ProceduralTerrainGenerator.TerrainSpot> spots, System.Random rand, float height)
+    {
         float tileStartX = rawCoord.x * tileSize + padding;
         float tileEndX = (rawCoord.x + 1) * tileSize - padding;
         float tileStartZ = rawCoord.y * tileSize + padding;
         float tileEndZ = (rawCoord.y + 1) * tileSize - padding;
 
+        float px = rand.NextFloat(tileStartX, tileEndX);
+        float pz = rand.NextFloat(tileStartZ, tileEndZ);
+        return new Vector3(px, height, pz);
+    }
+
+    private void GenerateLightFunnel(Vector2Int tileCoord, List<ProceduralTerrainGenerator.TerrainSpot> spots)
+    {
+        float minY = 700f, maxY = 950f;
+        int steps = 6;
+        float stepY = (maxY - minY) / steps;
+
+        float tileStartX = tileCoord.x * tileSize + padding;
+        float tileEndX = (tileCoord.x + 1) * tileSize - padding;
+        float tileStartZ = tileCoord.y * tileSize + padding;
+        float tileEndZ = (tileCoord.y + 1) * tileSize - padding;
+
         List<Vector3> funnelPoints = new();
-        System.Random rand = new System.Random(rawCoord.x * 7919 ^ rawCoord.y * 1973 ^ worldSeed);
+        System.Random rand = new System.Random(tileCoord.x * 7919 ^ tileCoord.y * 1973 ^ worldSeed);
 
         for (int i = 0; i < steps; i++)
         {
             float y = minY + i * stepY;
             float t = i / (float)steps;
 
-            float px = Mathf.Lerp(tileStartX, tileEndX, Mathf.PerlinNoise(t * 2f, rawCoord.y + 123));
-            float pz = Mathf.Lerp(tileStartZ, tileEndZ, Mathf.PerlinNoise(rawCoord.x + 321, t * 2f));
+            float px = Mathf.Lerp(tileStartX, tileEndX, Mathf.PerlinNoise(t * 2f, tileCoord.y + 123));
+            float pz = Mathf.Lerp(tileStartZ, tileEndZ, Mathf.PerlinNoise(tileCoord.x + 321, t * 2f));
 
             Vector3 p = new Vector3(px, y, pz);
             funnelPoints.Add(p);
@@ -135,61 +167,6 @@ public class TileAssetGenerator : MonoBehaviour
         var lightPrefab = lightPrefabs[rand.Next(lightPrefabs.Length)];
         var lightObj = Instantiate(lightPrefab, top + Vector3.up * 5f, Quaternion.identity, this.transform);
         lightObj.name = $"LightSource";
-    }
-
-    private void GenerateBridgeTile(List<ProceduralTerrainGenerator.TerrainSpot> spots)
-    {
-        // Start similar to fallback terrain but simpler or themed
-        // For now, we'll reuse the cluster generator from fallback
-        GenerateClusteredIslands(spots, bridge: true);
-    }
-
-    private void GenerateWanderTile()
-    {
-        // Currently empty. Could be populated with ambient life later.
-    }
-
-    private void GenerateClusteredIslands(List<ProceduralTerrainGenerator.TerrainSpot> spots, bool bridge = false)
-    {
-        int hash = rawCoord.x * 73856093 ^ rawCoord.y * 19349663 ^ worldSeed;
-        System.Random rand = new System.Random(hash);
-        int clusterCount = rand.Next(1, maxIslands + 1);
-
-        for (int c = 0; c < clusterCount; c++)
-        {
-            if (!bridge && rand.NextDouble() > clusterChance)
-                continue;
-
-            int islandsInCluster = rand.Next(minIslandsPerCluster, maxIslandsPerCluster + 1);
-
-            float minX = rawCoord.x * tileSize + padding;
-            float maxX = (rawCoord.x + 1) * tileSize - padding;
-            float minZ = rawCoord.y * tileSize + padding;
-            float maxZ = (rawCoord.y + 1) * tileSize - padding;
-            float baseX = rand.NextFloat(minX, maxX);
-            float baseZ = rand.NextFloat(minZ, maxZ);
-            float baseY = rand.NextFloat(750f, 850f);
-
-            for (int i = 0; i < islandsInCluster; i++)
-            {
-                GameObject prefab = ChooseIslandType(rand, rawCoord, c * 10 + i);
-
-                Vector3 offset = new Vector3(
-                    rand.NextFloat(-clusterRadius, clusterRadius),
-                    rand.NextFloat(-clusterVerticalVariation, clusterVerticalVariation),
-                    rand.NextFloat(-clusterRadius, clusterRadius)
-                );
-
-                Vector3 position = new Vector3(baseX, baseY, baseZ) + offset;
-
-                GameObject island = Instantiate(prefab, transform);
-                island.name = $"Cluster_{c}_Island_{i}";
-                island.transform.position = position;
-
-                float scale = rand.NextFloat(scaleRange.x, scaleRange.y);
-                island.transform.localScale = Vector3.one * scale * 4f;
-            }
-        }
     }
 
     private GameObject ChooseIslandType(System.Random rand, Vector2Int coord, int index)
