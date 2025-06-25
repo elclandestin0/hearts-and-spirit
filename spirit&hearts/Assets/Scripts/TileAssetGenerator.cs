@@ -27,6 +27,13 @@ public class TileAssetGenerator : MonoBehaviour
     [Header("Light Funnel Assets")]
     public GameObject[] funnelStepsPrefabs;
     public GameObject[] lightPrefabs;
+    [Header("Cluster Config")]
+    public int minIslandsPerCluster = 2;
+    public int maxIslandsPerCluster = 4;
+    public float clusterRadius = 200f;
+    public float clusterVerticalVariation = 50f;
+    public float clusterChance = 0.6f; // % chance a tile will contain a cluster
+
     [HideInInspector] public Vector2Int rawCoord;
 
     // Set Terrain Reference
@@ -95,50 +102,45 @@ public class TileAssetGenerator : MonoBehaviour
 
         int hash = rawCoord.x * 73856093 ^ rawCoord.y * 19349663 ^ worldSeed;
         System.Random rand = new System.Random(hash);
-        int islandCount = rand.Next(1, maxIslands + 1);
+        int clusterCount = rand.Next(1, maxIslands + 1);
 
-        for (int i = 0; i < islandCount; i++)
+        for (int c = 0; c < clusterCount; c++)
         {
-            GameObject prefab = ChooseIslandType(rand, rawCoord, i);
-            Vector3 position = Vector3.zero;
+            if (rand.NextDouble() > clusterChance)
+                continue; // Skip cluster for intentional gap
 
-            if (prefab == navigationIslandPrefab && rampSpots.Count > 0)
-                position = rampSpots[rand.Next(rampSpots.Count)];
-            else if (prefab == ringIslandPrefab && ringSpots.Count > 0)
-                position = ringSpots[rand.Next(ringSpots.Count)];
-            else if (prefab == obstacleIslandPrefab && obstacleSpots.Count > 0)
-                position = obstacleSpots[rand.Next(obstacleSpots.Count)];
-            else if (chillSpots.Count > 0)
-                position = chillSpots[rand.Next(chillSpots.Count)];
-            else
+            int islandsInCluster = rand.Next(minIslandsPerCluster, maxIslandsPerCluster + 1);
+
+            // Pick a base position for the cluster (center point)
+            float minX = rawCoord.x * tileSize + padding;
+            float maxX = (rawCoord.x + 1) * tileSize - padding;
+            float minZ = rawCoord.y * tileSize + padding;
+            float maxZ = (rawCoord.y + 1) * tileSize - padding;
+            float baseX = rand.NextFloat(minX, maxX);
+            float baseZ = rand.NextFloat(minZ, maxZ);
+            float baseY = rand.NextFloat(750f, 850f); // mid-high base
+
+            for (int i = 0; i < islandsInCluster; i++)
             {
-                float minX = rawCoord.x * tileSize + padding;
-                float maxX = (rawCoord.x + 1) * tileSize - padding;
-                float minZ = rawCoord.y * tileSize + padding;
-                float maxZ = (rawCoord.y + 1) * tileSize - padding;
+                GameObject prefab = ChooseIslandType(rand, rawCoord, c * 10 + i);
 
-                position = new Vector3(
-                    rand.NextFloat(minX, maxX),
-                    rand.NextFloat(heightRange.x, heightRange.y),
-                    rand.NextFloat(minZ, maxZ)
+                Vector3 offset = new Vector3(
+                    rand.NextFloat(-clusterRadius, clusterRadius),
+                    rand.NextFloat(-clusterVerticalVariation, clusterVerticalVariation),
+                    rand.NextFloat(-clusterRadius, clusterRadius)
                 );
+
+                Vector3 position = new Vector3(baseX, baseY, baseZ) + offset;
+
+                GameObject island = Instantiate(prefab, transform);
+                island.name = $"Cluster_{c}_Island_{i}";
+                island.transform.position = position;
+
+                float scale = rand.NextFloat(scaleRange.x, scaleRange.y);
+                island.transform.localScale = Vector3.one * scale * 4f;
             }
-
-            GameObject island = Instantiate(prefab, transform);
-            island.name = $"Island_{i}";
-
-            float y;
-            if (prefab == ringIslandPrefab)
-                y = rand.NextFloat(850f, 900f);
-            else if (prefab == navigationIslandPrefab)
-                y = rand.NextFloat(700f, 750f);
-            else
-                y = rand.NextFloat(750f, 850f);
-
-            island.transform.position = new Vector3(position.x, y, position.z);
-            float scale = rand.NextFloat(scaleRange.x, scaleRange.y);
-            island.transform.localScale = Vector3.one * scale * 4f;
         }
+
     }
 
     private void GenerateLightFunnel(Vector2Int tileCoord, List<ProceduralTerrainGenerator.TerrainSpot> spots)
