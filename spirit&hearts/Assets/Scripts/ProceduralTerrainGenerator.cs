@@ -167,14 +167,6 @@ public class ProceduralTerrainGenerator : MonoBehaviour
                     height += roughNoise * roughnessStrength;
                 }
 
-                float edgeOffsetX = Mathf.Clamp01(1f - Mathf.Abs(x - width / 2f) / (width * 0.5f));
-                float edgeOffsetZ = Mathf.Clamp01(1f - Mathf.Abs(z - depth / 2f) / (depth * 0.5f));
-                float edgeRaise = Mathf.PerlinNoise(x * 0.05f, z * 0.05f) * edgeOffsetX * edgeOffsetZ * 15f;
-                height += edgeRaise;
-
-                float inwardFalloff = Mathf.Clamp01(Mathf.Abs(x - width * 0.5f) / (width * 0.5f)) * Mathf.Clamp01(Mathf.Abs(z - depth * 0.5f) / (depth * 0.5f));
-                height *= inwardFalloff;
-
                 vertices[i] = new Vector3(x, height, z);
                 uvs[i] = new Vector2((float)x / width, (float)z / depth);
             }
