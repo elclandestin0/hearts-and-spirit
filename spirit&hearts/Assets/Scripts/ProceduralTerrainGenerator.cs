@@ -33,19 +33,19 @@ public class ProceduralTerrainGenerator : MonoBehaviour
     [Header("Curved Edge Settings")]
     public bool enableCurvedEdges = true;
     public float edgeCurvatureStrength = 20f;
+
     [Header("Border Ridge Settings")]
     public bool enableRidgeFusion = true;
     public float ridgeBoostStrength = 15f;
-    public float ridgeWidthPercent = 0.15f; // How wide the ridge band is from edge
-    public float ridgeNoiseScale = 0.3f;     // Local variation in ridge height
+    public float ridgeWidthPercent = 0.15f;
+    public float ridgeNoiseScale = 0.3f;
 
     public struct TerrainSpot
     {
         public Vector3 worldPos;
-        public float heightNorm; // 0–1 normalized
-        public float slope; // estimated
+        public float heightNorm;
+        public float slope;
     }
-
 
     public List<TerrainSpot> GetClassifiedSpots()
     {
@@ -67,7 +67,7 @@ public class ProceduralTerrainGenerator : MonoBehaviour
         for (int i = 0; i < verts.Length; i++)
         {
             float heightNorm = Mathf.InverseLerp(minY, maxY, verts[i].y);
-            float slope = 1f - Mathf.Abs(Vector3.Dot(normals[i], Vector3.up)); // 0 = flat, 1 = vertical
+            float slope = 1f - Mathf.Abs(Vector3.Dot(normals[i], Vector3.up));
 
             spots.Add(new TerrainSpot
             {
@@ -108,13 +108,11 @@ public class ProceduralTerrainGenerator : MonoBehaviour
         {
             for (int x = 0; x <= width; x++, i++)
             {
-                // Normalized distance to edge for falloff
                 float edgeX = Mathf.Min(x, width - x);
                 float edgeZ = Mathf.Min(z, depth - z);
                 float edgeDist = Mathf.Min(edgeX, edgeZ);
                 float falloff = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(edgeDist / maxDistanceToEdge));
 
-                // Multi-octave noise
                 float amplitude = 1f;
                 float frequency = 1f;
                 float noiseHeight = 0f;
@@ -130,44 +128,37 @@ public class ProceduralTerrainGenerator : MonoBehaviour
                     frequency *= lacunarity;
                 }
 
-                noiseHeight = Mathf.Pow(noiseHeight, peakSharpness); // spike the peaks
+                noiseHeight = Mathf.Pow(noiseHeight, peakSharpness);
                 float height = noiseHeight * heightMultiplier * falloff;
 
-            if (enableRidgeFusion)
-            {
-                float edgeBand = width * ridgeWidthPercent;
-
-                // Distance from left/right and bottom/top edges
-                float distToLeft = Mathf.Abs(x);
-                float distToRight = Mathf.Abs(width - x);
-                float distToBottom = Mathf.Abs(z);
-                float distToTop = Mathf.Abs(depth - z);
-
-                // Midpoints (between tiles) – boost here
-                float edgeCenterBoost = 0f;
-
-                // Check if close to vertical mid-edge (left or right edge centers)
-                if (distToLeft < edgeBand || distToRight < edgeBand)
+                if (enableRidgeFusion)
                 {
-                    float verticalCenterDist = Mathf.Abs(z - (depth / 2f)) / (depth / 2f); // 0 at center
-                    float vFalloff = Mathf.Clamp01(1f - verticalCenterDist);
-                    float vNoise = Mathf.PerlinNoise((x + offset.x + 2000f) * ridgeNoiseScale, (z + offset.y + 2000f) * ridgeNoiseScale);
-                    edgeCenterBoost += vFalloff * vNoise * ridgeBoostStrength * 0.5f;
+                    float edgeBand = width * ridgeWidthPercent;
+                    float distToLeft = Mathf.Abs(x);
+                    float distToRight = Mathf.Abs(width - x);
+                    float distToBottom = Mathf.Abs(z);
+                    float distToTop = Mathf.Abs(depth - z);
+                    float edgeCenterBoost = 0f;
+
+                    if (distToLeft < edgeBand || distToRight < edgeBand)
+                    {
+                        float verticalCenterDist = Mathf.Abs(z - (depth / 2f)) / (depth / 2f);
+                        float vFalloff = Mathf.Clamp01(1f - verticalCenterDist);
+                        float vNoise = Mathf.PerlinNoise((x + offset.x + 2000f) * ridgeNoiseScale, (z + offset.y + 2000f) * ridgeNoiseScale);
+                        edgeCenterBoost += vFalloff * vNoise * ridgeBoostStrength * 0.5f;
+                    }
+
+                    if (distToBottom < edgeBand || distToTop < edgeBand)
+                    {
+                        float horizontalCenterDist = Mathf.Abs(x - (width / 2f)) / (width / 2f);
+                        float hFalloff = Mathf.Clamp01(1f - horizontalCenterDist);
+                        float hNoise = Mathf.PerlinNoise((x + offset.x + 3000f) * ridgeNoiseScale, (z + offset.y + 3000f) * ridgeNoiseScale);
+                        edgeCenterBoost += hFalloff * hNoise * ridgeBoostStrength * 0.5f;
+                    }
+
+                    height += edgeCenterBoost;
                 }
 
-                // Check if close to horizontal mid-edge (top or bottom edge centers)
-                if (distToBottom < edgeBand || distToTop < edgeBand)
-                {
-                    float horizontalCenterDist = Mathf.Abs(x - (width / 2f)) / (width / 2f); // 0 at center
-                    float hFalloff = Mathf.Clamp01(1f - horizontalCenterDist);
-                    float hNoise = Mathf.PerlinNoise((x + offset.x + 3000f) * ridgeNoiseScale, (z + offset.y + 3000f) * ridgeNoiseScale);
-                    edgeCenterBoost += hFalloff * hNoise * ridgeBoostStrength * 0.5f;
-                }
-
-                height += edgeCenterBoost;
-            }
-
-                // Add localized roughness for rocky peaks
                 if (noiseHeight > 0.7f)
                 {
                     float rX = (x + offset.x) * roughnessFrequency;
@@ -175,6 +166,14 @@ public class ProceduralTerrainGenerator : MonoBehaviour
                     float roughNoise = Mathf.PerlinNoise(rX, rZ) - 0.5f;
                     height += roughNoise * roughnessStrength;
                 }
+
+                float edgeOffsetX = Mathf.Clamp01(1f - Mathf.Abs(x - width / 2f) / (width * 0.5f));
+                float edgeOffsetZ = Mathf.Clamp01(1f - Mathf.Abs(z - depth / 2f) / (depth * 0.5f));
+                float edgeRaise = Mathf.PerlinNoise(x * 0.05f, z * 0.05f) * edgeOffsetX * edgeOffsetZ * 15f;
+                height += edgeRaise;
+
+                float inwardFalloff = Mathf.Clamp01(Mathf.Abs(x - width * 0.5f) / (width * 0.5f)) * Mathf.Clamp01(Mathf.Abs(z - depth * 0.5f) / (depth * 0.5f));
+                height *= inwardFalloff;
 
                 vertices[i] = new Vector3(x, height, z);
                 uvs[i] = new Vector2((float)x / width, (float)z / depth);
