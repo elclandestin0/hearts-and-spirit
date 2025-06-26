@@ -9906,8 +9906,35 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0200a4ccaec63ca47abe9c7d4e10d0b8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1330539251473994160}
   m_SourcePrefab: {fileID: 100100000, guid: 0200a4ccaec63ca47abe9c7d4e10d0b8, type: 3}
+--- !u!1 &6951035088181045404 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 0200a4ccaec63ca47abe9c7d4e10d0b8, type: 3}
+  m_PrefabInstance: {fileID: 7833554448109770189}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1330539251473994160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6951035088181045404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f3beb822924a413db7877b7162e7983, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lanternRenderer: {fileID: 0}
+  unlitColor: {r: 1, g: 1, b: 1, a: 1}
+  unlitIntensity: 1
+  litColor: {r: 0.7529412, g: 0.08627451, b: 0, a: 1}
+  litIntensity: 1000
+  transitionDuration: 1.5
+  isLit: 0
 --- !u!4 &7727289900554187302 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0200a4ccaec63ca47abe9c7d4e10d0b8, type: 3}

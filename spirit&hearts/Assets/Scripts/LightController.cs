@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class LanternController : MonoBehaviour
+public class LightController : MonoBehaviour
 {
     public Renderer lanternRenderer;
 
@@ -22,6 +22,7 @@ public class LanternController : MonoBehaviour
 
     private void Start()
     {
+        lanternRenderer.material = new Material(lanternRenderer.material);
         _previousLitState = isLit;
         ApplyInitialState();
     }
@@ -40,6 +41,8 @@ public class LanternController : MonoBehaviour
         Color baseColor = isLit ? litColor : unlitColor;
         float intensity = isLit ? litIntensity : unlitIntensity;
         _mat.SetColor("_BaseColor", baseColor * intensity);
+        _mat.EnableKeyword("_EMISSION");
+        _mat.SetColor("_EmissionColor", Color.yellow * 5f);
     }
 
     private void StartTransition(bool toLit)
