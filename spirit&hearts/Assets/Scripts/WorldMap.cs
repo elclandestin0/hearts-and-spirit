@@ -8,6 +8,8 @@ public enum WorldTileRole
     Bridge,
     Wander
 }
+// lit: 191 24 0 255
+// unlit: 
 
 public static class WorldMap
 {

@@ -23,8 +23,8 @@ public class ProceduralTerrainGenerator : MonoBehaviour
     [Range(0f, 1f)] public float borderFalloffPercent = 0.2f;
 
     [Header("Peak Roughness")]
-    public float roughnessFrequency = 1.2f;
-    public float roughnessStrength = 10f;
+    public float roughnessFrequency = 0.4f;
+    public float roughnessStrength = 2.5f;
 
     [HideInInspector] public Vector2 offset;
 
