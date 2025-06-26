@@ -2,7 +2,6 @@ using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
 
-[ExecuteAlways]
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class ProceduralTerrainGenerator : MonoBehaviour
 {
@@ -23,8 +22,8 @@ public class ProceduralTerrainGenerator : MonoBehaviour
     [Range(0f, 1f)] public float borderFalloffPercent = 0.2f;
 
     [Header("Peak Roughness")]
-    public float roughnessFrequency = 0.4f;
-    public float roughnessStrength = 2.5f;
+    public float roughnessFrequency = 0.8f;
+    public float roughnessStrength = 5f;
 
     [HideInInspector] public Vector2 offset;
 

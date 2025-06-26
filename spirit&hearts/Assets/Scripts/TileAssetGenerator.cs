@@ -18,6 +18,8 @@ public class TileAssetGenerator : MonoBehaviour
     public GameObject ringIslandPrefab;
     public GameObject obstacleIslandPrefab;
     public GameObject landmarkIslandPrefab;
+    public GameObject forestPrefab;
+    public GameObject altarPrefab;
     public GameObject smallArchPrefab;
     public GameObject smallDiagonalPrefab;
     public GameObject smallDonutPrefab;
@@ -85,14 +87,32 @@ public class TileAssetGenerator : MonoBehaviour
 
     private void GenerateLandmarkTile()
     {
-        GameObject island = Instantiate(landmarkIslandPrefab, transform);
-        island.name = $"Island_Landmark";
+        GameObject prefabToUse = null;
+
+        if (rawCoord == new Vector2Int(-3, 3))
+            prefabToUse = landmarkIslandPrefab;
+        else if (rawCoord == new Vector2Int(3, -3))
+            prefabToUse = altarPrefab;
+        else if (rawCoord == new Vector2Int(0, -3))
+            prefabToUse = forestPrefab;
+        else
+            prefabToUse = landmarkIslandPrefab; // fallback (optional)
+
+        if (prefabToUse == null)
+        {
+            Debug.LogWarning($"No landmark prefab assigned for coord {rawCoord}");
+            return;
+        }
+
+        GameObject island = Instantiate(prefabToUse, transform);
+        island.name = $"Island_Landmark_{rawCoord.x}_{rawCoord.y}";
         island.transform.position = new Vector3(
             (rawCoord.x + 0.5f) * tileSize,
             1000f,
             (rawCoord.y + 0.5f) * tileSize
         );
     }
+
 
     private void GenerateWanderTile()
     {

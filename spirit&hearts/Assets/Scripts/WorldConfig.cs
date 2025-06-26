@@ -2,10 +2,10 @@ using UnityEngine;
 using System.Collections.Generic;
 public static class WorldConfig
 {
-    public static readonly int minX = -4;
-    public static readonly int maxX = 4;
-    public static readonly int minZ = -4;
-    public static readonly int maxZ = 4;
+    public static readonly int minX = -3;
+    public static readonly int maxX = 3;
+    public static readonly int minZ = -3;
+    public static readonly int maxZ = 3;
 
     // Landmarks...
     public static readonly Dictionary<Vector2Int, string> Landmarks = new()
