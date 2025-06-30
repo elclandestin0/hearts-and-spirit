@@ -1,6 +1,7 @@
+using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
 
-[ExecuteAlways]
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class ProceduralTerrainGenerator : MonoBehaviour
 {
@@ -21,27 +22,68 @@ public class ProceduralTerrainGenerator : MonoBehaviour
     [Range(0f, 1f)] public float borderFalloffPercent = 0.2f;
 
     [Header("Peak Roughness")]
-    public float roughnessFrequency = 1.2f;
-    public float roughnessStrength = 10f;
+    public float roughnessFrequency = 0.8f;
+    public float roughnessStrength = 5f;
 
     [HideInInspector] public Vector2 offset;
 
-    private MeshFilter meshFilter;
+    public MeshFilter meshFilter;
     private MeshCollider meshCollider;
+
+    [Header("Curved Edge Settings")]
+    public bool enableCurvedEdges = true;
+    public float edgeCurvatureStrength = 20f;
+
+    [Header("Border Ridge Settings")]
+    public bool enableRidgeFusion = true;
+    public float ridgeBoostStrength = 15f;
+    public float ridgeWidthPercent = 0.15f;
+    public float ridgeNoiseScale = 0.3f;
+
+    public struct TerrainSpot
+    {
+        public Vector3 worldPos;
+        public float heightNorm;
+        public float slope;
+    }
+
+    public List<TerrainSpot> GetClassifiedSpots()
+    {
+        List<TerrainSpot> spots = new();
+        if (meshFilter.sharedMesh == null) return spots;
+
+        Vector3[] verts = meshFilter.sharedMesh.vertices;
+        Vector3[] normals = meshFilter.sharedMesh.normals;
+
+        float maxY = float.MinValue;
+        float minY = float.MaxValue;
+
+        foreach (var v in verts)
+        {
+            if (v.y > maxY) maxY = v.y;
+            if (v.y < minY) minY = v.y;
+        }
+
+        for (int i = 0; i < verts.Length; i++)
+        {
+            float heightNorm = Mathf.InverseLerp(minY, maxY, verts[i].y);
+            float slope = 1f - Mathf.Abs(Vector3.Dot(normals[i], Vector3.up));
+
+            spots.Add(new TerrainSpot
+            {
+                worldPos = transform.TransformPoint(verts[i]),
+                heightNorm = heightNorm,
+                slope = slope
+            });
+        }
+
+        return spots;
+    }
 
     private void OnEnable()
     {
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
-        GenerateTerrain();
-    }
-
-    private void OnValidate()
-    {
-        if (!Application.isPlaying && meshFilter != null)
-        {
-            GenerateTerrain();
-        }
     }
 
     [ContextMenu("Generate Terrain")]
@@ -66,13 +108,11 @@ public class ProceduralTerrainGenerator : MonoBehaviour
         {
             for (int x = 0; x <= width; x++, i++)
             {
-                // Normalized distance to edge for falloff
                 float edgeX = Mathf.Min(x, width - x);
                 float edgeZ = Mathf.Min(z, depth - z);
                 float edgeDist = Mathf.Min(edgeX, edgeZ);
                 float falloff = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(edgeDist / maxDistanceToEdge));
 
-                // Multi-octave noise
                 float amplitude = 1f;
                 float frequency = 1f;
                 float noiseHeight = 0f;
@@ -88,10 +128,37 @@ public class ProceduralTerrainGenerator : MonoBehaviour
                     frequency *= lacunarity;
                 }
 
-                noiseHeight = Mathf.Pow(noiseHeight, peakSharpness); // spike the peaks
+                noiseHeight = Mathf.Pow(noiseHeight, peakSharpness);
                 float height = noiseHeight * heightMultiplier * falloff;
 
-                // Add localized roughness for rocky peaks
+                if (enableRidgeFusion)
+                {
+                    float edgeBand = width * ridgeWidthPercent;
+                    float distToLeft = Mathf.Abs(x);
+                    float distToRight = Mathf.Abs(width - x);
+                    float distToBottom = Mathf.Abs(z);
+                    float distToTop = Mathf.Abs(depth - z);
+                    float edgeCenterBoost = 0f;
+
+                    if (distToLeft < edgeBand || distToRight < edgeBand)
+                    {
+                        float verticalCenterDist = Mathf.Abs(z - (depth / 2f)) / (depth / 2f);
+                        float vFalloff = Mathf.Clamp01(1f - verticalCenterDist);
+                        float vNoise = Mathf.PerlinNoise((x + offset.x + 2000f) * ridgeNoiseScale, (z + offset.y + 2000f) * ridgeNoiseScale);
+                        edgeCenterBoost += vFalloff * vNoise * ridgeBoostStrength * 0.5f;
+                    }
+
+                    if (distToBottom < edgeBand || distToTop < edgeBand)
+                    {
+                        float horizontalCenterDist = Mathf.Abs(x - (width / 2f)) / (width / 2f);
+                        float hFalloff = Mathf.Clamp01(1f - horizontalCenterDist);
+                        float hNoise = Mathf.PerlinNoise((x + offset.x + 3000f) * ridgeNoiseScale, (z + offset.y + 3000f) * ridgeNoiseScale);
+                        edgeCenterBoost += hFalloff * hNoise * ridgeBoostStrength * 0.5f;
+                    }
+
+                    height += edgeCenterBoost;
+                }
+
                 if (noiseHeight > 0.7f)
                 {
                     float rX = (x + offset.x) * roughnessFrequency;
@@ -132,4 +199,46 @@ public class ProceduralTerrainGenerator : MonoBehaviour
         meshFilter.sharedMesh = mesh;
         meshCollider.sharedMesh = mesh;
     }
+
+    public float GetMaxHeight()
+    {
+        if (meshFilter.sharedMesh == null)
+            return 0f;
+
+        float max = float.MinValue;
+        Vector3[] verts = meshFilter.sharedMesh.vertices;
+
+        for (int i = 0; i < verts.Length; i++)
+        {
+            if (verts[i].y > max)
+                max = verts[i].y;
+        }
+
+        return max;
+    }
+
+
+    [ContextMenu("Save Mesh As Asset")]
+    public void SaveMeshAsset()
+    {
+        #if UNITY_EDITOR
+            if (meshFilter.sharedMesh == null)
+            {
+                Debug.LogWarning("No mesh to save.");
+                return;
+            }
+
+            string path = $"Assets/SavedMountains/Terrain_{name}_{Random.Range(1000, 9999)}.asset";
+            Mesh meshToSave = Instantiate(meshFilter.sharedMesh);
+
+            AssetDatabase.CreateAsset(meshToSave, path);
+            AssetDatabase.SaveAssets();
+
+            meshFilter.sharedMesh = meshToSave;
+            meshCollider.sharedMesh = meshToSave;
+
+            Debug.Log($"Saved mesh to {path}");
+        #endif
+    }
+
 }

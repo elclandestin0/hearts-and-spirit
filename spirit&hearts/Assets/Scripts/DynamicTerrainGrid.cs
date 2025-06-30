@@ -4,108 +4,73 @@ using System.Collections.Generic;
 public class DynamicTerrainGrid : MonoBehaviour
 {
     [Header("Setup")]
-    public GameObject terrainBlockPrefab;
+    public GameObject terrainPrefab;
     public Transform player;
     public int blockSize = 200;
+
     [Header("Optional")]
-    public GameObject cloudPlane;
+    public GameObject cloudPlane, skyDome, cloudsParticle;
 
-    private Dictionary<Vector2Int, GameObject> activeTiles = new();
-    private Vector2Int currentReflectedCenter;
-    private Vector2Int currentRawCenter;
-
+    private Dictionary<Vector2Int, GameObject> allTiles = new();
 
     void Start()
     {
-        Vector2Int rawCoord = new Vector2Int(
-            Mathf.FloorToInt(player.position.x / blockSize),
-            Mathf.FloorToInt(player.position.z / blockSize)
-        );
-        UpdateGridAroundPlayer(rawCoord);
+        // Pre-generate and cache all terrain tiles
+        for (int z = WorldConfig.minZ; z <= WorldConfig.maxZ; z++)
+        {
+            for (int x = WorldConfig.minX; x <= WorldConfig.maxX; x++)
+            {
+                Vector2Int coord = new Vector2Int(x, z);
+                Vector3 pos = new Vector3(x * blockSize, 0f, z * blockSize);
+
+                GameObject tile = Instantiate(terrainPrefab, pos, Quaternion.identity);
+                tile.name = $"Mountain_{x}_{z}";
+
+                var gen = tile.GetComponent<ProceduralTerrainGenerator>();
+                gen.offset = new Vector2(x * blockSize, z * blockSize);
+                gen.GenerateTerrain();
+
+                var assetGen = tile.GetComponent<TileAssetGenerator>();
+                if (assetGen != null)
+                {
+                    assetGen.rawCoord = new Vector2Int(x, z);
+                    assetGen.SetTerrainReference(gen);
+
+                    float maxHeight = gen.GetMaxHeight();
+                    assetGen.heightRange.x = Mathf.Max(assetGen.heightRange.x, maxHeight + 10f);
+                    assetGen.heightRange.y = Mathf.Max(assetGen.heightRange.y, assetGen.heightRange.x + 50f);
+
+                    assetGen.GenerateIslands();
+                }
+
+                allTiles[coord] = tile;
+            }
+        }
+
+        // Position sky elements at center of 0,0 terrain
+        // MoveToCenter(cloudPlane, new Vector2Int(0, 0));
+        // MoveToCenter(skyDome, new Vector2Int(0, 0));
+        // MoveToCenter(cloudsParticle, new Vector2Int(0, 0));
     }
 
     void Update()
     {
         if (!Application.isPlaying) return;
 
-        Vector2Int rawCoord = new Vector2Int(
-            Mathf.FloorToInt(player.position.x / blockSize),
-            Mathf.FloorToInt(player.position.z / blockSize)
-        );
-
-        Vector2Int reflectedCoord = new Vector2Int(
-            WorldConfig.WrapCoord(rawCoord.x, WorldConfig.minX, WorldConfig.maxX),
-            WorldConfig.WrapCoord(rawCoord.y, WorldConfig.minZ, WorldConfig.maxZ)
-        );
-
-        PlayerWorldTracker.UpdateCoord(player.position, blockSize);
-
-        if (reflectedCoord != currentReflectedCenter)
-        {
-            currentReflectedCenter = reflectedCoord;
-            UpdateGridAroundPlayer(rawCoord); // ← pass raw!
-        }
+        // No longer moving sky elements dynamically; static at (0,0)
     }
 
-    void UpdateGridAroundPlayer(Vector2Int rawCenterCoord)
+    void MoveToCenter(GameObject obj, Vector2Int centerCoord)
     {
-        currentRawCenter = rawCenterCoord;
-        HashSet<Vector2Int> newTileKeys = new();
+        if (obj == null || !allTiles.ContainsKey(centerCoord))
+            return;
 
-        for (int dz = -1; dz <= 1; dz++)
-        {
-            for (int dx = -1; dx <= 1; dx++)
-            {
-                Vector2Int rawCoord = new Vector2Int(rawCenterCoord.x + dx, rawCenterCoord.y + dz);
-                Vector2Int reflectedCoord = new Vector2Int(
-                    WorldConfig.WrapCoord(rawCoord.x, WorldConfig.minX, WorldConfig.maxX),
-                    WorldConfig.WrapCoord(rawCoord.y, WorldConfig.minZ, WorldConfig.maxZ)
-                );
+        GameObject centerTile = allTiles[centerCoord];
+        Vector3 centerPos = centerTile.transform.position;
+        centerPos.y = obj.transform.position.y;
+        centerPos.x += blockSize / 2f;
+        centerPos.z += blockSize / 2f;
 
-                newTileKeys.Add(rawCoord); // ✅ Track by RAW COORD
-
-                if (!activeTiles.ContainsKey(rawCoord))
-                {
-                    Vector3 position = new Vector3(rawCoord.x * blockSize, transform.position.y, rawCoord.y * blockSize);
-                    GameObject tile = Instantiate(terrainBlockPrefab, position, Quaternion.identity, transform);
-                    tile.name = $"Tile_{reflectedCoord.x}_{reflectedCoord.y}_at_{rawCoord.x}_{rawCoord.y}";
-
-                    var gen = tile.GetComponent<ProceduralTerrainGenerator>();
-                    if (gen != null)
-                    {
-                        gen.offset = new Vector2(reflectedCoord.x * blockSize, reflectedCoord.y * blockSize);
-                        gen.GenerateTerrain();
-                    }
-
-                    activeTiles.Add(rawCoord, tile);
-                }
-            }
-        }
-
-        // Clean up tiles no longer needed
-        List<Vector2Int> toRemove = new();
-        foreach (var kvp in activeTiles)
-        {
-            if (!newTileKeys.Contains(kvp.Key))
-            {
-                DestroyImmediate(kvp.Value);
-                toRemove.Add(kvp.Key);
-            }
-        }
-
-        foreach (var key in toRemove)
-        {
-            activeTiles.Remove(key);
-        }
-
-        if (cloudPlane != null && activeTiles.ContainsKey(rawCenterCoord))
-        {
-            GameObject centerTile = activeTiles[rawCenterCoord];
-            Vector3 newPos = centerTile.transform.position;
-            newPos.y = cloudPlane.transform.position.y;
-            newPos.x += blockSize / 2;
-            newPos.z += blockSize / 2;
-            cloudPlane.transform.position = newPos;
-        }
+        obj.transform.position = centerPos;
     }
 }
