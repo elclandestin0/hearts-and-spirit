@@ -206,7 +206,7 @@ public class Movement : MonoBehaviour
     private void UpdateDiveAngle()
     {
         diveAngle = Vector3.Angle(headFwd, Vector3.down);
-        bool isCurrentlyDiving = diveAngle < 50f && isGliding && velocity.magnitude > 5f;
+        bool isCurrentlyDiving = diveAngle < 90f && isGliding && velocity.magnitude > 5f;
 
         if (isCurrentlyDiving)
         {
