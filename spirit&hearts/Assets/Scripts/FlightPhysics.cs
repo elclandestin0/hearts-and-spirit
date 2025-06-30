@@ -85,7 +85,7 @@ public static class FlightPhysics
             // float velocityDelta = (velocity - preVelocity).magnitude;
 
             Vector3 targetDiveVelocity = headForward.normalized * diveSpeed;
-            velocity = Vector3.Lerp(velocity, targetDiveVelocity, deltaTime * 2.5f);
+            velocity += Vector3.Lerp(velocity, targetDiveVelocity, deltaTime * 2.5f);
 
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
         }
