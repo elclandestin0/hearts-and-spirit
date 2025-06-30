@@ -320,7 +320,6 @@ public class DoveCompanion : MonoBehaviour
     private void ObstacleCheck()
     {
         if (currentState != DoveState.Orbiting) return;
-        Debug.Log("Obstacle check");
         Vector3 rayOrigin = transform.position + Vector3.up * 0.2f; // slight vertical lift to avoid hitting ground immediately
         Vector3 toTarget = (liveTargetPosition - rayOrigin).normalized;
 

@@ -218,12 +218,20 @@ PrefabInstance:
       value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 2130433395076051474, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+      propertyPath: sphereRadius
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2130433395076051474, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: glideStrength
       value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 2130433395076051474, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: impactLayer.m_Bits
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2130433395076051474, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+      propertyPath: sphereCastDistance
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4934435829363447659, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_FOVAxisMode
@@ -297,7 +305,8 @@ PrefabInstance:
       propertyPath: m_StartingInteractionOverridesMap.Array.size
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1312439253634280487, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 8526492151438153135, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}

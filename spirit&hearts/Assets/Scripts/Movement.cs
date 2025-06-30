@@ -22,6 +22,9 @@ public class Movement : MonoBehaviour
     [SerializeField] private float glideTime = 0f;
     [SerializeField] private float glideStrength = 4.0f;
     [SerializeField] private float diveAcceleratorSmoothness = 2.5f;
+    [SerializeField] private float sphereRadius = 10f;
+    [SerializeField] private float sphereCastDistance = 1.0f;
+    [SerializeField] private LayerMask impactLayer;
     public float diveAngle = 0f;
 
     [Header("Recorder")]
@@ -79,11 +82,6 @@ public class Movement : MonoBehaviour
     private float lastRecordedDiveSpeed = 0f;
     private Vector3 lastDiveForward = Vector3.zero;
 
-    // Bounce
-    [SerializeField] private float sphereRadius = 0.4f;
-    [SerializeField] private float sphereCastDistance = 0.6f;
-    [SerializeField] private LayerMask impactLayer;
-    
     [Header("Audio")]
     [SerializeField] private AudioSource flapAudioSource;
     [SerializeField] private AudioSource diveAudioSource;
@@ -91,6 +89,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private AudioClip flapClip;
     [SerializeField] private float targetVolumeDive;
     [SerializeField] private float targetVolumeGlide;
+    
     void Start()
     {
         // Save initial world-space hand positions for motion delta
@@ -101,7 +100,6 @@ public class Movement : MonoBehaviour
     void Update()
     {
         CheckSurfaceImpact();
-
         // Handle bounce recovery (loss of control)
         if (inputLockedDuringBounce)
         {
@@ -119,9 +117,9 @@ public class Movement : MonoBehaviour
             {
                 recentlyBounced = false;
             }
-
             return;
         }
+
         DetectControllerInput();
 
         // Normal flight update
@@ -475,6 +473,23 @@ public class Movement : MonoBehaviour
         }
     }
 
+    private void OnDrawGizmosSelected()
+    {
+        if (!Application.isPlaying || velocity.sqrMagnitude < 0.01f) return;
+
+        Gizmos.color = Color.yellow;
+        Vector3 origin = head.position;
+        Vector3 direction = velocity.normalized;
+        float distance = sphereCastDistance;
+
+        // Draw the path
+        Gizmos.DrawLine(origin, origin + direction * distance);
+
+        // Draw start and end spheres
+        Gizmos.DrawWireSphere(origin, sphereRadius);
+        Gizmos.DrawWireSphere(origin + direction * distance, sphereRadius);
+    }
+
 
     private void CheckSurfaceImpact()
     {
@@ -483,22 +498,27 @@ public class Movement : MonoBehaviour
             bounceTimer -= Time.deltaTime;
             if (bounceTimer <= 0f)
                 recentlyBounced = false;
+            return;
         }
 
+        if (velocity.sqrMagnitude < 0.01f) return; // don't cast with no velocity
+        Debug.Log("good vel: " + velocity.sqrMagnitude);
         Vector3 origin = head.position;
         Vector3 direction = velocity.normalized;
 
-        if (Physics.SphereCast(origin, sphereRadius, velocity.normalized, out RaycastHit hit, sphereCastDistance, impactLayer, QueryTriggerInteraction.Ignore))
+        if (Physics.SphereCast(origin, sphereRadius, direction, out RaycastHit hit, sphereCastDistance,  ~0, QueryTriggerInteraction.Ignore))
         {
             float speed = velocity.magnitude;
-            float approachDot = Vector3.Dot(velocity.normalized, -hit.normal);
-
+            float approachDot = Vector3.Dot(direction, -hit.normal);
+            Debug.Log("approach dot : " + approachDot);
             if (approachDot > 0.5f)
             {
                 Vector3 bounce = hit.normal * speed * 2f;
                 velocity = bounce;
 
+                Debug.DrawRay(hit.point, hit.normal, Color.red, 1f);
                 Debug.DrawRay(hit.point, bounce, Color.green, 1f);
+
                 recentlyBounced = true;
                 bounceTimer = bounceDuration;
             }
