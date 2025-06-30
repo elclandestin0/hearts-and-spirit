@@ -78,7 +78,11 @@ public class Movement : MonoBehaviour
     private float diveEndTime = -1f;
     private float lastRecordedDiveSpeed = 0f;
     private Vector3 lastDiveForward = Vector3.zero;
-    
+
+    // Bounce
+    [SerializeField] private float sphereRadius = 0.4f;
+    [SerializeField] private float sphereCastDistance = 0.6f;
+    [SerializeField] private LayerMask impactLayer;
     
     [Header("Audio")]
     [SerializeField] private AudioSource flapAudioSource;
@@ -96,7 +100,7 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        // CheckSurfaceImpact();
+        CheckSurfaceImpact();
 
         // Handle bounce recovery (loss of control)
         if (inputLockedDuringBounce)
@@ -474,42 +478,27 @@ public class Movement : MonoBehaviour
 
     private void CheckSurfaceImpact()
     {
-        // Bounce check
         if (recentlyBounced)
         {
             bounceTimer -= Time.deltaTime;
             if (bounceTimer <= 0f)
-            {
                 recentlyBounced = false;
-            }
         }
 
-        Vector3 rayOrigin = head.position;
-        float rayLength = 0.5f;
+        Vector3 origin = head.position;
+        Vector3 direction = velocity.normalized;
 
-        // Forward ray
-        Debug.DrawRay(rayOrigin, headFwd * rayLength, Color.cyan, 0f, false);
-        Debug.DrawRay(rayOrigin, headDown * rayLength, Color.cyan, 0f, false);
-
-        RaycastHit hit;
-        bool forwardHit = Physics.Raycast(rayOrigin, headFwd, out RaycastHit forward, rayLength);
-        bool downwardsHit = Physics.Raycast(rayOrigin, headDown, out RaycastHit downward, rayLength);
-        hit = forwardHit ? forward : downward;
-
-        if (forwardHit || downwardsHit)
-        {    
-            Vector3 impactNormal = hit.normal;
+        if (Physics.SphereCast(origin, sphereRadius, velocity.normalized, out RaycastHit hit, sphereCastDistance, impactLayer, QueryTriggerInteraction.Ignore))
+        {
             float speed = velocity.magnitude;
+            float approachDot = Vector3.Dot(velocity.normalized, -hit.normal);
 
-            float approachDot = Vector3.Dot(velocity.normalized, -impactNormal);
             if (approachDot > 0.5f)
             {
-                Vector3 bounce = impactNormal * speed * 2f;
+                Vector3 bounce = hit.normal * speed * 2f;
                 velocity = bounce;
 
                 Debug.DrawRay(hit.point, bounce, Color.green, 1f);
-
-                // Trigger slow blending
                 recentlyBounced = true;
                 bounceTimer = bounceDuration;
             }
