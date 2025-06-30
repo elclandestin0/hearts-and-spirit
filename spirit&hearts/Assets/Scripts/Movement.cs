@@ -22,7 +22,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private float glideTime = 0f;
     [SerializeField] private float glideStrength = 4.0f;
     [SerializeField] private float diveAcceleratorSmoothness = 2.5f;
-    [SerializeField] private float sphereRadius = 10f;
+    [SerializeField] private float sphereRadius = 5f;
     [SerializeField] private float sphereCastDistance = 1.0f;
     [SerializeField] private LayerMask impactLayer;
     public float diveAngle = 0f;
@@ -473,24 +473,6 @@ public class Movement : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        if (!Application.isPlaying || velocity.sqrMagnitude < 0.01f) return;
-
-        Gizmos.color = Color.yellow;
-        Vector3 origin = head.position;
-        Vector3 direction = velocity.normalized;
-        float distance = sphereCastDistance;
-
-        // Draw the path
-        Gizmos.DrawLine(origin, origin + direction * distance);
-
-        // Draw start and end spheres
-        Gizmos.DrawWireSphere(origin, sphereRadius);
-        Gizmos.DrawWireSphere(origin + direction * distance, sphereRadius);
-    }
-
-
     private void CheckSurfaceImpact()
     {
         if (recentlyBounced)
@@ -502,7 +484,6 @@ public class Movement : MonoBehaviour
         }
 
         if (velocity.sqrMagnitude < 0.01f) return; // don't cast with no velocity
-        Debug.Log("good vel: " + velocity.sqrMagnitude);
         Vector3 origin = head.position;
         Vector3 direction = velocity.normalized;
 
@@ -510,14 +491,10 @@ public class Movement : MonoBehaviour
         {
             float speed = velocity.magnitude;
             float approachDot = Vector3.Dot(direction, -hit.normal);
-            Debug.Log("approach dot : " + approachDot);
             if (approachDot > 0.5f)
             {
                 Vector3 bounce = hit.normal * speed * 2f;
                 velocity = bounce;
-
-                Debug.DrawRay(hit.point, hit.normal, Color.red, 1f);
-                Debug.DrawRay(hit.point, bounce, Color.green, 1f);
 
                 recentlyBounced = true;
                 bounceTimer = bounceDuration;
