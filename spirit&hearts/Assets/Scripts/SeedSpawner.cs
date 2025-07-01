@@ -2,8 +2,8 @@ using UnityEngine;
 public class SeedSpawner : MonoBehaviour
 {
     public GameObject seedPrefab;
+    public Transform spawnPoint;
     private GameObject spawnedSeed;
-
     void Start()
     {
         SpawnSeed();
@@ -13,7 +13,8 @@ public class SeedSpawner : MonoBehaviour
     {
         if (spawnedSeed == null && seedPrefab != null)
         {
-            spawnedSeed = Instantiate(seedPrefab, transform.position + Vector3.up * 10f, Quaternion.identity);
+            Quaternion spawnRotation = Quaternion.Euler(-90f, spawnPoint.rotation.eulerAngles.y, spawnPoint.rotation.eulerAngles.z);
+            spawnedSeed = Instantiate(seedPrefab, spawnPoint.position, spawnRotation);
         }
     }
 }

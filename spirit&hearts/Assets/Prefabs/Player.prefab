@@ -3264,6 +3264,11 @@ MonoBehaviour:
   glideTime: 0
   glideStrength: 4
   diveAcceleratorSmoothness: 2.5
+  sphereRadius: 0.5
+  sphereCastDistance: 1
+  impactLayer:
+    serializedVersion: 2
+    m_Bits: 0
   diveAngle: 0
   recorder: {fileID: 8178502599650468775}
   isGliding: 0
@@ -3779,7 +3784,6 @@ GameObject:
   - component: {fileID: 7339887439719960300}
   - component: {fileID: 6366760630776286102}
   - component: {fileID: 2748394949736170467}
-  - component: {fileID: 3126020288792278114}
   m_Layer: 2
   m_Name: Player
   m_TagString: Untagged
@@ -3888,34 +3892,6 @@ MonoBehaviour:
   m_MotionControllerModeEnded:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &3126020288792278114
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5990766776719165149}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9b3d17eeb2e6bc47ada81d8f7f638d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_GazeInteractor: {fileID: 0}
-  m_FallbackDivergence: 60
-  m_HideCursorWithNoActiveRays: 1
-  m_RayInteractors:
-  - m_Interactor: {fileID: 0}
-    m_TeleportRay: 0
-  - m_Interactor: {fileID: 1622610299828252763}
-    m_TeleportRay: 1
-  - m_Interactor: {fileID: 0}
-    m_TeleportRay: 0
-  - m_Interactor: {fileID: 3965557623935941841}
-    m_TeleportRay: 1
-  m_AimAssistRequiredAngle: 30
-  m_AimAssistRequiredSpeed: 0.25
-  m_AimAssistPercent: 0.8
-  m_AimAssistMaxSpeedPercent: 10
 --- !u!1 &6036261318424055375
 GameObject:
   m_ObjectHideFlags: 0
@@ -4766,6 +4742,7 @@ GameObject:
   - component: {fileID: 3641313632790004247}
   - component: {fileID: 2039361352703888449}
   - component: {fileID: 1312439253634280487}
+  - component: {fileID: 1809218013488806387}
   m_Layer: 2
   m_Name: Head
   m_TagString: Untagged
@@ -4858,7 +4835,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -4961,6 +4938,18 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1809218013488806387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7429419164786851979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2aeb6bea27bbf4a40938c49b115a838d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7932513404506860371
 GameObject:
   m_ObjectHideFlags: 0

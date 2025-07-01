@@ -487,7 +487,7 @@ public class Movement : MonoBehaviour
         Vector3 origin = head.position;
         Vector3 direction = velocity.normalized;
 
-        if (Physics.SphereCast(origin, sphereRadius, direction, out RaycastHit hit, sphereCastDistance,  ~0, QueryTriggerInteraction.Ignore))
+        if (Physics.SphereCast(origin, sphereRadius, direction, out RaycastHit hit, sphereCastDistance, impactLayer, QueryTriggerInteraction.Ignore))
         {
             float speed = velocity.magnitude;
             float approachDot = Vector3.Dot(direction, -hit.normal);
