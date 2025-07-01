@@ -413,8 +413,7 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            float blendSpeed = (recentlyBounced && bounceTimer > 0f) ? 0.2f : 1.5f;
-            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 0.2f);
+            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
             velocity = blendedDir * velocity.magnitude;
             // velocity += Vector3.down * (gravity / 3) * Time.deltaTime * 1.5f;
         }
