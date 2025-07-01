@@ -108,7 +108,7 @@ public class TileAssetGenerator : MonoBehaviour
         island.name = $"Island_Landmark_{rawCoord.x}_{rawCoord.y}";
         island.transform.position = new Vector3(
             (rawCoord.x + 0.5f) * tileSize,
-            1000f,
+            tileSize,
             (rawCoord.y + 0.5f) * tileSize
         );
     }

@@ -79,11 +79,6 @@ public static class FlightPhysics
             Vector3 diveAccel = headForward.normalized * diveSpeed * diveRamp;
             Vector3 diveBoost = diveAccel * deltaTime;
 
-            // Vector3 preVelocity = velocity;
-            // velocity += diveBoost;
-
-            // float velocityDelta = (velocity - preVelocity).magnitude;
-
             Vector3 targetDiveVelocity = headForward.normalized * diveSpeed;
             velocity += Vector3.Lerp(velocity, targetDiveVelocity, deltaTime * 2.5f);
 
