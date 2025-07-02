@@ -7,6 +7,7 @@ public class SeedCollector : MonoBehaviour
     [Header("Audio")]
     public AudioSource pickupSound;
     public AudioSource lightSound;
+    public AmbientLightManager lightManager;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -22,18 +23,18 @@ public class SeedCollector : MonoBehaviour
 
         if (other.CompareTag("Light") && seedsCollected > 0)
         {
-            LightController light = other.GetComponent<LightController>() 
-                                  ?? other.GetComponentInParent<LightController>() 
-                                  ?? other.GetComponentInChildren<LightController>();
-
+            LightController light = other.GetComponent<LightController>()
+                                            ?? other.GetComponentInParent<LightController>()
+                                            ?? other.GetComponentInChildren<LightController>();
             if (light != null && !light.isLit)
             {
                 light.isLit = true;
                 seedsCollected--;
                 lightSound?.Play();  // Play light-up sound
                 Debug.Log("Seed used to light a source! Seeds remaining: " + seedsCollected);
+                lightManager.UpdateAmbientLight();
             }
-            else 
+            else
             {
                 Debug.Log(light == null ? "Light null" : "Light not null");
                 Debug.Log(!light?.isLit ?? false ? "Not lit" : "It's lit");
