@@ -99,11 +99,11 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        // Spline forces
-        foreach (var windZone in FindObjectsOfType<SplineWindZone>())
+        foreach (var zone in FindObjectsOfType<SplineWindZone>())
         {
-            velocity += windZone.GetWindForceAtPosition(transform.position) * Time.deltaTime;
+            velocity += zone.GetWindForceAtPosition(transform.position) * Time.deltaTime;
         }
+
         CheckSurfaceImpact();
         // Handle bounce recovery (loss of control)
         if (inputLockedDuringBounce)
