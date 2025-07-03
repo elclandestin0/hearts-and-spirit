@@ -105,19 +105,15 @@ public class Movement : MonoBehaviour
         }
 
         CheckSurfaceImpact();
-        // Handle bounce recovery (loss of control)
         if (inputLockedDuringBounce)
         {
             bounceTimer -= Time.deltaTime;
 
             velocity *= 0.98f;
 
-            // Move character while in bounce phase
             ApplyMovement();
             ApplyDrag();
             DrawDebugLines();
-
-            // End bounce recovery
             if (bounceTimer <= 0f)
             {
                 recentlyBounced = false;
@@ -407,21 +403,37 @@ public class Movement : MonoBehaviour
     {
         if (isGliding)
         {
-            // Slower descent when fast
             float speedFactor = Mathf.InverseLerp(0f, maxDiveSpeed, velocity.magnitude);
             float gravityScale = Mathf.Lerp(1.0f, 0.4f, speedFactor);
 
             velocity += Vector3.down * gravity * gravityScale * Time.deltaTime;
+        }
+        // We really don't need this block.
+        
+        // else
+        // {
+        //     bool isInWindZone = false;
 
-            // 🌀 Optional: smooth lift when fast
-            // ApplyAirPocketEffect();
-        }
-        else
-        {
-            Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
-            velocity = blendedDir * velocity.magnitude;
-            // velocity += Vector3.down * (gravity / 3) * Time.deltaTime * 1.5f;
-        }
+        //     foreach (var zone in FindObjectsOfType<SplineWindZone>())
+        //     {
+        //         Vector3 wind = zone.GetWindForceAtPosition(transform.position);
+        //         if (wind != Vector3.zero)
+        //         {
+        //             isInWindZone = true;
+        //             break;
+        //         }
+        //     }
+
+        //     if (!isInWindZone)
+        //     {
+        //         // Only blend toward head forward if NOT in wind zone
+        //         Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
+        //         velocity = blendedDir * velocity.magnitude;
+        //     }
+
+        //     // Optional: apply gravity when falling outside wind
+        //     velocity += Vector3.down * gravity * 0.5f * Time.deltaTime;
+        // }
     }
 
     private void ApplyAirPocketEffect()

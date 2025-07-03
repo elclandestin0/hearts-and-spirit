@@ -5,7 +5,7 @@ using Unity.Mathematics;
 public class SplineWindZone : MonoBehaviour
 {
     public SplineContainer spline;
-    public float windStrength = 10f;
+    public float windStrength = 100f;
     public float influenceRadius = 25f;
 
     public Vector3 GetWindForceAtPosition(Vector3 position)
@@ -32,12 +32,7 @@ public class SplineWindZone : MonoBehaviour
 
         float distance = Vector3.Distance(position, worldPoint);
         if (distance > influenceRadius)
-        {
-            Debug.Log("not in the zone");
             return Vector3.zero;
-        }
-
-        Debug.Log("in the zone");
 
         float falloff = 1f - Mathf.Clamp01(distance / influenceRadius);
         return worldTangent.normalized * windStrength * falloff;
