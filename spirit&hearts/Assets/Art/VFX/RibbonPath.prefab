@@ -26,8 +26,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7243362275187812720}
   - {fileID: 1586855439250868915}
@@ -9927,6 +9927,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7243362275187812720}
   - component: {fileID: 2973532644350483649}
+  - component: {fileID: 8943805782220583835}
   m_Layer: 0
   m_Name: Spline
   m_TagString: Untagged
@@ -10069,6 +10070,21 @@ MonoBehaviour:
       m_Data: []
   m_Knots:
     m_KnotsLink: []
+--- !u!114 &8943805782220583835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7125108674996575221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8981d36a334a6436886e826db306fdee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spline: {fileID: 2973532644350483649}
+  windStrength: 1000
+  influenceRadius: 25
 --- !u!1 &8230292467232690990
 GameObject:
   m_ObjectHideFlags: 0
@@ -10097,7 +10113,7 @@ Transform:
   m_GameObject: {fileID: 8230292467232690990}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: -0.09260448, w: 0.995703}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.0000051001634, y: -0.00000060390994, z: 0.0000025655354}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
