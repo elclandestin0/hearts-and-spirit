@@ -227,15 +227,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 559
+      value: 2356
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 305
+      value: 949
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 349
+      value: -2184
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalRotation.w
@@ -957,8 +957,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   darkColor: {r: 0, g: 0, b: 0, a: 1}
   fullLitColor: {r: 1, g: 1, b: 1, a: 1}
-  lit: 0
   total: 0
+  lit: 0
 --- !u!4 &1029670550
 Transform:
   m_ObjectHideFlags: 0

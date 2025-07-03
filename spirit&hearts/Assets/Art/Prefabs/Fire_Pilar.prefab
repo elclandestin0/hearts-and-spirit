@@ -153,7 +153,7 @@ GameObject:
   - component: {fileID: 7698922400257618585}
   m_Layer: 0
   m_Name: Sphere
-  m_TagString: Untagged
+  m_TagString: Light
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -260,10 +260,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightMaterial: {fileID: 2100000, guid: a29f6fafb374e764fb55414ad3c078d3, type: 2}
-  unlitColor: {r: 0, g: 0, b: 0, a: 0}
-  unlitIntensity: 0
-  litColor: {r: 0, g: 0, b: 0, a: 0}
-  litIntensity: 0
+  unlitColor: {r: 1, g: 1, b: 1, a: 0}
+  unlitIntensity: 1
+  litColor: {r: 0.7529412, g: 0.08627451, b: 0, a: 0}
+  litIntensity: 1000
   transitionDuration: 1.5
   isLit: 0
 --- !u!54 &7698922400257618585

@@ -5,16 +5,16 @@ public class AmbientLightManager : MonoBehaviour
     [Header("Ambient Light Settings")]
     public Color darkColor = Color.black;
     public Color fullLitColor = Color.white;
-    public int lit = 0;
-    public int total;
-    GameObject[] allLights;
-    void Start() 
+
+    [SerializeField] private int total;
+    [SerializeField] private int lit;
+
+    public void UpdateAmbientLight()
     {
         GameObject[] allLights = GameObject.FindGameObjectsWithTag("Light");
         total = allLights.Length;
-    }
-    public void UpdateAmbientLight()
-    {
+        lit = 0;
+
         foreach (GameObject obj in allLights)
         {
             LightController controller = obj.GetComponent<LightController>()
@@ -26,8 +26,6 @@ public class AmbientLightManager : MonoBehaviour
         }
 
         float litPercent = total > 0 ? (float)lit / total : 0f;
-
-        // Lerp from darkColor to fullLitColor based on percentage of lights lit
         RenderSettings.ambientLight = Color.Lerp(darkColor, fullLitColor, litPercent);
     }
 }
