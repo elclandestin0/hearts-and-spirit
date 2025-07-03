@@ -13,6 +13,6 @@ public class DestroyAfterSplineEnd : MonoBehaviour
     void Update()
     {
         if (animate.NormalizedTime >= 1f)
-            Destroy(gameObject);
+            Destroy(this);
     }
 }
