@@ -5,9 +5,28 @@ public class AmbientLightManager : MonoBehaviour
     [Header("Ambient Light Settings")]
     public Color darkColor = Color.black;
     public Color fullLitColor = Color.white;
-
     [SerializeField] private int total;
     [SerializeField] private int lit;
+
+    // Transition duration between currentStartColor and currentTargetColor
+    public float transitionDuration = 1.5f;
+    private Color currentTargetColor;
+    private Color currentStartColor;
+    private float transitionTimer = 0f;
+    private bool isTransitioning = false;
+
+    private void Update()
+    {
+        if (isTransitioning)
+        {
+            transitionTimer += Time.deltaTime;
+            float t = Mathf.Clamp01(transitionTimer / transitionDuration);
+            RenderSettings.ambientLight = Color.Lerp(currentStartColor, currentTargetColor, t);
+
+            if (t >= 1f)
+                isTransitioning = false;
+        }
+    }
 
     public void UpdateAmbientLight()
     {
@@ -26,6 +45,9 @@ public class AmbientLightManager : MonoBehaviour
         }
 
         float litPercent = total > 0 ? (float)lit / total : 0f;
-        RenderSettings.ambientLight = Color.Lerp(darkColor, fullLitColor, litPercent);
+        currentStartColor = RenderSettings.ambientLight;
+        currentTargetColor = Color.Lerp(darkColor, fullLitColor, litPercent);
+        transitionTimer = 0f;
+        isTransitioning = true;
     }
 }
