@@ -89,11 +89,11 @@ public class TileAssetGenerator : MonoBehaviour
     {
         GameObject prefabToUse = null;
 
-        if (rawCoord == new Vector2Int(-3, 3))
+        if (rawCoord == new Vector2Int(-2, 2))
             prefabToUse = landmarkIslandPrefab;
-        else if (rawCoord == new Vector2Int(3, -3))
+        else if (rawCoord == new Vector2Int(2, -2))
             prefabToUse = altarPrefab;
-        else if (rawCoord == new Vector2Int(0, -3))
+        else if (rawCoord == new Vector2Int(0, -2))
             prefabToUse = forestPrefab;
         else
             prefabToUse = landmarkIslandPrefab; // fallback (optional)

@@ -13,9 +13,9 @@ public static class WorldMap
 {
     public static readonly Dictionary<Vector2Int, string> Landmarks = new()
     {
-        { new Vector2Int(-3,  3), "Lighthouse" },  // NW
-        { new Vector2Int(3, -3), "Altar" },       // SE
-        { new Vector2Int(0, -3), "Forest" }       // South center
+        { new Vector2Int(-2, 2), "Lighthouse" },  // NW
+        { new Vector2Int(2, -2), "Altar" },       // SE
+        { new Vector2Int(0, -2), "Forest" }       // South center
     };
 
     public static WorldTileRole GetRole(Vector2Int coord)
