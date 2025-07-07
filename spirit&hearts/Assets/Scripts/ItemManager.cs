@@ -1,18 +1,26 @@
 using UnityEngine;
 
-public class SeedCollector : MonoBehaviour
+public class ItemManager : MonoBehaviour
 {
     public int seedsCollected = 0;
 
-    [Header("Audio")]
+    [Header("Audio and light")]
     public AudioSource pickupSound;
     public AudioSource lightSound;
     public AmbientLightManager lightManager;
 
+    // Movement section
+    [Header("Movement")]
+    public Movement movementScript;
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Lol triggered " + other.gameObject.name);
+        // Level section
+        if (other.CompareTag("SpeedBooster"))
+        {
+            movementScript.ActivateSpeedBoost();
+        }
 
+        // Light section
         if (other.CompareTag("Seed"))
         {
             seedsCollected++;

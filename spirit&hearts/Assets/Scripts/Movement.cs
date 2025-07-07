@@ -26,7 +26,6 @@ public class Movement : MonoBehaviour
     [SerializeField] private float sphereCastDistance = 1.0f;
     [SerializeField] private LayerMask impactLayer;
     public float diveAngle = 0f;
-
     [Header("Recorder")]
     [SerializeField] private GhostFlightRecorder recorder;
     // 🔒 Script-controlled flight values
@@ -38,10 +37,8 @@ public class Movement : MonoBehaviour
     private float snapAngle = 45f;
     private float turnThreshold = 0.8f;
     private float turnCooldown = 0.5f;
-
     private float turnCooldownTimer = 0f;
     private bool canSnapTurn => turnCooldownTimer <= 0f;
-
     // private readonly float glideRotationSpeed = 40f; // kept for future UX toggles
     private Vector3 velocity = Vector3.zero;
     private Vector3 prevLeftPos, prevRightPos;
@@ -71,7 +68,6 @@ public class Movement : MonoBehaviour
     private float bounceDuration = 1f;
     private float bounceDampFactor = 0.9f;
     private bool inputLockedDuringBounce => recentlyBounced && bounceTimer > 0f;
-
     // Dive->Lift 
     private bool wasDiving = false;
     private float lastDiveEndTime = -10f;
@@ -88,6 +84,15 @@ public class Movement : MonoBehaviour
     [SerializeField] private AudioClip flapClip;
     [SerializeField] private float targetVolumeDive;
     [SerializeField] private float targetVolumeGlide;
+
+    [Header("Speed Boost")]
+    // Speed Boost
+    private bool isSpeedBoosted = false;
+    private float speedBoostStartTime = -10f;
+    private float speedBoostDuration = 3f;
+    private float speedBoostFadeDuration = 2f;
+    private float speedBoostMagnitude = 150f;
+    private Vector3 speedBoostDirection = Vector3.zero;
     
     void Start()
     {
@@ -134,6 +139,7 @@ public class Movement : MonoBehaviour
         SavePreviousFramePositions();
         RecordMotion();
         DrawDebugLines();
+        UpdateSpeedBoost();
         CapSpeed();
         UpdateFlightAudio();
     }
@@ -424,9 +430,6 @@ public class Movement : MonoBehaviour
                 Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
                 velocity = blendedDir * velocity.magnitude;
             }
-
-            // Optional: apply gravity when falling outside wind
-            // velocity += Vector3.down * gravity * 0.5f * Time.deltaTime;
         }
     }
 
@@ -474,6 +477,43 @@ public class Movement : MonoBehaviour
         Debug.DrawLine(head.position, head.position + velocity.normalized * 5f, Color.cyan, 0f, false);
         Debug.DrawLine(head.position, head.position + headFwd * 3f, Color.red, 0f, false);
     }
+
+    // Speed Boost
+    public void ActivateSpeedBoost()
+    {
+        isSpeedBoosted = true;
+        speedBoostStartTime = Time.time;
+        speedBoostDirection = head.forward.normalized; // starting point
+    }
+
+    private void UpdateSpeedBoost()
+    {
+        if (!isSpeedBoosted) return;
+
+        float elapsed = Time.time - speedBoostStartTime;
+
+        // Smoothly update the boost direction toward where the head is facing
+        speedBoostDirection = Vector3.Slerp(speedBoostDirection, head.forward.normalized, Time.deltaTime * 3f);
+
+        if (elapsed < speedBoostDuration)
+        {
+            // Maintain constant speed boost in current direction
+            velocity += speedBoostDirection * speedBoostMagnitude;
+        }
+        else if (elapsed < speedBoostDuration + speedBoostFadeDuration)
+        {
+            float fadeElapsed = elapsed - speedBoostDuration;
+            float fadePercent = 1f - (fadeElapsed / speedBoostFadeDuration);
+            float fadedSpeed = speedBoostMagnitude * fadePercent;
+
+            velocity += speedBoostDirection * fadedSpeed;
+        }
+        else
+        {
+            isSpeedBoosted = false;
+        }
+    }
+
 
     private void CapSpeed()
     {
@@ -540,7 +580,7 @@ public class Movement : MonoBehaviour
             return;
 
         float speed = velocity.magnitude;
-        targetVolumeGlide = Mathf.InverseLerp(0f, maxDiveSpeed, speed) * .75f;
+        targetVolumeGlide = Mathf.InverseLerp(0f, maxDiveSpeed, speed);
         diveAudioSource.volume = targetVolumeGlide;
 
         if (!diveAudioSource.isPlaying)
