@@ -85,7 +85,6 @@ public class Movement : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private AudioSource flapAudioSource;
     [SerializeField] private AudioSource diveAudioSource;
-    [SerializeField] private AudioSource glideAudioSource;
     [SerializeField] private AudioClip flapClip;
     [SerializeField] private float targetVolumeDive;
     [SerializeField] private float targetVolumeGlide;
@@ -136,6 +135,7 @@ public class Movement : MonoBehaviour
         RecordMotion();
         DrawDebugLines();
         CapSpeed();
+        UpdateFlightAudio();
     }
 
 
@@ -211,7 +211,7 @@ public class Movement : MonoBehaviour
 
         if (isCurrentlyDiving)
         {
-            PlayDive();
+            // PlayDive();
             
             if (!wasDiving) 
             {
@@ -235,7 +235,7 @@ public class Movement : MonoBehaviour
             glideTime = 0f;
 
             lastDiveForward = head.forward; // ✅ Store direction at dive exit
-            StopDive();
+            // StopDive();
         }
 
         wasDiving = isCurrentlyDiving;
@@ -323,13 +323,7 @@ public class Movement : MonoBehaviour
             isGliding = true;
         }
 
-        if (!isGliding) 
-        {
-            StopGlide();
-            return;
-        }
-
-        PlayGlide();
+        if (!isGliding) return;
 
         Vector3 leftToHead = leftHand.position - head.position;
         Vector3 rightToHead = rightHand.position - head.position;
@@ -410,30 +404,30 @@ public class Movement : MonoBehaviour
         }
         // We really don't need this block.
         
-        // else
-        // {
-        //     bool isInWindZone = false;
+        else
+        {
+            bool isInWindZone = false;
 
-        //     foreach (var zone in FindObjectsOfType<SplineWindZone>())
-        //     {
-        //         Vector3 wind = zone.GetWindForceAtPosition(transform.position);
-        //         if (wind != Vector3.zero)
-        //         {
-        //             isInWindZone = true;
-        //             break;
-        //         }
-        //     }
+            foreach (var zone in FindObjectsOfType<SplineWindZone>())
+            {
+                Vector3 wind = zone.GetWindForceAtPosition(transform.position);
+                if (wind != Vector3.zero)
+                {
+                    isInWindZone = true;
+                    break;
+                }
+            }
 
-        //     if (!isInWindZone)
-        //     {
-        //         // Only blend toward head forward if NOT in wind zone
-        //         Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
-        //         velocity = blendedDir * velocity.magnitude;
-        //     }
+            if (!isInWindZone)
+            {
+                // Only blend toward head forward if NOT in wind zone
+                Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
+                velocity = blendedDir * velocity.magnitude;
+            }
 
-        //     // Optional: apply gravity when falling outside wind
-        //     velocity += Vector3.down * gravity * 0.5f * Time.deltaTime;
-        // }
+            // Optional: apply gravity when falling outside wind
+            // velocity += Vector3.down * gravity * 0.5f * Time.deltaTime;
+        }
     }
 
     private void ApplyAirPocketEffect()
@@ -540,44 +534,17 @@ public class Movement : MonoBehaviour
         }
     }
 
-    private void PlayDive()
+    private void UpdateFlightAudio()
     {
-        if (diveAudioSource != null)
-        {
-            targetVolumeDive = Mathf.InverseLerp(0f, 60f, velocity.magnitude);
-            diveAudioSource.volume = targetVolumeDive;
+        if (diveAudioSource == null)
+            return;
 
-            if (!diveAudioSource.isPlaying)
-                diveAudioSource.Play();
-        }
-    }
+        float speed = velocity.magnitude;
+        targetVolumeGlide = Mathf.InverseLerp(0f, maxDiveSpeed, speed) * .75f;
+        diveAudioSource.volume = targetVolumeGlide;
 
-    private void StopDive()
-    {
-        if (diveAudioSource != null)
-        {
-            diveAudioSource.Stop();
-        }
-    }
-
-    private void PlayGlide()
-    {
-        if (glideAudioSource != null)
-        {
-            targetVolumeGlide = Mathf.InverseLerp(0f, 30f, velocity.magnitude);
-            glideAudioSource.volume = targetVolumeGlide;
-
-            if (!glideAudioSource.isPlaying)
-                glideAudioSource.Play();
-        }
-    }
-
-    private void StopGlide()
-    {
-        if (glideAudioSource != null)
-        {
-            glideAudioSource.Stop();
-        }
+        if (!diveAudioSource.isPlaying)
+            diveAudioSource.Play();
     }
 }
 
