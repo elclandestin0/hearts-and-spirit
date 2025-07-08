@@ -169,8 +169,9 @@ MonoBehaviour:
   currentState: 0
   attractionRadius: 150
   attachDistance: 25
-  minSpeed: 50
-  maxSpeed: 110
+  minSpeed: 100
+  maxSpeed: 200
   seedHolster: {fileID: 0}
+  lightSeekRadius: 300
   lightTag: Light
   lightManager: {fileID: 0}

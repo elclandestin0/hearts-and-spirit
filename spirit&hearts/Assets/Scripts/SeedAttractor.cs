@@ -96,7 +96,6 @@ public class SeedBehavior : MonoBehaviour
         float distance = Vector3.Distance(transform.position, player.position);
         if (distance <= attachDistance)
         {
-            GetComponent<Rotate>().enabled = false;
             currentState = State.AttachedToPlayer;
             transform.SetParent(seedHolster);
             transform.localPosition = new Vector3(0f, 0f, 0f);
@@ -107,6 +106,7 @@ public class SeedBehavior : MonoBehaviour
     private void SearchForNearbyLight()
     {
         GameObject[] lightSources = GameObject.FindGameObjectsWithTag(lightTag);
+        transform.rotation = Quaternion.Euler(-90, 0f, 0f);
         Transform closest = null;
         foreach (GameObject light in lightSources)
         {
@@ -123,8 +123,6 @@ public class SeedBehavior : MonoBehaviour
             currentLightTarget = closest;
             transform.SetParent(null);
             currentState = State.MoveToLight;
-            GetComponent<Rotate>().enabled = false;
-            GetComponent<MeshRenderer>().enabled = true;
         }
     }
 
