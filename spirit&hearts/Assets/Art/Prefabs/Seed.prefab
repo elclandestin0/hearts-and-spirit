@@ -167,11 +167,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
-  attractionRadius: 50
+  attractionRadius: 150
   attachDistance: 25
-  minSpeed: 10
-  maxSpeed: 80
-  lightSeekRadius: 50
+  minSpeed: 50
+  maxSpeed: 110
+  seedHolster: {fileID: 0}
   lightTag: Light
-  lightSound: {fileID: 0}
   lightManager: {fileID: 0}

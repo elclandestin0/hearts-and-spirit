@@ -9,13 +9,14 @@ public class SeedBehavior : MonoBehaviour
     private Transform currentLightTarget;
 
     [Header("Attraction Settings")]
-    [SerializeField] private float attractionRadius = 150f;
-    [SerializeField] private float attachDistance = 25f;
-    [SerializeField] private float minSpeed = 120f;
-    [SerializeField] private float maxSpeed = 200f;
+    [SerializeField] private float attractionRadius;
+    [SerializeField] private float attachDistance;
+    [SerializeField] private float minSpeed;
+    [SerializeField] private float maxSpeed;
     [SerializeField] private Transform seedHolster;
 
     [Header("Light Seeking Settings")]
+    [SerializeField] private float lightSeekRadius;
     [SerializeField] private string lightTag = "Light";
     [SerializeField] private AmbientLightManager lightManager;
     void Start()
@@ -110,7 +111,8 @@ public class SeedBehavior : MonoBehaviour
         foreach (GameObject light in lightSources)
         {
             float d = Vector3.Distance(transform.position, light.transform.position);
-            if (d < attractionRadius)
+            Debug.Log("light source: " + light.name + " distance: " + d);
+            if (d < lightSeekRadius)
             {
                 closest = light.transform;
             }
