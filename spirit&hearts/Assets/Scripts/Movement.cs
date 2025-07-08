@@ -93,6 +93,13 @@ public class Movement : MonoBehaviour
     private float speedBoostFadeDuration = 2f;
     private float speedBoostMagnitude = 150f;
     private Vector3 speedBoostDirection = Vector3.zero;
+
+    // Wind stuff
+    private Vector3 lastKnownWindDir = Vector3.forward;
+    private bool wasInWindZoneLastFrame = false;
+    private float lastWindExitTime = -10f;
+    private float windExitBlendDuration = 2.5f;
+
     
     void Start()
     {
@@ -401,32 +408,59 @@ public class Movement : MonoBehaviour
     }
     private void ApplyGravityIfNeeded()
     {
+        bool isInWindZone = false;
+
+        foreach (var zone in FindObjectsOfType<SplineWindZone>())
+        {
+            Vector3 wind = zone.GetWindForceAtPosition(transform.position);
+            if (wind != Vector3.zero)
+            {
+                isInWindZone = true;
+                lastKnownWindDir = wind.normalized;
+                break;
+            }
+        }
+
+        if (isInWindZone)
+        {
+            wasInWindZoneLastFrame = true;
+        }
+        else if (wasInWindZoneLastFrame)
+        {
+            lastWindExitTime = Time.time;
+            wasInWindZoneLastFrame = false;
+        }
+
+        float sinceExit = Time.time - lastWindExitTime;
+        float windBlendFactor = Mathf.Clamp01(sinceExit / windExitBlendDuration);
+        bool withinWindTransition = sinceExit < windExitBlendDuration;
+
         if (isGliding)
         {
+            // Glide follows wind (or recent wind) before blending back to head
+            Vector3 glideDir = withinWindTransition
+                ? Vector3.Slerp(lastKnownWindDir, headFwd.normalized, windBlendFactor)
+                : headFwd.normalized;
+
             float speedFactor = Mathf.InverseLerp(0f, maxDiveSpeed, velocity.magnitude);
             float gravityScale = Mathf.Lerp(1.0f, 0.4f, speedFactor);
 
+            // Apply gravity while continuing in the wind/head blend direction
             velocity += Vector3.down * gravity * gravityScale * Time.deltaTime;
+
+            // Optional: could blend direction here too if you want turning to feel smoother
+            // velocity = Vector3.Slerp(velocity, glideDir * velocity.magnitude, Time.deltaTime * someTurnSpeed);
         }
-        // We really don't need this block.
-        
         else
         {
-            bool isInWindZone = false;
-
-            foreach (var zone in FindObjectsOfType<SplineWindZone>())
+            // Not gliding: blend velocity direction normally
+            if (withinWindTransition)
             {
-                Vector3 wind = zone.GetWindForceAtPosition(transform.position);
-                if (wind != Vector3.zero)
-                {
-                    isInWindZone = true;
-                    break;
-                }
+                Vector3 blendedDir = Vector3.Slerp(lastKnownWindDir, headFwd.normalized, windBlendFactor);
+                velocity = blendedDir * velocity.magnitude;
             }
-
-            if (!isInWindZone)
+            else
             {
-                // Only blend toward head forward if NOT in wind zone
                 Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
                 velocity = blendedDir * velocity.magnitude;
             }
