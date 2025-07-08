@@ -13,15 +13,15 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private float attachDistance = 25f;
     [SerializeField] private float minSpeed = 120f;
     [SerializeField] private float maxSpeed = 200f;
+    [SerializeField] private Transform seedHolster;
 
     [Header("Light Seeking Settings")]
-    [SerializeField] private float lightSeekRadius = 50f;
     [SerializeField] private string lightTag = "Light";
     [SerializeField] private AmbientLightManager lightManager;
-
     void Start()
     {
         player = GameObject.FindWithTag("Player")?.transform;
+        seedHolster = player.transform.Find("SeedHolster");
         lightManager = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
     }
 
@@ -38,7 +38,7 @@ public class SeedBehavior : MonoBehaviour
 
             case State.AttractToPlayer:
                 Debug.Log("Moving to player");
-                MoveToward(player);
+                MoveToward(seedHolster);
                 CheckForAttachment();
                 break;
 
@@ -95,15 +95,12 @@ public class SeedBehavior : MonoBehaviour
         float distance = Vector3.Distance(transform.position, player.position);
         if (distance <= attachDistance)
         {
-
-            GetComponent<MeshRenderer>().enabled = false;
             GetComponent<Rotate>().enabled = false;
             currentState = State.AttachedToPlayer;
-            transform.SetParent(player, false);
+            transform.SetParent(seedHolster);
             transform.localPosition = new Vector3(0f, 0f, 0f);
             player.gameObject.GetComponent<ItemManager>().PlayPickUpSound();
         }
-
     }
 
     private void SearchForNearbyLight()
@@ -113,11 +110,8 @@ public class SeedBehavior : MonoBehaviour
         foreach (GameObject light in lightSources)
         {
             float d = Vector3.Distance(transform.position, light.transform.position);
-            Debug.Log("light: " + light.name + " andistanced distance: " + d);
-            if (d < lightSeekRadius)
+            if (d < attractionRadius)
             {
-                Debug.Log("found light source. distance " + d);
-                Debug.Log(light.name);
                 closest = light.transform;
             }
         }
@@ -125,10 +119,10 @@ public class SeedBehavior : MonoBehaviour
         if (closest != null)
         {
             currentLightTarget = closest;
-            transform.SetParent(null); // Detach from player
+            transform.SetParent(null);
             currentState = State.MoveToLight;
+            GetComponent<Rotate>().enabled = false;
             GetComponent<MeshRenderer>().enabled = true;
-            GetComponent<Rotate>().enabled = true;
         }
     }
 
