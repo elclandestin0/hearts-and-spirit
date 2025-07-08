@@ -7,20 +7,21 @@ public class Rotate : MonoBehaviour
     public float bobAmplitude = 0.1f;
     public float bobFrequency = 2f;
 
-    private Vector3 startPos;
+    private float initialY = 0f;
 
     void Start()
     {
-        startPos = transform.position;
+        initialY = transform.localPosition.y;
     }
 
     void Update()
     {
-        // ✨ Rotate around Y axis (like a PS1 power-up idol waiting for you)
+        // 🌪️ Rotate around world Y
         transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
 
-        // 🎈 Add some gentle vertical bobbing for playful life
-        float newY = startPos.y + Mathf.Sin(Time.time * bobFrequency) * bobAmplitude;
-        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+        // 🪩 Bob up and down without freezing other axes
+        Vector3 pos = transform.localPosition;
+        pos.y = initialY + Mathf.Sin(Time.time * bobFrequency) * bobAmplitude;
+        transform.localPosition = pos;
     }
 }

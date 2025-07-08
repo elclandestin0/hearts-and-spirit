@@ -9,15 +9,14 @@ public class SeedBehavior : MonoBehaviour
     private Transform currentLightTarget;
 
     [Header("Attraction Settings")]
-    [SerializeField] private float attractionRadius = 75f;
-    [SerializeField] private float attachDistance = 20f;
-    [SerializeField] private float minSpeed = 40f;
-    [SerializeField] private float maxSpeed = 80f;
+    [SerializeField] private float attractionRadius = 150f;
+    [SerializeField] private float attachDistance = 25f;
+    [SerializeField] private float minSpeed = 120f;
+    [SerializeField] private float maxSpeed = 200f;
 
     [Header("Light Seeking Settings")]
     [SerializeField] private float lightSeekRadius = 50f;
     [SerializeField] private string lightTag = "Light";
-    [SerializeField] private AudioSource lightSound;
     [SerializeField] private AmbientLightManager lightManager;
 
     void Start()
@@ -49,7 +48,6 @@ public class SeedBehavior : MonoBehaviour
                 break;
 
             case State.MoveToLight:
-                Debug.Log("Moving to light");
                 if (currentLightTarget != null)
                 {
                     MoveToward(currentLightTarget);
@@ -67,7 +65,7 @@ public class SeedBehavior : MonoBehaviour
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
-                            lightSound?.Play();
+                            player.gameObject.GetComponent<ItemManager>().PlayLightSound();
                             lightManager?.UpdateAmbientLight();
                             Debug.Log("Seed activated the light source.");
                             Destroy(this.gameObject);
@@ -95,25 +93,31 @@ public class SeedBehavior : MonoBehaviour
     private void CheckForAttachment()
     {
         float distance = Vector3.Distance(transform.position, player.position);
-        Debug.Log("Distance to player: " + distance);
         if (distance <= attachDistance)
         {
+
+            GetComponent<MeshRenderer>().enabled = false;
+            GetComponent<Rotate>().enabled = false;
             currentState = State.AttachedToPlayer;
-            transform.SetParent(player); // Stick to the player
+            transform.SetParent(player, false);
+            transform.localPosition = new Vector3(0f, 0f, 0f);
+            player.gameObject.GetComponent<ItemManager>().PlayPickUpSound();
         }
+
     }
 
     private void SearchForNearbyLight()
     {
         GameObject[] lightSources = GameObject.FindGameObjectsWithTag(lightTag);
         Transform closest = null;
-        Debug.Log("Searching for light sources");
-
         foreach (GameObject light in lightSources)
         {
             float d = Vector3.Distance(transform.position, light.transform.position);
+            Debug.Log("light: " + light.name + " andistanced distance: " + d);
             if (d < lightSeekRadius)
             {
+                Debug.Log("found light source. distance " + d);
+                Debug.Log(light.name);
                 closest = light.transform;
             }
         }
@@ -123,6 +127,8 @@ public class SeedBehavior : MonoBehaviour
             currentLightTarget = closest;
             transform.SetParent(null); // Detach from player
             currentState = State.MoveToLight;
+            GetComponent<MeshRenderer>().enabled = true;
+            GetComponent<Rotate>().enabled = true;
         }
     }
 
