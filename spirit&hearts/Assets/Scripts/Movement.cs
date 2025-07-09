@@ -132,7 +132,8 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        DetectControllerInput();
+        // Reactivate later
+        // DetectControllerInput();
 
         // Normal flight update
         UpdateDeltaValues();
@@ -152,6 +153,8 @@ public class Movement : MonoBehaviour
         
         // Really should make a method for the below..
         if (Input.GetKey(KeyCode.N)) isHovering = true;
+        else isHovering = false;
+        Debug.Log("Hovering: " + isHovering);
     }
 
 
