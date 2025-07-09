@@ -100,7 +100,7 @@ public class Movement : MonoBehaviour
     private float lastWindExitTime = -10f;
     private float windExitBlendDuration = 2.5f;
 
-
+    
     void Start()
     {
         // Save initial world-space hand positions for motion delta
@@ -149,6 +149,9 @@ public class Movement : MonoBehaviour
         UpdateSpeedBoost();
         CapSpeed();
         UpdateFlightAudio();
+        
+        // Really should make a method for the below..
+        if (Input.GetKey(KeyCode.N)) isHovering = true;
     }
 
 
@@ -225,8 +228,8 @@ public class Movement : MonoBehaviour
         if (isCurrentlyDiving)
         {
             // PlayDive();
-
-            if (!wasDiving)
+            
+            if (!wasDiving) 
             {
                 diveStartTime = Time.time;
                 lastRecordedDiveSpeed = velocity.magnitude;
@@ -263,7 +266,7 @@ public class Movement : MonoBehaviour
 
         // Enough time passed
         bool enoughTimePassed = Time.time - lastFlapTime >= 0.665f;
-
+        
         if (Input.GetKeyDown(KeyCode.Space) && enoughTimePassed)
         {
             velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
@@ -320,25 +323,18 @@ public class Movement : MonoBehaviour
     }
     private void HandleGlideLogic()
     {
+        // ✅ Ensure both hand objects are assigned and active
+        // if (leftHand == null || rightHand == null) return;
+        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        // {
+        //     isGliding = false;
+        //     return;
+        // }
         float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
         bool wingsOutstretched = handDistance > minHandSpread;
+        isGliding = wingsOutstretched;
 
-        bool hoveringAndGliding = isHovering && wingsOutstretched;
-        bool regularGliding = !isHovering && wingsOutstretched;
-
-        // 👇 Optional: simulate hover manually if wings not out
-        if (!wingsOutstretched && Input.GetKey(KeyCode.N))
-        {
-            isHovering = true;
-        }
-
-        isGliding = hoveringAndGliding || regularGliding;
-
-        // Manual test override for glide
-        if (Input.GetKey(KeyCode.M))
-        {
-            isGliding = true;
-        }
+        if (Input.GetKey(KeyCode.M)) isGliding = true;
 
         if (!isGliding) return;
 
@@ -355,13 +351,10 @@ public class Movement : MonoBehaviour
 
         float timeSinceDive = Time.time - lastDiveEndTime;
 
-        // 👇 Choose glide strength based on hover-glide
-        float adjustedGlideStrength = isHovering ? glideStrength * 0.25f : glideStrength;
-
         velocity = FlightPhysics.CalculateGlideVelocity(
             velocity,
             headFwd,
-            adjustedGlideStrength, // 👈 use adjusted value
+            glideStrength,
             maxDiveSpeed,
             Time.deltaTime,
             isGliding,
@@ -378,11 +371,13 @@ public class Movement : MonoBehaviour
         {
             float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
 
+            // Separate raw force values for forward and upward
             float forwardBonus = Mathf.Lerp(2f, 10f, liftPercent);
             float upwardBonus = Mathf.Lerp(1f, 10f, liftPercent);
 
             float pitchY = head.forward.y;
 
+            // Blended weights instead of hard if/else
             float forwardWeight = Mathf.Clamp01(5 - Mathf.InverseLerp(0.8f, 1.2f, pitchY));
             float climbWeight = Mathf.Clamp01(Mathf.InverseLerp(0.2f, 0.7f, pitchY));
             float stallWeight = Mathf.Clamp01(Mathf.InverseLerp(0.7f, 0.9f, pitchY)); // stall fade-in
@@ -402,12 +397,11 @@ public class Movement : MonoBehaviour
             postDiveLiftBoostDuration = 0f;
         }
 
-        // 👇 Keep speed suppression in hover even during glide
         if (isHovering)
         {
             float currentSpeed = velocity.magnitude;
-            float targetSpeed = Mathf.Min(currentSpeed, 3f);
-            float smoothedSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 4f);
+            float targetSpeed = Mathf.Min(currentSpeed, 3f); // never raise speed
+            float smoothedSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 4f); // adjust 4f for faster/slower smoothing
 
             velocity = velocity.normalized * smoothedSpeed;
         }
@@ -441,7 +435,7 @@ public class Movement : MonoBehaviour
         float windBlendFactor = Mathf.Clamp01(sinceExit / windExitBlendDuration);
         bool withinWindTransition = sinceExit < windExitBlendDuration;
 
-        if (isGliding)
+        if (!isHovering)
         {
             // Glide follows wind (or recent wind) before blending back to head
             Vector3 glideDir = withinWindTransition
@@ -627,4 +621,3 @@ public class Movement : MonoBehaviour
             diveAudioSource.Play();
     }
 }
-
