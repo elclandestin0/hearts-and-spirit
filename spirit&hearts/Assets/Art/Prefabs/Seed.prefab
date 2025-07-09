@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6816086302630203933}
   - component: {fileID: 7986125000264205921}
   - component: {fileID: 8546025100054043572}
+  - component: {fileID: 2097975818630986166}
   m_Layer: 0
   m_Name: Seed
   m_TagString: Seed
@@ -153,3 +154,24 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.012532808, y: 0.007833296, z: 0.01533773}
   m_Center: {x: 0.00031220308, y: -0.0000006717166, z: 0.0013128988}
+--- !u!114 &2097975818630986166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4170091215176379153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: badc0988232ef46ad9e2fc1f183afd27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentState: 0
+  attractionRadius: 150
+  attachDistance: 25
+  minSpeed: 100
+  maxSpeed: 200
+  seedHolster: {fileID: 0}
+  lightSeekRadius: 300
+  lightTag: Light
+  lightManager: {fileID: 0}
