@@ -28,7 +28,8 @@ public static class FlightPhysics
         bool recentlyBounced,
         float bounceTimer,
         float timeSinceDiveEnd,
-        float diveStartTime
+        float diveStartTime,
+        bool isSpeedBoosted
     )
     {
         Vector3 velocity = currentVelocity;
@@ -69,7 +70,7 @@ public static class FlightPhysics
         if (diveAngle < 60f && isManualDivePose)
         {
             float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);
-            float easedDive = Mathf.Pow(rawDive, 1.5f);
+            float easedDive = Mathf.Pow(rawDive, 1.005f);
             float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive);
             float diveSpeed = diveIntensity * maxDiveSpeed;
 
@@ -91,10 +92,13 @@ public static class FlightPhysics
             glideTime += deltaTime;
         }
 
-        if (velocity.magnitude > maxDiveSpeed)
-        {
-            velocity = velocity.normalized * maxDiveSpeed;
-        }
+        // if (velocity.magnitude > maxDiveSpeed && !isSpeedBoosted)
+        // {
+        //     float decaySpeed = 4.5f;
+        //     float newSpeed = Mathf.Lerp(velocity.magnitude, maxDiveSpeed, Time.deltaTime * decaySpeed);
+        //     velocity = velocity.normalized * newSpeed;
+        // }
+
         return velocity;
     }
 }

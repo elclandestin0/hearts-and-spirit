@@ -91,8 +91,11 @@ public class Movement : MonoBehaviour
     private float speedBoostStartTime = -10f;
     private float speedBoostDuration = 3f;
     private float speedBoostFadeDuration = 2f;
-    private float speedBoostMagnitude = 150f;
+    private float speedBoostMagnitude = 1.25f;
     private Vector3 speedBoostDirection = Vector3.zero;
+    private float boostDecayStartTime = -1f;
+    private bool wasBoostedRecently = false;
+    [SerializeField] private float boostDecayDuration = 2.0f;
 
     // Wind stuff
     private Vector3 lastKnownWindDir = Vector3.forward;
@@ -366,7 +369,8 @@ public class Movement : MonoBehaviour
             recentlyBounced,
             bounceTimer,
             timeSinceDive,
-            diveStartTime
+            diveStartTime,
+            isSpeedBoosted
         );
 
         // ✅ Only boost if duration is valid
@@ -446,17 +450,15 @@ public class Movement : MonoBehaviour
         if (!isHovering)
         {
             // ✅ Gravity direction always has 20% head influence
-            Vector3 gravityDirection = Vector3.down * 0.8f + head.forward.normalized * 0.2f;
+            Vector3 gravityDirection = Vector3.down * 0.75f + head.forward.normalized * 0.25f;
             gravityDirection.Normalize();
 
             velocity += gravityDirection * gravity * Time.deltaTime;
-
-            // Optional: blend velocity direction toward glideDir (smooth turning)
-            // velocity = Vector3.Slerp(velocity, glideDir * velocity.magnitude, Time.deltaTime * 1.5f);
         }
 
         // ✅ Regardless of state, velocity direction smoothly aligns with glideDir
-        velocity = Vector3.Slerp(velocity, glideDir * velocity.magnitude, Time.deltaTime * 1.5f);
+        // May need to delete this at some point... 
+        // velocity = Vector3.Slerp(velocity, glideDir * velocity.magnitude, Time.deltaTime * 1.5f);
     }
 
     private void ApplyAirPocketEffect()
@@ -519,7 +521,7 @@ public class Movement : MonoBehaviour
         float elapsed = Time.time - speedBoostStartTime;
 
         // Smoothly update the boost direction toward where the head is facing
-        speedBoostDirection = Vector3.Slerp(speedBoostDirection, head.forward.normalized, Time.deltaTime * 3f);
+        speedBoostDirection = Vector3.Slerp(speedBoostDirection, head.forward.normalized, Time.deltaTime * 1.5f);
 
         if (elapsed < speedBoostDuration)
         {
@@ -537,15 +539,24 @@ public class Movement : MonoBehaviour
         else
         {
             isSpeedBoosted = false;
+            wasBoostedRecently = true;
+            boostDecayStartTime = Time.time;
         }
-    }
 
+    }
 
     private void CapSpeed()
     {
-        if (velocity.magnitude > maxDiveSpeed)
+        // Gliding has it's own cap speed in FlightPhysics, no need to Cap speed twice, sailor
+        if (isSpeedBoosted) return;
+        float speed = velocity.magnitude;
+
+        if (speed > maxDiveSpeed)
         {
-            velocity = Vector3.ClampMagnitude(velocity, maxDiveSpeed);
+            // Gradually reduce speed toward maxDiveSpeed
+            float decaySpeed = 2.5f; // adjust for how quickly you want it to settle
+            float newSpeed = Mathf.Lerp(speed, maxDiveSpeed, Time.deltaTime * decaySpeed);
+            velocity = velocity.normalized * newSpeed;
         }
     }
 
