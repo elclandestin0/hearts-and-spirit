@@ -77,27 +77,32 @@ public static class FlightPhysics
             float diveTime = Time.time - diveStartTime;
             float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 2f);
 
-            Vector3 diveAccel = headForward.normalized * diveSpeed * diveRamp;
-            Vector3 diveBoost = diveAccel * deltaTime;
+            float targetDiveSpeed = diveSpeed * diveRamp;
+            float currentDiveSpeed = Vector3.Dot(velocity, headForward.normalized);
 
-            Vector3 targetDiveVelocity = headForward.normalized * diveSpeed;
-            velocity += Vector3.Lerp(velocity, targetDiveVelocity, deltaTime * 2.5f);
+            float speedGain = Mathf.MoveTowards(currentDiveSpeed, targetDiveSpeed, 25f * deltaTime); // Acceleration rate
+
+            Vector3 newDiveVelocity = headForward.normalized * speedGain;
+
+            // Blend into current velocity smoothly (feathered)
+            velocity = Vector3.Lerp(velocity, newDiveVelocity, deltaTime * 1.5f);
 
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
         }
-
-        else 
+        else
         {
-            // ⏱️ Accumulate glide time
             glideTime += deltaTime;
         }
 
-        // if (velocity.magnitude > maxDiveSpeed && !isSpeedBoosted)
-        // {
-        //     float decaySpeed = 4.5f;
-        //     float newSpeed = Mathf.Lerp(velocity.magnitude, maxDiveSpeed, Time.deltaTime * decaySpeed);
-        //     velocity = velocity.normalized * newSpeed;
-        // }
+        // Cap speed no cap
+        float speed = velocity.magnitude;
+        if (speed > maxDiveSpeed && !isSpeedBoosted)
+        {
+            // Gradually reduce speed toward maxDiveSpeed
+            float decaySpeed = 2.5f; // adjust for how quickly you want it to settle
+            float newSpeed = Mathf.Lerp(speed, maxDiveSpeed, Time.deltaTime * decaySpeed);
+            velocity = velocity.normalized * newSpeed;
+        }
 
         return velocity;
     }

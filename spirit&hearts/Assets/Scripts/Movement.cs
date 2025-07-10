@@ -91,7 +91,7 @@ public class Movement : MonoBehaviour
     private float speedBoostStartTime = -10f;
     private float speedBoostDuration = 3f;
     private float speedBoostFadeDuration = 2f;
-    private float speedBoostMagnitude = 1.25f;
+    private float speedBoostMagnitude = 1.0f;
     private Vector3 speedBoostDirection = Vector3.zero;
     private float boostDecayStartTime = -1f;
     private bool wasBoostedRecently = false;
