@@ -67,32 +67,31 @@ public static class FlightPhysics
         }
 
         // Dive logic
-        if (diveAngle < 60f && isManualDivePose)
-        {
-            float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);
-            float easedDive = Mathf.Pow(rawDive, 1.005f);
-            float diveIntensity = Mathf.Lerp(0.001f, 1f, easedDive);
-            float diveSpeed = diveIntensity * maxDiveSpeed;
+        // if (diveAngle < 60f && isManualDivePose)
+        // {
+        //     float rawDive = Mathf.InverseLerp(60f, 10f, diveAngle);
+        //     float easedDive = Mathf.Pow(rawDive, 1.005f);
+        //     float diveIntensity = Mathf.Lerp(0.1f, 1f, easedDive);
+        //     float diveSpeed = diveIntensity * maxDiveSpeed;
 
-            float diveTime = Time.time - diveStartTime;
-            float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 2f);
+        //     float diveTime = Time.time - diveStartTime;
+        //     float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 2f);
 
-            float targetDiveSpeed = diveSpeed * diveRamp;
-            float currentDiveSpeed = Vector3.Dot(velocity, headForward.normalized);
+        //     float targetDiveSpeed = diveSpeed * diveRamp;
+        //     float currentDiveSpeed = Vector3.Dot(velocity, headForward.normalized);
 
-            float speedGain = Mathf.MoveTowards(currentDiveSpeed, targetDiveSpeed, 25f * deltaTime); // Acceleration rate
+        //     Vector3 diveAccel = headForward.normalized * diveSpeed * diveRamp;
+        //     Vector3 diveBoost = diveAccel * deltaTime;
 
-            Vector3 newDiveVelocity = headForward.normalized * speedGain;
+        //     Vector3 targetDiveVelocity = headForward.normalized * diveSpeed;
+        //     velocity += Vector3.Lerp(velocity, targetDiveVelocity, deltaTime * 2.5f);
 
-            // Blend into current velocity smoothly (feathered)
-            velocity = Vector3.Lerp(velocity, newDiveVelocity, deltaTime * 1.5f);
-
-            glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
-        }
-        else
-        {
-            glideTime += deltaTime;
-        }
+        //     glideTime = Mathf.Max(0f, glideTime - deltaTime * 10f);
+        // }
+        // else
+        // {
+        //     glideTime += deltaTime;
+        // }
 
         // Cap speed no cap
         float speed = velocity.magnitude;
