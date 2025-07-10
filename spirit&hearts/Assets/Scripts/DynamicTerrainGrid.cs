@@ -46,11 +46,6 @@ public class DynamicTerrainGrid : MonoBehaviour
                 allTiles[coord] = tile;
             }
         }
-
-        // Position sky elements at center of 0,0 terrain
-        // MoveToCenter(cloudPlane, new Vector2Int(0, 0));
-        // MoveToCenter(skyDome, new Vector2Int(0, 0));
-        // MoveToCenter(cloudsParticle, new Vector2Int(0, 0));
     }
 
     void Update()
