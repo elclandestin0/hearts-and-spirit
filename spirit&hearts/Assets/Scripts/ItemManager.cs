@@ -17,7 +17,7 @@ public class ItemManager : MonoBehaviour
         // Level section
         if (other.CompareTag("SpeedBooster"))
         {
-            Debug.Log("Whaaaa!!");
+            Debug.Log("Whaaa!");
             movementScript.ActivateSpeedBoost();
         }
     }

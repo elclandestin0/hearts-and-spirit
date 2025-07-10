@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2868165539095012517
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2594096170757699664}
+  - component: {fileID: 7644999246493175013}
+  m_Layer: 0
+  m_Name: TileWorldCoordinate
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2594096170757699664
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2868165539095012517}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 942.0821, y: 119.99969, z: 3077.2263}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7644999246493175013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2868165539095012517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78fe271520d5d4d329da85c15504f798, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldSeed: 42
+  maxIslands: 4
+  scaleRange: {x: 0.8, y: 1.5}
+  heightRange: {x: 0, y: 0}
+  tileSize: 1000
+  padding: 300
+  terrainGen: {fileID: 0}
+  navigationIslandPrefab: {fileID: 0}
+  ringIslandPrefab: {fileID: 0}
+  obstacleIslandPrefab: {fileID: 0}
+  landmarkIslandPrefab: {fileID: 0}
+  forestPrefab: {fileID: 0}
+  altarPrefab: {fileID: 0}
+  smallArchPrefab: {fileID: 0}
+  smallDiagonalPrefab: {fileID: 0}
+  smallDonutPrefab: {fileID: 0}
+  smallDoublePrefab: {fileID: 0}
+  smallFlatPrefab: {fileID: 0}
+  smallPikesPrefab: {fileID: 0}
+  funnelStepsPrefabs: []
+  lightPrefabs: []
+  minIslandsPerCluster: 2
+  maxIslandsPerCluster: 4
+  clusterRadius: 200
+  clusterVerticalVariation: 50
+  clusterChance: 0.6
+  rawCoord: {x: 0, y: 0}
