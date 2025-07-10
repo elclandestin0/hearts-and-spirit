@@ -438,36 +438,25 @@ public class Movement : MonoBehaviour
         float windBlendFactor = Mathf.Clamp01(sinceExit / windExitBlendDuration);
         bool withinWindTransition = sinceExit < windExitBlendDuration;
 
+        // ✅ Glide direction uses wind if within transition
+        Vector3 glideDir = withinWindTransition
+            ? Vector3.Slerp(lastKnownWindDir, headFwd.normalized, windBlendFactor)
+            : headFwd.normalized;
+
         if (!isHovering)
         {
-            // Glide follows wind (or recent wind) before blending back to head
-            Vector3 glideDir = withinWindTransition
-                ? Vector3.Slerp(lastKnownWindDir, headFwd.normalized, windBlendFactor)
-                : headFwd.normalized;
+            // ✅ Gravity direction always has 20% head influence
+            Vector3 gravityDirection = Vector3.down * 0.8f + head.forward.normalized * 0.2f;
+            gravityDirection.Normalize();
 
-            float speedFactor = Mathf.InverseLerp(0f, maxDiveSpeed, velocity.magnitude);
-            float gravityScale = Mathf.Lerp(1.0f, 0.4f, speedFactor);
+            velocity += gravityDirection * gravity * Time.deltaTime;
 
-            // Apply gravity while continuing in the wind/head blend direction
-            velocity += Vector3.down * gravity * gravityScale * Time.deltaTime;
-
-            // Optional: could blend direction here too if you want turning to feel smoother
-            // velocity = Vector3.Slerp(velocity, glideDir * velocity.magnitude, Time.deltaTime * someTurnSpeed);
+            // Optional: blend velocity direction toward glideDir (smooth turning)
+            // velocity = Vector3.Slerp(velocity, glideDir * velocity.magnitude, Time.deltaTime * 1.5f);
         }
-        else
-        {
-            // Not gliding: blend velocity direction normally
-            if (withinWindTransition)
-            {
-                Vector3 blendedDir = Vector3.Slerp(lastKnownWindDir, headFwd.normalized, windBlendFactor);
-                velocity = blendedDir * velocity.magnitude;
-            }
-            else
-            {
-                Vector3 blendedDir = Vector3.Slerp(velocity.normalized, headFwd.normalized, Time.deltaTime * 1.5f);
-                velocity = blendedDir * velocity.magnitude;
-            }
-        }
+
+        // ✅ Regardless of state, velocity direction smoothly aligns with glideDir
+        velocity = Vector3.Slerp(velocity, glideDir * velocity.magnitude, Time.deltaTime * 1.5f);
     }
 
     private void ApplyAirPocketEffect()
@@ -511,7 +500,7 @@ public class Movement : MonoBehaviour
     }
     private void DrawDebugLines()
     {
-        Debug.DrawLine(head.position, head.position + velocity.normalized * 5f, Color.cyan, 0f, false);
+        Debug.DrawLine(head.position, head.position + velocity.normalized * 50f, Color.cyan, 0f, false);
         Debug.DrawLine(head.position, head.position + headFwd * 3f, Color.red, 0f, false);
     }
 
