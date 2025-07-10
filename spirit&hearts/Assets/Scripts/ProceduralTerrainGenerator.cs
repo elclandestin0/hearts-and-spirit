@@ -26,7 +26,6 @@ public class ProceduralTerrainGenerator : MonoBehaviour
     public float roughnessStrength = 5f;
 
     [HideInInspector] public Vector2 offset;
-
     public MeshFilter meshFilter;
     private MeshCollider meshCollider;
 

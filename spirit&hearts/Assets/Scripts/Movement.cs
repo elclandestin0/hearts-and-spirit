@@ -107,6 +107,7 @@ public class Movement : MonoBehaviour
     void Start()
     {
         // Save initial world-space hand positions for motion delta
+        head = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Transform>();
         prevLeftPos = leftHand.position;
         prevRightPos = rightHand.position;
     }
