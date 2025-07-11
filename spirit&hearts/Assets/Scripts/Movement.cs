@@ -504,7 +504,12 @@ public class Movement : MonoBehaviour
     private void DrawDebugLines()
     {
         Debug.DrawLine(head.position, head.position + velocity.normalized * 50f, Color.cyan, 0f, false);
-        Debug.DrawLine(head.position, head.position + headFwd * 3f, Color.red, 0f, false);
+        Debug.DrawLine(head.position, head.position + headFwd * 3f * 30f, Color.red, 0f, false);
+        
+        // Gravity direction
+        Vector3 gravityDirection = Vector3.down * 0.75f + head.forward.normalized * 0.25f;
+        gravityDirection.Normalize();
+        Debug.DrawLine(head.position, head.position + gravityDirection * 20f, Color.blue, 0f, false);
     }
 
     // Speed Boost
