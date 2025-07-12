@@ -198,46 +198,4 @@ public class ProceduralTerrainGenerator : MonoBehaviour
         meshFilter.sharedMesh = mesh;
         meshCollider.sharedMesh = mesh;
     }
-
-    public float GetMaxHeight()
-    {
-        if (meshFilter.sharedMesh == null)
-            return 0f;
-
-        float max = float.MinValue;
-        Vector3[] verts = meshFilter.sharedMesh.vertices;
-
-        for (int i = 0; i < verts.Length; i++)
-        {
-            if (verts[i].y > max)
-                max = verts[i].y;
-        }
-
-        return max;
-    }
-
-
-    [ContextMenu("Save Mesh As Asset")]
-    public void SaveMeshAsset()
-    {
-        #if UNITY_EDITOR
-            if (meshFilter.sharedMesh == null)
-            {
-                Debug.LogWarning("No mesh to save.");
-                return;
-            }
-
-            string path = $"Assets/SavedMountains/Terrain_{name}_{Random.Range(1000, 9999)}.asset";
-            Mesh meshToSave = Instantiate(meshFilter.sharedMesh);
-
-            AssetDatabase.CreateAsset(meshToSave, path);
-            AssetDatabase.SaveAssets();
-
-            meshFilter.sharedMesh = meshToSave;
-            meshCollider.sharedMesh = meshToSave;
-
-            Debug.Log($"Saved mesh to {path}");
-        #endif
-    }
-
 }

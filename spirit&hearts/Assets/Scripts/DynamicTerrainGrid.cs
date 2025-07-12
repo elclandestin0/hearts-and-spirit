@@ -27,102 +27,16 @@ public class DynamicTerrainGrid : MonoBehaviour
     private MeshCollider meshCollider;
 
     private Dictionary<Vector2Int, GameObject> tileLookup = new();
+    [SerializeField] private Material defaultTerrainMaterial;
 
     void Start()
     {
         meshFilter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
 
-        GenerateMainTerrainMesh();
+        // GenerateMainTerrainMesh();
         SpawnCoordinateTiles();
     }
-
-    void GenerateMainTerrainMesh()
-    {
-        int width = totalSize;
-        int depth = totalSize;
-        Vector3[] vertices = new Vector3[(width + 1) * (depth + 1)];
-        Vector2[] uvs = new Vector2[vertices.Length];
-        int[] triangles = new int[width * depth * 6];
-
-        System.Random prng = new(seed);
-        Vector2[] octaveOffsets = new Vector2[octaves];
-        for (int i = 0; i < octaves; i++)
-        {
-            float offsetX = prng.Next(-100000, 100000);
-            float offsetY = prng.Next(-100000, 100000);
-            octaveOffsets[i] = new Vector2(offsetX, offsetY);
-        }
-
-        float maxDistanceToEdge = Mathf.Min(width, depth) * borderFalloffPercent;
-
-        for (int z = 0, i = 0; z <= depth; z++)
-        {
-            for (int x = 0; x <= width; x++, i++)
-            {
-                float edgeX = Mathf.Min(x, width - x);
-                float edgeZ = Mathf.Min(z, depth - z);
-                float edgeDist = Mathf.Min(edgeX, edgeZ);
-                float falloff = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(edgeDist / maxDistanceToEdge));
-
-                float amplitude = 1f;
-                float frequency = 1f;
-                float noiseHeight = 0f;
-
-                for (int o = 0; o < octaves; o++)
-                {
-                    float sampleX = x * baseScale * frequency + octaveOffsets[o].x;
-                    float sampleZ = z * baseScale * frequency + octaveOffsets[o].y;
-                    float perlin = Mathf.PerlinNoise(sampleX, sampleZ);
-                    noiseHeight += perlin * amplitude;
-                    amplitude *= persistence;
-                    frequency *= lacunarity;
-                }
-
-                noiseHeight = Mathf.Pow(noiseHeight, peakSharpness);
-                float height = noiseHeight * heightMultiplier * falloff;
-
-                if (noiseHeight > 0.7f)
-                {
-                    float roughX = x * roughnessFrequency;
-                    float roughZ = z * roughnessFrequency;
-                    float roughNoise = Mathf.PerlinNoise(roughX, roughZ) - 0.5f;
-                    height += roughNoise * roughnessStrength;
-                }
-
-                vertices[i] = new Vector3(x, height, z);
-                uvs[i] = new Vector2((float)x / width, (float)z / depth);
-            }
-        }
-
-        int tris = 0;
-        for (int z = 0; z < depth; z++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                int i = z * (width + 1) + x;
-
-                triangles[tris++] = i;
-                triangles[tris++] = i + width + 1;
-                triangles[tris++] = i + 1;
-
-                triangles[tris++] = i + 1;
-                triangles[tris++] = i + width + 1;
-                triangles[tris++] = i + width + 2;
-            }
-        }
-
-        Mesh mesh = new Mesh();
-        mesh.name = "WorldTerrain";
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.uv = uvs;
-        mesh.RecalculateNormals();
-
-        meshFilter.sharedMesh = mesh;
-        meshCollider.sharedMesh = mesh;
-    }
-
     void SpawnCoordinateTiles()
     {
         int tileSize = totalSize / divisions;

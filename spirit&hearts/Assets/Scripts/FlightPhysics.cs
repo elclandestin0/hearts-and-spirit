@@ -78,16 +78,13 @@ public static class FlightPhysics
             float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 2f);
 
             // Boost is *extra glide force*, not overriding anything
-            float divePush = diveSpeedBoost * diveRamp * deltaTime * 10f;
+            float divePush = diveSpeedBoost * diveRamp * deltaTime * 0.5f;
 
             // Add dive push in the glide direction
             velocity += headForward.normalized * divePush;
 
             // Slightly counteract glideTime to extend strong glide
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 3f);
-
-            Debug.Log("Dive push: " + divePush);
-            Debug.Log(" Final velocity " + velocity);
         }
         else
         {
