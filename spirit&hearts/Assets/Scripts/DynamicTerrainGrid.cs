@@ -41,7 +41,6 @@ public class DynamicTerrainGrid : MonoBehaviour
     {
         int tileSize = totalSize / divisions;
         float maxY = GetMaxHeight();
-
         for (int z = 0; z < divisions; z++)
         {
             for (int x = 0; x < divisions; x++)
@@ -54,9 +53,15 @@ public class DynamicTerrainGrid : MonoBehaviour
 
                 if (tile.TryGetComponent(out TileAssetGenerator assetGen))
                 {
+                    Debug.Log("Got tile asset generator: " + tile.name);
                     assetGen.rawCoord = coord;
                     assetGen.heightRange = new Vector2(maxY + 10f, maxY + 60f); // arbitrary buffer for now
                     assetGen.GenerateIslands();
+                }
+
+                else 
+                {
+                    Debug.Log("No tile asset generator found");
                 }
 
                 tileLookup[coord] = tile;

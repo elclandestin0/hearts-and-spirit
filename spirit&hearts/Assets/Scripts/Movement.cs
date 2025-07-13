@@ -103,6 +103,8 @@ public class Movement : MonoBehaviour
     private float lastWindExitTime = -10f;
     private float windExitBlendDuration = 2.5f;
 
+    // Hover speed
+    public float maxHoverSpeed = 10.0f;
     
     void Start()
     {
@@ -308,7 +310,7 @@ public class Movement : MonoBehaviour
         // Super weak flaps when hovering
         if (isHovering)
         {
-            flapStrengthMultiplier *= 0.2f; // Very weak flaps
+            flapStrengthMultiplier *= 1.0f; // Very weak flaps
         }
 
         // Calculate flap every 0.2 seconds
@@ -408,7 +410,7 @@ public class Movement : MonoBehaviour
         if (isHovering)
         {
             float currentSpeed = velocity.magnitude;
-            float targetSpeed = Mathf.Min(currentSpeed, 3f); // never raise speed
+            float targetSpeed = Mathf.Min(currentSpeed, maxHoverSpeed); // never raise speed
             float smoothedSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 4f); // adjust 4f for faster/slower smoothing
 
             velocity = velocity.normalized * smoothedSpeed;
