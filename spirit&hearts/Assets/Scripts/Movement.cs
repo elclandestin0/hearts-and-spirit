@@ -418,7 +418,6 @@ public class Movement : MonoBehaviour
     }
     private void ApplyGravityIfNeeded()
     {
-        // When hover is in windzone, make it the closest to a roller-coaster vibe.
         bool isInWindZone = false;
 
         foreach (var zone in FindObjectsOfType<SplineWindZone>())
@@ -435,6 +434,12 @@ public class Movement : MonoBehaviour
         if (isInWindZone)
         {
             wasInWindZoneLastFrame = true;
+
+            // ✅ Light tangent alignment (damp lateral drift)
+            Vector3 tangent = lastKnownWindDir;
+            Vector3 lateral = Vector3.ProjectOnPlane(velocity, tangent);
+            float lateralDampingStrength = 1.0f; // Tune this as needed
+            velocity -= lateral * Time.deltaTime * lateralDampingStrength;
         }
         else if (wasInWindZoneLastFrame)
         {
@@ -446,24 +451,22 @@ public class Movement : MonoBehaviour
         float windBlendFactor = Mathf.Clamp01(sinceExit / windExitBlendDuration);
         bool withinWindTransition = sinceExit < windExitBlendDuration;
 
-        // ✅ Glide direction uses wind if within transition
         Vector3 glideDir = withinWindTransition
             ? Vector3.Slerp(lastKnownWindDir, headFwd.normalized, windBlendFactor)
             : headFwd.normalized;
 
         if (!isHovering)
         {
-            // ✅ Gravity direction always has 20% head influence
             Vector3 gravityDirection = Vector3.down * 0.75f + head.forward.normalized * 0.25f;
             gravityDirection.Normalize();
 
             velocity += gravityDirection * gravity * Time.deltaTime;
         }
 
-        // ✅ Regardless of state, velocity direction smoothly aligns with glideDir
-        // May need to delete this at some point... 
+        // Optional — revisit later
         // velocity = Vector3.Slerp(velocity, glideDir * velocity.magnitude, Time.deltaTime * 1.5f);
     }
+
 
     private void ApplyAirPocketEffect()
     {
