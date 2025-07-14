@@ -418,6 +418,7 @@ public class Movement : MonoBehaviour
     }
     private void ApplyGravityIfNeeded()
     {
+        // When hover is in windzone, make it the closest to a roller-coaster vibe.
         bool isInWindZone = false;
 
         foreach (var zone in FindObjectsOfType<SplineWindZone>())
