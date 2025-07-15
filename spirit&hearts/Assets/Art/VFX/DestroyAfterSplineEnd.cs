@@ -3,16 +3,18 @@ using UnityEngine.Splines;
 
 public class DestroyAfterSplineEnd : MonoBehaviour
 {
-    private SplineAnimate animate;
-
     void Start()
     {
-        animate = GetComponent<SplineAnimate>();
+        SplineAnimate animate = GetComponent<SplineAnimate>();
+        if (animate != null)
+        {
+            StartCoroutine(DestroyAfter(animate.Duration));
+        }
     }
 
-    void Update()
+    private System.Collections.IEnumerator DestroyAfter(float delay)
     {
-        if (animate.NormalizedTime >= 1f)
-            Destroy(gameObject);
+        yield return new WaitForSeconds(delay);
+        Destroy(gameObject);
     }
 }
