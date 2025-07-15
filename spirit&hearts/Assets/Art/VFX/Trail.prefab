@@ -50,7 +50,7 @@ MonoBehaviour:
   m_PlayOnAwake: 1
   m_LoopMode: 0
   m_Method: 0
-  m_Duration: 2
+  m_Duration: 1
   m_MaxSpeed: 15.931501
   m_EasingMode: 0
   m_AlignmentMode: 1
@@ -155,7 +155,7 @@ TrailRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0
+        time: 0.023529053
         value: 0
         inSlope: 0
         outSlope: 0
@@ -164,8 +164,8 @@ TrailRenderer:
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 0.1472264
-        value: 0.022405557
+        time: 0.15899092
+        value: 0.37625307
         inSlope: -0.040067974
         outSlope: -0.040067974
         tangentMode: 0
@@ -173,8 +173,8 @@ TrailRenderer:
         inWeight: 0.33333334
         outWeight: 0.6035806
       - serializedVersion: 3
-        time: 0.3389997
-        value: 0.043428164
+        time: 0.3213529
+        value: 0.7511232
         inSlope: -0.023938308
         outSlope: -0.023938308
         tangentMode: 0
@@ -182,8 +182,8 @@ TrailRenderer:
         inWeight: 0.33333334
         outWeight: 0.68789876
       - serializedVersion: 3
-        time: 0.5143564
-        value: 0.036749896
+        time: 0.53200316
+        value: 0.4615364
         inSlope: 0.0065757507
         outSlope: 0.0065757507
         tangentMode: 0
@@ -191,8 +191,8 @@ TrailRenderer:
         inWeight: 0.61907697
         outWeight: 0.9948736
       - serializedVersion: 3
-        time: 0.66878366
-        value: 0.031079683
+        time: 0.5981965
+        value: 0.76954406
         inSlope: 0.0048523005
         outSlope: 0.0048523005
         tangentMode: 0
@@ -200,22 +200,22 @@ TrailRenderer:
         inWeight: 0.33333334
         outWeight: 0.681893
       - serializedVersion: 3
-        time: 0.8053463
-        value: 0.010715652
-        inSlope: 0.025978956
-        outSlope: 0.025978956
+        time: 0.7465237
+        value: 0.84615326
+        inSlope: 0.58002335
+        outSlope: 0.58002335
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 0.5532759
+        outWeight: 1
       - serializedVersion: 3
         time: 1
-        value: 0
-        inSlope: 0
-        outSlope: 0
+        value: 1
+        inSlope: 0.6082294
+        outSlope: 0.6082294
         tangentMode: 0
         weightedMode: 0
-        inWeight: 0
+        inWeight: 0.99788886
         outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
@@ -254,7 +254,7 @@ TrailRenderer:
     numCapVertices: 0
     alignment: 0
     textureMode: 1
-    textureScale: {x: 1, y: 1}
+    textureScale: {x: 10, y: 10}
     shadowBias: 0.5
     generateLightingData: 0
   m_MinVertexDistance: 0.01

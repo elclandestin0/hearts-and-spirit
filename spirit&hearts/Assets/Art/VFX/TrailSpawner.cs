@@ -12,7 +12,7 @@ public class TrailSpawner : MonoBehaviour
     [Header("Visual offset area (local)")]
     public Vector3 visualOffsetArea = new Vector3(1f, 0.5f, 0f);
 
-    void Start()
+    void Start()    
     {
         StartCoroutine(SpawnRoutine());
     }
@@ -50,7 +50,7 @@ public class TrailSpawner : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"No se encontró el hijo 'TrailVisual' en {instance.name}");
+            Debug.LogWarning($"No se encontrï¿½ el hijo 'TrailVisual' en {instance.name}");
         }
     }
 }
