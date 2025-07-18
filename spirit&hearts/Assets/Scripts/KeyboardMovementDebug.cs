@@ -12,7 +12,7 @@ public class KeyboardMovementDebug : MonoBehaviour
 
     [Header("Mouse / Touchpad")]
     public bool enableMouseLook = true;
-    public float mouseSensitivity = 1.0f;
+    public float mouseSensitivity = 1.5f;
 
     void Update()
     {
@@ -31,7 +31,7 @@ public class KeyboardMovementDebug : MonoBehaviour
         if (Input.GetKey(KeyCode.D)) yaw += yawSpeed * Time.deltaTime;
 
         // Touchpad (Mouse) look
-        if (enableMouseLook && Input.GetMouseButton(1)) // Hold Right-Click or Cmd+click
+        if (enableMouseLook) // Hold Right-Click or Cmd+click
         {
             float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
