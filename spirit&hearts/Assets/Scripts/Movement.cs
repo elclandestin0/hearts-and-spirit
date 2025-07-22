@@ -105,18 +105,21 @@ public class Movement : MonoBehaviour
 
     // Hover speed
     public float maxHoverSpeed = 10.0f;
-    
+
+    // Wind zones
+    private SplineWindZone[] zones;
     void Start()
     {
         // Save initial world-space hand positions for motion delta
         head = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Transform>();
         prevLeftPos = leftHand.position;
         prevRightPos = rightHand.position;
+        zones = FindObjectsOfType<SplineWindZone>();
     }
 
     void Update()
     {
-        foreach (var zone in FindObjectsOfType<SplineWindZone>())
+        foreach (var zone in zones)
         {
             velocity += zone.GetWindForceAtPosition(transform.position) * Time.deltaTime;
         }
@@ -420,7 +423,7 @@ public class Movement : MonoBehaviour
     {
         bool isInWindZone = false;
 
-        foreach (var zone in FindObjectsOfType<SplineWindZone>())
+        foreach (var zone in zones)
         {
             Vector3 wind = zone.GetWindForceAtPosition(transform.position);
             if (wind != Vector3.zero)
