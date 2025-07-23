@@ -22,7 +22,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private float glideTime = 0f;
     [SerializeField] private float glideStrength = 4.0f;
     [SerializeField] private float diveAcceleratorSmoothness = 2.5f;
-    [SerializeField] private float sphereRadius = 5f;
+    [SerializeField] private float sphereRadius = 2.5f;
     [SerializeField] private float sphereCastDistance = 1.0f;
     [SerializeField] private LayerMask impactLayer;
     public float diveAngle = 0f;
@@ -585,24 +585,32 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        if (velocity.sqrMagnitude < 0.01f) return; // don't cast with no velocity
+        if (velocity.sqrMagnitude < 0.0001f) return; // Optional: remove entirely
         Vector3 origin = head.position;
         Vector3 direction = velocity.normalized;
+        float dynamicDistance = Mathf.Max(0.5f, velocity.magnitude * Time.deltaTime * 2f); // dynamic cast distance
 
-        if (Physics.SphereCast(origin, sphereRadius, direction, out RaycastHit hit, sphereCastDistance, impactLayer, QueryTriggerInteraction.Ignore))
+        Debug.DrawRay(origin, direction * dynamicDistance, Color.red);
+
+        if (Physics.SphereCast(origin, sphereRadius, direction, out RaycastHit hit, dynamicDistance, impactLayer, QueryTriggerInteraction.Ignore))
         {
             float speed = velocity.magnitude;
             float approachDot = Vector3.Dot(direction, -hit.normal);
-            if (approachDot > 0.5f)
+            Debug.Log($"Impact detected. Approach dot: {approachDot}");
+
+            if (approachDot > 0.2f) // more forgiving threshold
             {
                 Vector3 bounce = hit.normal * speed * 2f;
                 velocity = bounce;
 
                 recentlyBounced = true;
                 bounceTimer = bounceDuration;
+
+                Debug.DrawLine(origin, hit.point, Color.green, 1f);
             }
         }
     }
+
 
     private void PlayFlap()
     {
@@ -637,5 +645,21 @@ public class Movement : MonoBehaviour
 
         if (!diveAudioSource.isPlaying)
             diveAudioSource.Play();
+    }
+
+    // Gizmos
+    private void OnDrawGizmos()
+    {
+        if (!Application.isPlaying) return;
+
+        Vector3 origin = head.position;
+        Vector3 direction = velocity.normalized;
+        float dynamicDistance = Mathf.Max(0.5f, velocity.magnitude * Time.deltaTime * 2f);
+        Vector3 endPoint = origin + direction * dynamicDistance;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(origin, sphereRadius);      // starting sphere
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(endPoint, sphereRadius);    // end of cast sphere
     }
 }
