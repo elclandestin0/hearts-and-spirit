@@ -14,6 +14,18 @@ public class AmbientLightManager : MonoBehaviour
     private Color currentStartColor;
     private float transitionTimer = 0f;
     private bool isTransitioning = false;
+    private GameObject[] allLights;
+
+    private void Start()
+    {
+        allLights = GameObject.FindGameObjectsWithTag("Light");
+        total = allLights.Length;
+        for (int i = 0; i < total; i++)
+        {
+            Debug.Log("Found Light: " + allLights[i].name);
+        }
+        Debug.Log("Number of lights in the scene: " + total);
+    }
 
     private void Update()
     {
@@ -30,8 +42,6 @@ public class AmbientLightManager : MonoBehaviour
 
     public void UpdateAmbientLight()
     {
-        GameObject[] allLights = GameObject.FindGameObjectsWithTag("Light");
-        total = allLights.Length;
         lit = 0;
 
         foreach (GameObject obj in allLights)
