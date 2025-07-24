@@ -39,7 +39,7 @@ public static class FlightPhysics
 
         // ✨ New logic: if we just exited a dive, blend slower
         float diveBlendMod = Mathf.Lerp(1.5f, 3.0f, Mathf.Clamp01(timeSinceDiveEnd / 2f));
-        float blendSpeed = (recentlyBounced && bounceTimer > 0f) ? 0.2f : diveBlendMod;
+        float blendSpeed = diveBlendMod;
 
         Vector3 blendedDir = Vector3.Slerp(currentDir, headForward.normalized, deltaTime * blendSpeed);
         float blendedSpeed = Mathf.Lerp(currentSpeed, currentSpeed + glideStrength, deltaTime * blendSpeed);

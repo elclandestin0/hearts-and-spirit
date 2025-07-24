@@ -600,14 +600,20 @@ public class Movement : MonoBehaviour
 
             if (approachDot > 0.2f) // more forgiving threshold
             {
-                Vector3 bounce = hit.normal * speed * 2f;
-                velocity = bounce;
+
+                // Calculate bounce blend from 1.25 to 2.5 based on speed
+                float bounceBlend = Mathf.Lerp(1.25f, 2.5f, velocity.magnitude);
+
+                // Apply the dynamic bounce
+                Vector3 bounce = hit.normal * speed * bounceBlend;
+                velocity += bounce;
 
                 recentlyBounced = true;
                 bounceTimer = bounceDuration;
 
                 Debug.DrawLine(origin, hit.point, Color.green, 1f);
             }
+
         }
     }
 
