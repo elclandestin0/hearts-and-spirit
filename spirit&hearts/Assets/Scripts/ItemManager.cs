@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ItemManager : MonoBehaviour
 {
-    private int seedsCollected = 0;
+    [SerializeField] private int seedsCollected = 0;
 
     [Header("Audio and light")]
     public AudioSource pickupSound;
@@ -16,7 +16,6 @@ public class ItemManager : MonoBehaviour
     public void AddSeed() 
     {
         seedsCollected++;
-        PlayPickUpSound();
     }
 
     public void RemoveSeed() 

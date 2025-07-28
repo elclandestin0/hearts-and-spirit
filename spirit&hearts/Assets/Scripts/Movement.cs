@@ -118,6 +118,7 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
+        Debug.Log("is gliding "+ isGliding);
         foreach (var zone in zones)
         {
             velocity += zone.GetWindForceAtPosition(transform.position) * Time.deltaTime;
@@ -160,7 +161,14 @@ public class Movement : MonoBehaviour
         UpdateFlightAudio();
         
         // Really should make a method for the below..
-        isHovering = Input.GetKey(KeyCode.N);
+        if(Input.GetKey(KeyCode.N))
+        {
+            isHovering = true;
+        } 
+        else 
+        { 
+            isHovering = false;
+        }
         Debug.Log("Hovering: " + isHovering);
     }
 
@@ -291,7 +299,7 @@ public class Movement : MonoBehaviour
             PlayFlap();
         }
         
-        // // ✅ Ensure both hand objects are assigned and active
+        // ✅ Ensure both hand objects are assigned and active
         if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
         if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
         {
@@ -316,7 +324,7 @@ public class Movement : MonoBehaviour
         }
 
         // Calculate flap every 0.2 seconds
-        if ((justStartedMovingDown) && enoughTimePassed)
+        if ((Input.GetKeyDown(KeyCode.F) || justStartedMovingDown) && enoughTimePassed)
         {
             velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
                 head.forward,
@@ -345,7 +353,14 @@ public class Movement : MonoBehaviour
         bool wingsOutstretched = handDistance > minHandSpread;
         isGliding = wingsOutstretched;
 
-        isGliding = Input.GetKey(KeyCode.M);
+        if(Input.GetKey(KeyCode.M)) 
+        {
+            isGliding = true;
+        } 
+        else 
+        {
+            isGliding = false;
+        }
         Vector3 leftToHead = leftHand.position - head.position;
         Vector3 rightToHead = rightHand.position - head.position;
 
@@ -358,7 +373,6 @@ public class Movement : MonoBehaviour
         bool isManualDivePose = leftBehind && rightBehind;
 
         float timeSinceDive = Time.time - lastDiveEndTime;
-
         velocity = FlightPhysics.CalculateGlideVelocity(
             velocity,
             headFwd,

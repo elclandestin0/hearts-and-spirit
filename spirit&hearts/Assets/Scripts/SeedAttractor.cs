@@ -19,6 +19,7 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private float lightSeekRadius;
     [SerializeField] private string lightTag = "Light";
     [SerializeField] private AmbientLightManager lightManager;
+    private LightController light;
     void Start()
     {
         player = GameObject.FindWithTag("Player")?.transform;
@@ -59,10 +60,6 @@ public class SeedBehavior : MonoBehaviour
                         // Reached light source
                         Debug.Log("Seed arrived at light");
 
-                        LightController light = currentLightTarget.GetComponent<LightController>()
-                                                ?? currentLightTarget.GetComponentInParent<LightController>()
-                                                ?? currentLightTarget.GetComponentInChildren<LightController>();
-
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
@@ -72,6 +69,7 @@ public class SeedBehavior : MonoBehaviour
                             Debug.Log("Seed activated the light source.");
                             Destroy(this.gameObject);
                         }
+
                         else
                         {
                             Debug.Log(light == null ? "Light null" : "Light not null");
@@ -101,6 +99,7 @@ public class SeedBehavior : MonoBehaviour
             transform.SetParent(seedHolster);
             transform.localPosition = new Vector3(0f, 0f, 0f);
             player.gameObject.GetComponent<ItemManager>().AddSeed();
+            player.gameObject.GetComponent<ItemManager>().PlayPickUpSound();
         }
     }
 
@@ -122,7 +121,12 @@ public class SeedBehavior : MonoBehaviour
         if (closest != null)
         {
             currentLightTarget = closest;
+            LightController light = currentLightTarget.GetComponent<LightController>()
+                                                ?? currentLightTarget.GetComponentInParent<LightController>()
+                                                ?? currentLightTarget.GetComponentInChildren<LightController>();
+
             transform.SetParent(null);
+            if (light.isLit) return;
             currentState = State.MoveToLight;
         }
     }
