@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ItemManager : MonoBehaviour
 {
-    public int seedsCollected = 0;
+    private int seedsCollected = 0;
 
     [Header("Audio and light")]
     public AudioSource pickupSound;
@@ -12,6 +12,17 @@ public class ItemManager : MonoBehaviour
     // Movement section
     [Header("Movement")]
     public Movement movementScript;
+
+    public void AddSeed() 
+    {
+        seedsCollected++;
+        PlayPickUpSound();
+    }
+
+    public void RemoveSeed() 
+    {
+        seedsCollected--;
+    }
     private void OnTriggerEnter(Collider other)
     {
         // Level section

@@ -66,6 +66,7 @@ public class SeedBehavior : MonoBehaviour
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
+                            player.gameObject.GetComponent<ItemManager>().RemoveSeed();
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
                             lightManager?.UpdateAmbientLight();
                             Debug.Log("Seed activated the light source.");
@@ -99,7 +100,7 @@ public class SeedBehavior : MonoBehaviour
             currentState = State.AttachedToPlayer;
             transform.SetParent(seedHolster);
             transform.localPosition = new Vector3(0f, 0f, 0f);
-            player.gameObject.GetComponent<ItemManager>().PlayPickUpSound();
+            player.gameObject.GetComponent<ItemManager>().AddSeed();
         }
     }
 

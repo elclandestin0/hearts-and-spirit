@@ -31,7 +31,7 @@ public class AmbientLightManager : MonoBehaviour
     {
         if (isTransitioning)
         {
-            transitionTimer += Time.deltaTime;
+            transitionTimer += Time.deltaTime; 
             float t = Mathf.Clamp01(transitionTimer / transitionDuration);
             RenderSettings.ambientLight = Color.Lerp(currentStartColor, currentTargetColor, t);
 
