@@ -186,7 +186,7 @@ public class DoveCompanion : MonoBehaviour
     #region Hovering
     private void Hover()
     {
-        bool isIdle = !movementScript.isGliding && !movementScript.isFlapping;
+        bool isIdle = !movementScript.isGliding;
 
         if (isIdle && currentState != DoveState.Hovering)
         {
@@ -219,7 +219,7 @@ public class DoveCompanion : MonoBehaviour
             isHoverIdle = true;
             float timer = 0f;
 
-            while (timer < waitDuration && isHoverIdle && (!movementScript.isGliding || !movementScript.isFlapping))
+            while (timer < waitDuration && isHoverIdle && !movementScript.isGliding)
             {
                 float offsetY = Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
                 Vector3 baseHover = player.position + currentHoverOffset;
@@ -246,7 +246,7 @@ public class DoveCompanion : MonoBehaviour
         float speedBlendDuration = 0.5f;
         float currentSpeed = 0f;
         
-        while (!movementScript.isGliding && !movementScript.isFlapping)
+        while (!movementScript.isGliding)
         {
             Vector3 targetPos = player.position + offset;
             float distance = Vector3.Distance(transform.position, targetPos);

@@ -46,7 +46,6 @@ public class Movement : MonoBehaviour
     // private bool isGrounded = false;
     [Header("Debug variables")]
     public bool isGliding = false;
-    public bool isFlapping = false;
     private bool isHovering = false;
 
     // Publicly accessible variables for reference
@@ -104,7 +103,7 @@ public class Movement : MonoBehaviour
     private float windExitBlendDuration = 2.5f;
 
     // Hover speed
-    public float maxHoverSpeed = 10.0f;
+    public float maxHoverSpeed = 30.0f;
 
     // Wind zones
     private SplineWindZone[] zones;
@@ -161,8 +160,7 @@ public class Movement : MonoBehaviour
         UpdateFlightAudio();
         
         // Really should make a method for the below..
-        if (Input.GetKey(KeyCode.N)) isHovering = true;
-        else isHovering = false;
+        isHovering = Input.GetKey(KeyCode.N);
         Debug.Log("Hovering: " + isHovering);
     }
 
@@ -278,8 +276,7 @@ public class Movement : MonoBehaviour
 
         // Enough time passed
         bool enoughTimePassed = Time.time - lastFlapTime >= 0.665f;
-        
-        if (Input.GetKeyDown(KeyCode.Space) && enoughTimePassed)
+        if (Input.GetKeyDown(KeyCode.F) && enoughTimePassed)
         {
             velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
                 head.forward,
@@ -287,12 +284,14 @@ public class Movement : MonoBehaviour
                 flapStrength,
                 forwardPropulsionStrength
             );
+            Debug.Log("Flappity flap.");
             glideTime = 0f;
             lastFlapTime = Time.time;
             OnFlap?.Invoke();
             PlayFlap();
         }
-        // ✅ Ensure both hand objects are assigned and active
+        
+        // // ✅ Ensure both hand objects are assigned and active
         if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
         if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
         {
@@ -317,7 +316,7 @@ public class Movement : MonoBehaviour
         }
 
         // Calculate flap every 0.2 seconds
-        if ((Input.GetKeyDown(KeyCode.Space) || justStartedMovingDown) && enoughTimePassed)
+        if ((justStartedMovingDown) && enoughTimePassed)
         {
             velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
                 head.forward,
@@ -346,10 +345,7 @@ public class Movement : MonoBehaviour
         bool wingsOutstretched = handDistance > minHandSpread;
         isGliding = wingsOutstretched;
 
-        if (Input.GetKey(KeyCode.M)) isGliding = true;
-
-        if (!isGliding) return;
-
+        isGliding = Input.GetKey(KeyCode.M);
         Vector3 leftToHead = leftHand.position - head.position;
         Vector3 rightToHead = rightHand.position - head.position;
 

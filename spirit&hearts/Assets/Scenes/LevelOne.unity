@@ -3643,7 +3643,7 @@ PrefabInstance:
       objectReference: {fileID: 1029670549}
     - target: {fileID: 2130433395076051474, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: maxHoverSpeed
-      value: 10
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 2130433395076051474, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: glideAudioSource
@@ -6231,11 +6231,11 @@ PrefabInstance:
       objectReference: {fileID: 475700256}
     - target: {fileID: 3684215988008648832, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: orbitRadius
-      value: 80
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3684215988008648832, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: baseOrbitSpeed
-      value: 50
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3684215988008648832, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: movementScript
@@ -6243,23 +6243,19 @@ PrefabInstance:
       objectReference: {fileID: 475700257}
     - target: {fileID: 3684215988008648832, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: wanderDistance
-      value: 800
-      objectReference: {fileID: 0}
-    - target: {fileID: 3684215988008648832, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
-      propertyPath: orbitChillSpeedThreshold
-      value: 500
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalScale.x
-      value: 30
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalScale.y
-      value: 30
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalScale.z
-      value: 30
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.x
