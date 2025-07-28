@@ -55,7 +55,7 @@ public class SeedBehavior : MonoBehaviour
                     MoveToward(currentLightTarget);
 
                     float d = Vector3.Distance(transform.position, currentLightTarget.position);
-                    if (d < 0.5f)
+                    if (d < 10f)
                     {
                         // Reached light source
                         Debug.Log("Seed arrived at light");

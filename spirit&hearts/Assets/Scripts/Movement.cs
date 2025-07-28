@@ -46,6 +46,7 @@ public class Movement : MonoBehaviour
     // private bool isGrounded = false;
     [Header("Debug variables")]
     public bool isGliding = false;
+    public bool isFlapping = false;
     private bool isHovering = false;
 
     // Publicly accessible variables for reference
@@ -103,7 +104,7 @@ public class Movement : MonoBehaviour
     private float windExitBlendDuration = 2.5f;
 
     // Hover speed
-    public float maxHoverSpeed = 30.0f;
+    public float maxHoverSpeed = 10.0f;
 
     // Wind zones
     private SplineWindZone[] zones;
@@ -360,6 +361,7 @@ public class Movement : MonoBehaviour
         else 
         {
             isGliding = false;
+            return;
         }
         Vector3 leftToHead = leftHand.position - head.position;
         Vector3 rightToHead = rightHand.position - head.position;
