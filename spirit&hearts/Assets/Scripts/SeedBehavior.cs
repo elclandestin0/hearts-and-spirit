@@ -19,11 +19,12 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private float lightSeekRadius;
     [SerializeField] private string lightTag = "Light";
     [SerializeField] private AmbientLightManager lightManager;
-    private LightController light;
+    [SerializeField] private ItemManager itemManager;
     void Start()
     {
         player = GameObject.FindWithTag("Player")?.transform;
         seedHolster = player.transform.Find("SeedHolster");
+        itemManager = player.GetComponent<ItemManager>();
         lightManager = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
     }
 
@@ -46,7 +47,7 @@ public class SeedBehavior : MonoBehaviour
 
             case State.AttachedToPlayer:
                 Debug.Log("Attached to player");
-                SearchForNearbyLight();
+                itemManager.TrySendSeedToLight();
                 break;
 
             case State.MoveToLight:
@@ -59,14 +60,20 @@ public class SeedBehavior : MonoBehaviour
                     {
                         // Reached light source
                         Debug.Log("Seed arrived at light");
+                        LightController light = currentLightTarget.GetComponent<LightController>()
+                                                ?? currentLightTarget.GetComponentInParent<LightController>()
+                                                ?? currentLightTarget.GetComponentInChildren<LightController>();
 
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
-                            player.gameObject.GetComponent<ItemManager>().RemoveSeed();
-                            player.gameObject.GetComponent<ItemManager>().PlayLightSound();
+                            player.GetComponent<ItemManager>().PlayLightSound();
                             lightManager?.UpdateAmbientLight();
-                            Debug.Log("Seed activated the light source.");
+
+                            ItemManager itemManager = player.GetComponent<ItemManager>();
+                            itemManager.UnregisterSeed(this);
+                            itemManager.NotifyLightAvailable();
+
                             Destroy(this.gameObject);
                         }
 
@@ -86,6 +93,7 @@ public class SeedBehavior : MonoBehaviour
         float distance = Vector3.Distance(transform.position, player.position);
         if (distance < attractionRadius)
         {
+            Debug.Log("Attracted to player.. moving towards player");
             currentState = State.AttractToPlayer;
         }
     }
@@ -93,15 +101,20 @@ public class SeedBehavior : MonoBehaviour
     private void CheckForAttachment()
     {
         float distance = Vector3.Distance(transform.position, player.position);
+        Debug.Log("Checking for attachment");
         if (distance <= attachDistance)
         {
+            Debug.Log("Attached to player");
             currentState = State.AttachedToPlayer;
             transform.SetParent(seedHolster);
-            transform.localPosition = new Vector3(0f, 0f, 0f);
-            player.gameObject.GetComponent<ItemManager>().AddSeed();
-            player.gameObject.GetComponent<ItemManager>().PlayPickUpSound();
+            transform.localPosition = Vector3.zero;
+
+            // Perform the relevant actions
+            itemManager.PlayPickUpSound();
+            itemManager.RegisterSeed(this);
         }
     }
+
 
     private void SearchForNearbyLight()
     {
@@ -121,12 +134,7 @@ public class SeedBehavior : MonoBehaviour
         if (closest != null)
         {
             currentLightTarget = closest;
-            LightController light = currentLightTarget.GetComponent<LightController>()
-                                                ?? currentLightTarget.GetComponentInParent<LightController>()
-                                                ?? currentLightTarget.GetComponentInChildren<LightController>();
-
             transform.SetParent(null);
-            if (light.isLit) return;
             currentState = State.MoveToLight;
         }
     }
@@ -134,6 +142,7 @@ public class SeedBehavior : MonoBehaviour
 
     private void MoveToward(Transform target)
     {
+        Debug.Log("Moving to player ");
         float distance = Vector3.Distance(transform.position, target.position);
         float t = Mathf.InverseLerp(attractionRadius, 0f, distance); // closer = faster
         float speed = Mathf.Lerp(minSpeed, maxSpeed, t);
@@ -141,4 +150,13 @@ public class SeedBehavior : MonoBehaviour
         Vector3 direction = (target.position - transform.position).normalized;
         transform.position += direction * speed * Time.deltaTime;
     }
+
+    public void SendToLight(Transform lightTransform)
+    {
+        currentLightTarget = lightTransform;
+        transform.SetParent(null);
+        currentState = State.MoveToLight;
+        player.GetComponent<ItemManager>().UnregisterSeed(this);
+    }
+
 }
