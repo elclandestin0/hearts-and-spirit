@@ -10,7 +10,6 @@ public class DoveCompanion : MonoBehaviour
 
     // == General Flight Settings ==
     [Header("Flight Settings")]
-    public float transitionSmoothing = 5f;
     public float rotationSmoothing = 1f;
 
     [Header("Hovering")]
@@ -37,6 +36,7 @@ public class DoveCompanion : MonoBehaviour
     public float orbitRadiusChangeTimer;
     public float orbitRadiusChangeInterval = 3f;
     private float orbitAngle = 0f;
+    private float maxOrbitAngle = 50f;
     private int orbitDirection = 1;
     private bool transitioningToOrbit = false;
     private Vector3 smoothedOrbitOffset = Vector3.zero;
@@ -97,43 +97,38 @@ public class DoveCompanion : MonoBehaviour
         animator.SetBool("Gliding", movementScript.isGliding);
 
 
-        if (currentState != DoveState.Hovering)
+        bool shouldMoveToTarget = currentState == DoveState.Orbiting || currentState == DoveState.Hovering;
+
+        if (shouldMoveToTarget)
         {
             float proximityThreshold = 0.1f;
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
             float distance = Vector3.Distance(transform.position, liveTargetPosition);
             Vector3 moveDir = (liveTargetPosition - transform.position).normalized;
 
-            // If dove is far and in front of the player, make slower
-            // If dove is far and behind the player, make faster
-            // If dove is near the player, give regular speed
             Vector3 toDove = (transform.position - movementScript.head.position).normalized;
             Vector3 playerForward = movementScript.head.forward;
-
-            // Dot product: 1 = directly in front, -1 = directly behind
             float facingDot = Vector3.Dot(playerForward, toDove);
+            float attentionFactor = Mathf.InverseLerp(1f, -1f, facingDot);
 
-            // Calculate a weight based on player's attention
-            // -1 (behind): faster dove, +1 (front): slower dove
-            float attentionFactor = Mathf.InverseLerp(1f, -1f, facingDot); // converts dot range [1,-1] to [0,1]
-
-            // Boost if far, slow if close
             float distanceRatio = Mathf.Clamp01(distance / wanderDistance);
-
-            // Final speed: modulate based on how far dove is AND where it is in relation to player gaze
             float baseSpeed = Mathf.Lerp(playerSpeed / 1.1f, playerSpeed / 0.9f, distanceRatio);
             float speed = Mathf.Lerp(baseSpeed * 0.75f, baseSpeed * 1.75f, attentionFactor);
 
-            // Move dove
             float maxStep = distance / Time.deltaTime;
             speed = Mathf.Min(speed, maxStep);
             lastKnownSpeed = speed;
 
             transform.position += moveDir * speed * Time.deltaTime;
-            
+
+            // SmoothDamp only when needed
             float smoothingThreshold = 0.12f;
-            transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref moveVelocity, 2f);
+            if (distance > smoothingThreshold)
+            {
+                transform.position = Vector3.SmoothDamp(transform.position, liveTargetPosition, ref moveVelocity, 2f);
+            }
         }
+
 
         ObstacleCheck();
     }
@@ -144,9 +139,9 @@ public class DoveCompanion : MonoBehaviour
         float playerSpeed = movementScript.CurrentVelocity.magnitude;
         float orbitSpeed = baseOrbitSpeed * playerSpeed * 0.5f;
         orbitAngle += orbitSpeed * orbitDirection * Time.deltaTime;
-        orbitAngle = Mathf.Clamp(orbitAngle, -30f, 30f);
+        orbitAngle = Mathf.Clamp(orbitAngle, -maxOrbitAngle, maxOrbitAngle);
 
-        if (orbitAngle >= 30 || orbitAngle <= -30)
+        if (orbitAngle >= maxOrbitAngle || orbitAngle <= -maxOrbitAngle)
         {
             orbitDirection *= -1;
         }
@@ -183,7 +178,7 @@ public class DoveCompanion : MonoBehaviour
     }
 
 #endregion
-    #region Hovering
+#region Hovering
     private void Hover()
     {
         bool isIdle = !movementScript.isGliding;
@@ -224,8 +219,9 @@ public class DoveCompanion : MonoBehaviour
                 float offsetY = Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
                 Vector3 baseHover = player.position + currentHoverOffset;
                 Vector3 bobTarget = baseHover + new Vector3(0, offsetY, 0);
-
+                liveTargetPosition = bobTarget;
                 transform.position = Vector3.SmoothDamp(transform.position, bobTarget, ref doveVelocity, 0.15f);
+
 
                 Vector3 lookDir = (player.position - movementScript.head.forward * 2f) - transform.position;
                 Quaternion rot = Quaternion.LookRotation(lookDir.normalized);
@@ -241,43 +237,45 @@ public class DoveCompanion : MonoBehaviour
 
     private IEnumerator SmoothHoverApproach(Vector3 offset)
     {
-        float distanceThreshold = 0.2f;
+        float distanceThreshold = 20f;
+        float maxCatchupDistance = 1000f;
+        float blendDownDuration = 1.0f;
+
+        float currentSpeed = lastKnownSpeed;
         float blendTimer = 0f;
-        float speedBlendDuration = 0.5f;
-        float currentSpeed = 0f;
-        
+
+        Vector3 targetPos = player.position + offset;
+
         while (!movementScript.isGliding)
         {
-            Vector3 targetPos = player.position + offset;
+            targetPos = player.position + offset;
             float distance = Vector3.Distance(transform.position, targetPos);
 
             if (distance < distanceThreshold)
-            {
                 yield break;
-            }
 
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
             float maxPlayerSpeed = movementScript.MaxSpeed;
 
-            // Determine how "close" we are to the player
-            float distanceRatio = Mathf.Clamp01(wanderDistance / distance);
+            // Desired hover speed when close (slow and gentle)
+            float nearHoverSpeed = maxPlayerSpeed / 10f;
 
-            // Hover speed scales: max speed when far away, soft slow speed when close
-            float targetHoverSpeed = Mathf.Lerp(lastKnownSpeed, maxPlayerSpeed / 10.0f, distanceRatio);
+            // Distance-based catch-up factor
+            float distanceRatio = Mathf.Clamp01(distance / maxCatchupDistance); // 0 when close, 1 when far
+            float catchupSpeed = Mathf.Lerp(nearHoverSpeed, lastKnownSpeed, distanceRatio);
 
-            // Smoothly blend from orbit speed to hover speed over short time
-            if (blendTimer < speedBlendDuration)
+            // Smoothly blend from high speed to gentle hover speed
+            if (blendTimer < blendDownDuration)
             {
-                float t = blendTimer / speedBlendDuration;
-                currentSpeed = Mathf.Lerp(lastKnownSpeed, targetHoverSpeed, t);
+                float t = blendTimer / blendDownDuration;
+                currentSpeed = Mathf.Lerp(currentSpeed, catchupSpeed, t);
                 blendTimer += Time.deltaTime;
             }
             else
             {
-                currentSpeed = targetHoverSpeed;
+                currentSpeed = catchupSpeed;
             }
 
-            // Move toward target
             Vector3 moveDir = (targetPos - transform.position).normalized;
             transform.position += moveDir * currentSpeed * Time.deltaTime;
 
@@ -288,6 +286,7 @@ public class DoveCompanion : MonoBehaviour
             yield return null;
         }
     }
+
 
 #endregion
 #region Following and avoiding
