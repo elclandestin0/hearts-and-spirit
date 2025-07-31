@@ -12,6 +12,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
+  - _ALPHATEST_ON
   - _SURFACE_TYPE_TRANSPARENT
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -65,7 +66,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTexture:
-        m_Texture: {fileID: 2800000, guid: b1ef1d37daa8ce14a8f9ba5d2116a587, type: 3}
+        m_Texture: {fileID: 2800000, guid: 1b8578de304ed3a4ab5f9c1a65108497, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -95,7 +96,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0
-    - _AlphaClip: 0
+    - _AlphaClip: 1
     - _AlphaToMask: 0
     - _Blend: 2
     - _BlendModePreserveSpecular: 1
@@ -137,13 +138,14 @@ Material:
     - _SoftParticlesFarFadeDistance: 1
     - _SoftParticlesNearFadeDistance: 0
     - _SpecularHighlights: 1
-    - _Speed: 0.5
-    - _Speed2: 0.1
+    - _Speed: 0.3
+    - _Speed2: 0.2
     - _SrcBlend: 5
     - _SrcBlendAlpha: 1
+    - _Step: 0.01
     - _Surface: 1
-    - _Tiling: 0.5
-    - _TilingDetail: 2.08
+    - _Tiling: 2.47
+    - _TilingDetail: 2.28
     - _WorkflowMode: 1
     - _ZTest: 4
     - _ZWrite: 0
@@ -152,7 +154,7 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
-    - _Color: {r: 18.487272, g: 56.801476, b: 34.440994, a: 1}
+    - _Color: {r: 0.9751388, g: 2.9960787, b: 1.8166417, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
