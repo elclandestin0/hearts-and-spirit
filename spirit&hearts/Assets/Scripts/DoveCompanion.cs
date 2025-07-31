@@ -79,6 +79,27 @@ public class DoveCompanion : MonoBehaviour
     {
         Hover();
 
+        if (!movementScript.isGliding)
+        {
+            if (hoverRoutine == null)
+            {
+                Vector3 randomDir = Random.onUnitSphere;
+                randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.5f);
+                Vector3 offset = randomDir.normalized * wanderDistance;
+
+                currentHoverOffset = offset;
+                hoverRoutine = StartCoroutine(SmoothHoverApproach(currentHoverOffset));
+            }
+        }
+        else
+        {
+            if (hoverRoutine != null)
+            {
+                StopCoroutine(hoverRoutine);
+                hoverRoutine = null;
+            }
+        }
+
         switch (currentState)
         {
             case DoveState.Orbiting:
@@ -265,19 +286,19 @@ public class DoveCompanion : MonoBehaviour
             float catchupSpeed = Mathf.Lerp(nearHoverSpeed, lastKnownSpeed, distanceRatio);
 
             // Smoothly blend from high speed to gentle hover speed
-            if (blendTimer < blendDownDuration)
-            {
-                float t = blendTimer / blendDownDuration;
-                currentSpeed = Mathf.Lerp(currentSpeed, catchupSpeed, t);
-                blendTimer += Time.deltaTime;
-            }
-            else
-            {
-                currentSpeed = catchupSpeed;
-            }
+            // if (blendTimer < blendDownDuration)
+            // {
+            //     float t = blendTimer / blendDownDuration;
+            //     currentSpeed = Mathf.Lerp(currentSpeed, catchupSpeed, t);
+            //     blendTimer += Time.deltaTime;
+            // }
+            // else
+            // {
+            //     currentSpeed = catchupSpeed;
+            // }
 
             Vector3 moveDir = (targetPos - transform.position).normalized;
-            transform.position += moveDir * currentSpeed * Time.deltaTime;
+            transform.position += moveDir * playerSpeed * Time.deltaTime;
 
             // Look toward movement direction
             Quaternion targetRot = Quaternion.LookRotation(moveDir);
