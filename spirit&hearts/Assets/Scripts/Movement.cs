@@ -657,7 +657,7 @@ public class Movement : MonoBehaviour
 
         float speed = velocity.magnitude;
         targetVolumeGlide = Mathf.InverseLerp(0f, maxDiveSpeed, speed);
-        diveAudioSource.volume = targetVolumeGlide;
+        diveAudioSource.volume = targetVolumeGlide * 0.65f;
 
         if (!diveAudioSource.isPlaying)
             diveAudioSource.Play();
