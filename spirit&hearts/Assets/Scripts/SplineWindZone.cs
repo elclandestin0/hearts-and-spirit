@@ -34,7 +34,7 @@ public class SplineWindZone : MonoBehaviour
         if (distance > influenceRadius)
             return Vector3.zero;
 
-        Debug.Log("Now being affected by " + gameObject.transform.parent.name);
+        // Debug.Log("Now being affected by " + gameObject.transform.parent.name);
         float falloff = 1f - Mathf.Clamp01(distance / influenceRadius);
         return worldTangent.normalized * windStrength * falloff;
     }

@@ -78,28 +78,7 @@ public class DoveCompanion : MonoBehaviour
     void Update()
     {
         Hover();
-
-        if (!movementScript.isGliding)
-        {
-            if (hoverRoutine == null)
-            {
-                Vector3 randomDir = Random.onUnitSphere;
-                randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.5f);
-                Vector3 offset = randomDir.normalized * wanderDistance;
-
-                currentHoverOffset = offset;
-                hoverRoutine = StartCoroutine(SmoothHoverApproach(currentHoverOffset));
-            }
-        }
-        else
-        {
-            if (hoverRoutine != null)
-            {
-                StopCoroutine(hoverRoutine);
-                hoverRoutine = null;
-            }
-        }
-
+        
         switch (currentState)
         {
             case DoveState.Orbiting:
@@ -222,6 +201,7 @@ public class DoveCompanion : MonoBehaviour
     {
         while (true)
         {
+            Debug.Log("IdleHoverLoop.");
             Vector3 randomDir = Random.onUnitSphere;
             randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.5f);
             Vector3 offset = randomDir.normalized * wanderDistance;
@@ -237,6 +217,7 @@ public class DoveCompanion : MonoBehaviour
 
             while (timer < waitDuration && isHoverIdle && !movementScript.isGliding)
             {
+                Debug.Log("IdbleBobbing.");
                 float offsetY = Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
                 Vector3 baseHover = player.position + currentHoverOffset;
                 Vector3 bobTarget = baseHover + new Vector3(0, offsetY, 0);
@@ -266,9 +247,11 @@ public class DoveCompanion : MonoBehaviour
         float blendTimer = 0f;
 
         Vector3 targetPos = player.position + offset;
+        Debug.Log("SmoothHoverApproach");
 
         while (!movementScript.isGliding)
         {
+            Debug.Log("SmoothHoverApproach - IsGliding is false");
             targetPos = player.position + offset;
             float distance = Vector3.Distance(transform.position, targetPos);
 

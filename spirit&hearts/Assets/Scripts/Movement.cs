@@ -119,7 +119,6 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("is gliding "+ isGliding);
         foreach (var zone in zones)
         {
             velocity += zone.GetWindForceAtPosition(transform.position) * Time.deltaTime;
@@ -170,7 +169,6 @@ public class Movement : MonoBehaviour
         { 
             isHovering = false;
         }
-        Debug.Log("Hovering: " + isHovering);
     }
 
 
