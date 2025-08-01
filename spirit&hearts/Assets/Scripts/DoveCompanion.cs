@@ -202,7 +202,6 @@ public class DoveCompanion : MonoBehaviour
     {
         while (true)
         {
-            Debug.Log("IdleHoverLoop.");
             Vector3 randomDir = Random.onUnitSphere;
             randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.5f);
             Vector3 offset = randomDir.normalized * wanderDistance;
@@ -211,7 +210,7 @@ public class DoveCompanion : MonoBehaviour
 
             // Phase 1: magnitude-based smooth approach
             yield return StartCoroutine(SmoothHoverApproach(offset));
-
+            Debug.Log("Approached successfully.");
             // Phase 2: idle bobbing
             isHoverIdle = true;
             float timer = 0f;
@@ -252,12 +251,19 @@ public class DoveCompanion : MonoBehaviour
             Debug.Log("SmoothHoverApproach - IsGliding is false");
             liveTargetPosition = targetPos;
             float distance = Vector3.Distance(transform.position, targetPos);
+            float arrivalThreshold = 50.0f;
+
+            if (distance <= arrivalThreshold)
+            {
+                Debug.Log("Reached target hover offset. Exiting SmoothHoverApproach.");
+                yield break; // ✅ Exit the coroutine
+            }
 
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
             float maxPlayerSpeed = movementScript.MaxSpeed;
 
             // Desired hover speed when close (slow and gentle)
-            float nearHoverSpeed = maxPlayerSpeed / 5f;
+            float nearHoverSpeed = maxPlayerSpeed / 2f;
 
             // Distance-based catch-up factor
             float distanceRatio = Mathf.Clamp01(distance / maxCatchupDistance); // 0 when close, 1 when far
