@@ -34,7 +34,6 @@ public class SeedBehavior : MonoBehaviour
         switch (currentState)
         {
             case State.Idle:
-                Debug.Log("Idle");
                 CheckForPlayerProximity();
                 break;
 

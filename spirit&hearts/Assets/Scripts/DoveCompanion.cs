@@ -11,6 +11,7 @@ public class DoveCompanion : MonoBehaviour
     // == General Flight Settings ==
     [Header("Flight Settings")]
     public float rotationSmoothing = 1f;
+    public float currentSpeed = 0.0f;
 
     [Header("Hovering")]
     public float hoverAmplitude = 0.1f;
@@ -78,7 +79,7 @@ public class DoveCompanion : MonoBehaviour
     void Update()
     {
         Hover();
-        
+
         switch (currentState)
         {
             case DoveState.Orbiting:
@@ -97,7 +98,7 @@ public class DoveCompanion : MonoBehaviour
         animator.SetBool("Gliding", movementScript.isGliding);
 
 
-        bool shouldMoveToTarget = currentState == DoveState.Orbiting || currentState == DoveState.Hovering;
+        bool shouldMoveToTarget = currentState == DoveState.Orbiting;
 
         if (shouldMoveToTarget)
         {
@@ -239,49 +240,44 @@ public class DoveCompanion : MonoBehaviour
 
     private IEnumerator SmoothHoverApproach(Vector3 offset)
     {
-        float distanceThreshold = 20f;
         float maxCatchupDistance = 1000f;
         float blendDownDuration = 1.0f;
 
-        float currentSpeed = lastKnownSpeed;
+        currentSpeed = lastKnownSpeed;
         float blendTimer = 0f;
-
-        Vector3 targetPos = player.position + offset;
-        Debug.Log("SmoothHoverApproach");
 
         while (!movementScript.isGliding)
         {
+            Vector3 targetPos = player.position + offset;
             Debug.Log("SmoothHoverApproach - IsGliding is false");
-            targetPos = player.position + offset;
+            liveTargetPosition = targetPos;
             float distance = Vector3.Distance(transform.position, targetPos);
-
-            if (distance < distanceThreshold)
-                yield break;
 
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
             float maxPlayerSpeed = movementScript.MaxSpeed;
 
             // Desired hover speed when close (slow and gentle)
-            float nearHoverSpeed = maxPlayerSpeed / 10f;
+            float nearHoverSpeed = maxPlayerSpeed / 5f;
 
             // Distance-based catch-up factor
             float distanceRatio = Mathf.Clamp01(distance / maxCatchupDistance); // 0 when close, 1 when far
-            float catchupSpeed = Mathf.Lerp(nearHoverSpeed, lastKnownSpeed, distanceRatio);
+            float catchupSpeed = Mathf.Lerp(nearHoverSpeed, maxPlayerSpeed, distanceRatio);
 
             // Smoothly blend from high speed to gentle hover speed
-            // if (blendTimer < blendDownDuration)
-            // {
-            //     float t = blendTimer / blendDownDuration;
-            //     currentSpeed = Mathf.Lerp(currentSpeed, catchupSpeed, t);
-            //     blendTimer += Time.deltaTime;
-            // }
-            // else
-            // {
-            //     currentSpeed = catchupSpeed;
-            // }
+            if (blendTimer < blendDownDuration)
+            {
+                float t = blendTimer / blendDownDuration;
+                currentSpeed = Mathf.Lerp(currentSpeed, catchupSpeed, t);
+                blendTimer += Time.deltaTime;
+            }
+            else
+            {
+                currentSpeed = catchupSpeed;
+            }
 
             Vector3 moveDir = (targetPos - transform.position).normalized;
-            transform.position += moveDir * playerSpeed * Time.deltaTime;
+            transform.position += moveDir * currentSpeed * Time.deltaTime;
+            Debug.Log("Moved a little bit");
 
             // Look toward movement direction
             Quaternion targetRot = Quaternion.LookRotation(moveDir);
