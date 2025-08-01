@@ -18,7 +18,7 @@ public class DoveCompanion : MonoBehaviour
     public float hoverFrequency = 1f;
     public float moveDuration = 2f;
     public float waitDuration = 5f;
-    public float wanderDistance = 5f;
+    public float wanderDistance;
     private Vector3 baseHoverPos;
     private float hoverTimer;
     private bool isHovering = false;
@@ -186,6 +186,8 @@ public class DoveCompanion : MonoBehaviour
 
         if (isIdle && currentState != DoveState.Hovering)
         {
+            Debug.Log("About to flap infinite.");
+            FlapInfinite();
             currentState = DoveState.Hovering;
             if (hoverRoutine != null) StopCoroutine(hoverRoutine);
             hoverRoutine = StartCoroutine(IdleHoverLoop());
@@ -217,7 +219,6 @@ public class DoveCompanion : MonoBehaviour
 
             while (timer < waitDuration && isHoverIdle && !movementScript.isGliding)
             {
-                Debug.Log("IdbleBobbing.");
                 float offsetY = Mathf.Sin(Time.time * hoverFrequency) * hoverAmplitude;
                 Vector3 baseHover = player.position + currentHoverOffset;
                 Vector3 bobTarget = baseHover + new Vector3(0, offsetY, 0);
@@ -438,6 +439,18 @@ public class DoveCompanion : MonoBehaviour
         }
 
         isFlappingLoop = false;
+    }
+
+    private IEnumerator FlapInfinite() 
+    {
+        while (true)
+        {
+            animator.ResetTrigger("Flap");
+            animator.SetTrigger("Flap");
+
+            float flapDuration = GetAdjustedClipLength("Flap");
+            yield return new WaitForSeconds(flapDuration);
+        }
     }
 #endregion
 #region Helpers
