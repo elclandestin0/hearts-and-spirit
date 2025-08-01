@@ -233,12 +233,12 @@ public class DoveCompanion : MonoBehaviour
                 timer += Time.deltaTime;
                 yield return null;
             }
-
+            Debug.Log("Out of loop");
             isHoverIdle = false;
         }
     }
 
-    private IEnumerator SmoothHoverApproach(Vector3 offset)
+    private IEnumerator SmoothHoverApproach(Vector3 offset) 
     {
         float maxCatchupDistance = 1000f;
         float blendDownDuration = 1.0f;
@@ -257,7 +257,7 @@ public class DoveCompanion : MonoBehaviour
             if (distance <= arrivalThreshold)
             {
                 Debug.Log("Reached target hover offset. Exiting SmoothHoverApproach.");
-                yield break; // ✅ Exit the coroutine
+                yield break;
             }
 
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
