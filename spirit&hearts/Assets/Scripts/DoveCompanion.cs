@@ -66,11 +66,13 @@ public class DoveCompanion : MonoBehaviour
     private Vector3 liveTargetPosition;
     private Vector3 doveVelocity = Vector3.zero;
     private float lastKnownSpeed;
+    private DovinaAudioManager dovinaAudioManager;
 
 #region Loop
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
+        dovinaAudioManager = GetComponent<DovinaAudioManager>();
         currentOrbitRadius = orbitRadius;
         targetOrbitRadius = orbitRadius;
         movementScript.OnFlap += HandleFlap;
@@ -170,23 +172,23 @@ public class DoveCompanion : MonoBehaviour
 
         liveTargetPosition = targetPos;
 
-
         Vector3 lookPoint = movementScript.head.position + movementScript.head.forward * (wanderDistance * 10f);
         Vector3 direction = (lookPoint - transform.position).normalized;
         Quaternion targetRot = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSmoothing);
-        
+        // dovinaAudioManager.PlayRandom("gp_changes/movement/gliding");
     }
 
 #endregion
 #region Hovering
     private void Hover()
     {
+
+        dovinaAudioManager.PlayRandom("gp_changes/movement/hovering");
         bool isIdle = !movementScript.isGliding;
 
         if (isIdle && currentState != DoveState.Hovering)
         {
-            Debug.Log("About to flap infinite.");
             FlapInfinite();
             currentState = DoveState.Hovering;
             if (hoverRoutine != null) StopCoroutine(hoverRoutine);
@@ -213,6 +215,7 @@ public class DoveCompanion : MonoBehaviour
             // Phase 1: magnitude-based smooth approach
             yield return StartCoroutine(SmoothHoverApproach(offset));
             Debug.Log("Approached successfully.");
+            
             // Phase 2: idle bobbing
             isHoverIdle = true;
             float timer = 0f;
