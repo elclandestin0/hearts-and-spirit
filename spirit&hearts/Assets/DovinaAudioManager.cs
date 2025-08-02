@@ -71,6 +71,7 @@ public class DovinaAudioManager : MonoBehaviour
 
     public void PlayPriority(string category, int index)
     {
+        Debug.Log($"[DovinaAudioManager] Attempting to play PRIORITY audio: {category} #{index}");
         if (!audioCategories.TryGetValue(category, out var clips) || index < 0 || index >= clips.Length) return;
 
         if (audioSource.isPlaying)

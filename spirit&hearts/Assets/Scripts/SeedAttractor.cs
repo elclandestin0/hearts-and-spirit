@@ -20,11 +20,13 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private string lightTag = "Light";
     [SerializeField] private AmbientLightManager lightManager;
     private LightController light;
+    private DovinaAudioManager dovinaAudioManager;
     void Start()
     {
         player = GameObject.FindWithTag("Player")?.transform;
         seedHolster = player.transform.Find("SeedHolster");
         lightManager = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
+        dovinaAudioManager = GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
     }
 
     void Update()
@@ -34,6 +36,7 @@ public class SeedBehavior : MonoBehaviour
         switch (currentState)
         {
             case State.Idle:
+                Debug.Log("Idle");
                 CheckForPlayerProximity();
                 break;
 
@@ -58,13 +61,17 @@ public class SeedBehavior : MonoBehaviour
                     {
                         // Reached light source
                         Debug.Log("Seed arrived at light");
-
+                        LightController light = currentLightTarget.GetComponent<LightController>()
+                                                ?? currentLightTarget.GetComponentInParent<LightController>()
+                                                ?? currentLightTarget.GetComponentInChildren<LightController>();
+                        Debug.Log("Light: " + light.name);
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
                             player.gameObject.GetComponent<ItemManager>().RemoveSeed();
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
                             lightManager?.UpdateAmbientLight();
+                            dovinaAudioManager.PlayPriority("gp_changes/light", 4);
                             Debug.Log("Seed activated the light source.");
                             Destroy(this.gameObject);
                         }
@@ -99,6 +106,7 @@ public class SeedBehavior : MonoBehaviour
             transform.localPosition = new Vector3(0f, 0f, 0f);
             player.gameObject.GetComponent<ItemManager>().AddSeed();
             player.gameObject.GetComponent<ItemManager>().PlayPickUpSound();
+            dovinaAudioManager.PlayPriority("gp_changes/seed", 2);
         }
     }
 
@@ -120,10 +128,6 @@ public class SeedBehavior : MonoBehaviour
         if (closest != null)
         {
             currentLightTarget = closest;
-            LightController light = currentLightTarget.GetComponent<LightController>()
-                                                ?? currentLightTarget.GetComponentInParent<LightController>()
-                                                ?? currentLightTarget.GetComponentInChildren<LightController>();
-
             transform.SetParent(null);
             if (light.isLit) return;
             currentState = State.MoveToLight;
