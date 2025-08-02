@@ -1,10 +1,14 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class DovinaAudioManager : MonoBehaviour
 {
     public AudioSource audioSource;
+
     private Dictionary<string, AudioClip[]> audioCategories = new();
+    private bool isOnCooldown = false;
+    private Coroutine cooldownCoroutine;
 
     private void Awake()
     {
@@ -36,33 +40,68 @@ public class DovinaAudioManager : MonoBehaviour
 
     public void PlayRandom(string category)
     {
-        if (!audioCategories.ContainsKey(category))
-        {
-            Debug.LogWarning($"No audio clips found for category: {category}");
-            return;
-        }
+        if (isOnCooldown || audioSource.isPlaying) return;
 
-        // If something is already playing, skip
-        if (audioSource.isPlaying) return;
-        AudioClip[] clips = audioCategories[category];
-        if (clips.Length == 0) return;
+        if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
 
         AudioClip chosen = clips[Random.Range(0, clips.Length)];
         audioSource.clip = chosen;
         audioSource.Play();
-        Debug.Log("Playing " + category);
-    }
+        Debug.Log($"[DovinaAudioManager] Playing: {category}");
 
+        if (cooldownCoroutine != null)
+            StopCoroutine(cooldownCoroutine);
+        cooldownCoroutine = StartCoroutine(CooldownCoroutine());
+    }
 
     public void PlaySpecific(string category, int index)
     {
-        if (!audioCategories.ContainsKey(category)) return;
+        if (isOnCooldown || audioSource.isPlaying) return;
 
-        var clips = audioCategories[category];
-        if (index < 0 || index >= clips.Length) return;
+        if (!audioCategories.TryGetValue(category, out var clips) || index < 0 || index >= clips.Length) return;
 
-        audioSource.PlayOneShot(clips[index]);
+        audioSource.clip = clips[index];
+        audioSource.Play();
+        Debug.Log($"[DovinaAudioManager] Playing specific: {category} #{index}");
+
+        if (cooldownCoroutine != null)
+            StopCoroutine(cooldownCoroutine);
+        cooldownCoroutine = StartCoroutine(CooldownCoroutine());
+    }
+
+    public void PlayPriority(string category, int index)
+    {
+        if (!audioCategories.TryGetValue(category, out var clips) || index < 0 || index >= clips.Length) return;
+
+        if (audioSource.isPlaying)
+            audioSource.Stop(); // stop anything currently playing
+
+        audioSource.clip = clips[index];
+        audioSource.Play();
+        Debug.Log($"[DovinaAudioManager] Playing PRIORITY: {category} #{index}");
+
+        if (cooldownCoroutine != null)
+            StopCoroutine(cooldownCoroutine);
+        cooldownCoroutine = StartCoroutine(CooldownCoroutineAfterClip(clips[index].length));
+    }
+
+    private IEnumerator CooldownCoroutine()
+    {
+        isOnCooldown = true;
+        float waitTime = Random.Range(45f, 90f);
+        yield return new WaitForSeconds(waitTime);
+        isOnCooldown = false;
+    }
+
+    private IEnumerator CooldownCoroutineAfterClip(float clipLength)
+    {
+        isOnCooldown = true;
+        yield return new WaitForSeconds(clipLength); // wait for clip to finish
+        float waitTime = Random.Range(45f, 90f);
+        yield return new WaitForSeconds(waitTime);
+        isOnCooldown = false;
     }
 
     public bool IsPlaying => audioSource.isPlaying;
+    public bool IsOnCooldown => isOnCooldown;
 }
