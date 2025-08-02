@@ -40,7 +40,8 @@ public class DovinaAudioManager : MonoBehaviour
 
     public void PlayRandom(string category)
     {
-        if (isOnCooldown || audioSource.isPlaying) return;
+        // if (isOnCooldown || audioSource.isPlaying) return;
+        if (audioSource.isPlaying) return;
 
         if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
 

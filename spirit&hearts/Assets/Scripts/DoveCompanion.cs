@@ -215,7 +215,7 @@ public class DoveCompanion : MonoBehaviour
             // Phase 1: magnitude-based smooth approach
             yield return StartCoroutine(SmoothHoverApproach(offset));
             Debug.Log("Approached successfully.");
-            
+
             // Phase 2: idle bobbing
             isHoverIdle = true;
             float timer = 0f;
@@ -267,7 +267,7 @@ public class DoveCompanion : MonoBehaviour
             float maxPlayerSpeed = movementScript.MaxSpeed;
 
             // Desired hover speed when close (slow and gentle)
-            float nearHoverSpeed = maxPlayerSpeed / 2f;
+            float nearHoverSpeed = maxPlayerSpeed;
 
             // Distance-based catch-up factor
             float distanceRatio = Mathf.Clamp01(distance / maxCatchupDistance); // 0 when close, 1 when far

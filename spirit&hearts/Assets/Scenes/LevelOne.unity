@@ -4297,12 +4297,12 @@ AudioSource:
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
+  Priority: 0
+  DopplerLevel: 0
+  MinDistance: 100
+  MaxDistance: 1000
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 2
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -4310,10 +4310,28 @@ AudioSource:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
+      time: 0.022370905
+      value: 0.9865036
+      inSlope: -1.2039576
+      outSlope: -1.2039576
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.7664651
+    - serializedVersion: 3
+      time: 0.2857148
+      value: 0.5838158
+      inSlope: -0.42035085
+      outSlope: -0.42035085
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.80797976
+      value: 0.485571
+      inSlope: -0.96326935
+      outSlope: -0.96326935
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
@@ -4321,12 +4339,12 @@ AudioSource:
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: -1.1111112
+      outSlope: -1.1111112
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
@@ -4335,7 +4353,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.49
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -4375,6 +4393,39 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!167 &278844203
+AudioReverbZone:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278844190}
+  m_Enabled: 1
+  m_MinDistance: 10
+  m_MaxDistance: 15
+  m_ReverbPreset: 1
+  m_Room: -1000
+  m_RoomHF: -100
+  m_DecayTime: 1.49
+  m_DecayHFRatio: 0.83
+  m_Reflections: -2602
+  m_ReflectionsDelay: 0.007
+  m_Reverb: 200
+  m_ReverbDelay: 0.011
+  m_HFReference: 5000
+  m_Diffusion: 100
+  m_Density: 100
+  m_LFReference: 250
+  m_RoomLF: 0
+--- !u!170 &278844204
+AudioDistortionFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278844190}
+  m_Enabled: 1
+  m_DistortionLevel: 0.2
 --- !u!1001 &290346814
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6436,6 +6487,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6506568721181362649, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 278844195}
+    - targetCorrespondingSourceObject: {fileID: 6506568721181362649, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 278844204}
+    - targetCorrespondingSourceObject: {fileID: 6506568721181362649, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 278844203}
   m_SourcePrefab: {fileID: 100100000, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
 --- !u!1 &426394589 stripped
 GameObject:
@@ -23505,7 +23562,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: 5b910f3eb578647a9845d3ee81165b5d, type: 3}
   m_Resource: {fileID: 8300000, guid: 5b910f3eb578647a9845d3ee81165b5d, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.7
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0
