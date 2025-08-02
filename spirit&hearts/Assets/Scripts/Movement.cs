@@ -164,9 +164,10 @@ public class Movement : MonoBehaviour
         if(Input.GetKey(KeyCode.N))
         {
             isHovering = true;
-        } 
-        else 
-        { 
+        }
+        
+        else
+        {
             isHovering = false;
         }
     }
