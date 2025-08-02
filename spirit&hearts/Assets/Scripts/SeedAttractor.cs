@@ -57,22 +57,18 @@ public class SeedBehavior : MonoBehaviour
                     MoveToward(currentLightTarget);
 
                     float d = Vector3.Distance(transform.position, currentLightTarget.position);
-                    if (d < 10f)
+                    if (d <= 10f)
                     {
                         // Reached light source
-                        Debug.Log("Seed arrived at light");
                         LightController light = currentLightTarget.GetComponent<LightController>()
                                                 ?? currentLightTarget.GetComponentInParent<LightController>()
                                                 ?? currentLightTarget.GetComponentInChildren<LightController>();
-                        Debug.Log("Light: " + light.name);
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
                             player.gameObject.GetComponent<ItemManager>().RemoveSeed();
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
-                            lightManager?.UpdateAmbientLight();
-                            dovinaAudioManager.PlayPriority("gp_changes/light", 4);
-                            Debug.Log("Seed activated the light source.");
+                            dovinaAudioManager.PlayPriority("gp_changes/light", 1, 12);
                             Destroy(this.gameObject);
                         }
 
@@ -106,7 +102,7 @@ public class SeedBehavior : MonoBehaviour
             transform.localPosition = new Vector3(0f, 0f, 0f);
             player.gameObject.GetComponent<ItemManager>().AddSeed();
             player.gameObject.GetComponent<ItemManager>().PlayPickUpSound();
-            dovinaAudioManager.PlayPriority("gp_changes/seed", 2);
+            dovinaAudioManager.PlayPriority("gp_changes/seed", 2, 14);
         }
     }
 
@@ -118,7 +114,6 @@ public class SeedBehavior : MonoBehaviour
         foreach (GameObject light in lightSources)
         {
             float d = Vector3.Distance(transform.position, light.transform.position);
-            Debug.Log("light source: " + light.name + " distance: " + d);
             if (d < lightSeekRadius)
             {
                 closest = light.transform;
@@ -129,7 +124,6 @@ public class SeedBehavior : MonoBehaviour
         {
             currentLightTarget = closest;
             transform.SetParent(null);
-            if (light.isLit) return;
             currentState = State.MoveToLight;
         }
     }

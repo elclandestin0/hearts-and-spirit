@@ -69,22 +69,47 @@ public class DovinaAudioManager : MonoBehaviour
         cooldownCoroutine = StartCoroutine(CooldownCoroutine());
     }
 
-    public void PlayPriority(string category, int index)
+    public void PlayPriority(string category, int index = 0, int endIndex = -1)
     {
-        Debug.Log($"[DovinaAudioManager] Attempting to play PRIORITY audio: {category} #{index}");
-        if (!audioCategories.TryGetValue(category, out var clips) || index < 0 || index >= clips.Length) return;
+        if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0)
+            return;
+
+        // If endIndex is -1 (default), just play the specific index
+        if (endIndex == -1)
+        {
+            if (index < 0 || index >= clips.Length) return;
+
+            if (audioSource.isPlaying)
+                audioSource.Stop();
+
+            audioSource.clip = clips[index];
+            audioSource.Play();
+            Debug.Log($"[DovinaAudioManager] Playing PRIORITY: {category} #{index}");
+
+            if (cooldownCoroutine != null)
+                StopCoroutine(cooldownCoroutine);
+            cooldownCoroutine = StartCoroutine(CooldownCoroutineAfterClip(clips[index].length));
+            return;
+        }
+
+        // Otherwise, play a random clip between index and endIndex
+        index = Mathf.Clamp(index, 0, clips.Length - 1);
+        endIndex = Mathf.Clamp(endIndex, index, clips.Length - 1); // ensure endIndex >= index
+
+        int randomIndex = Random.Range(index, endIndex + 1);
 
         if (audioSource.isPlaying)
-            audioSource.Stop(); // stop anything currently playing
+            audioSource.Stop();
 
-        audioSource.clip = clips[index];
+        audioSource.clip = clips[randomIndex];
         audioSource.Play();
-        Debug.Log($"[DovinaAudioManager] Playing PRIORITY: {category} #{index}");
+        Debug.Log($"[DovinaAudioManager] Playing PRIORITY (RANGE): {category} #{randomIndex}");
 
         if (cooldownCoroutine != null)
             StopCoroutine(cooldownCoroutine);
-        cooldownCoroutine = StartCoroutine(CooldownCoroutineAfterClip(clips[index].length));
+        cooldownCoroutine = StartCoroutine(CooldownCoroutineAfterClip(clips[randomIndex].length));
     }
+
 
     private IEnumerator CooldownCoroutine()
     {
