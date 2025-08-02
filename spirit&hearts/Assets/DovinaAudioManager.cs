@@ -88,7 +88,7 @@ public class DovinaAudioManager : MonoBehaviour
     private IEnumerator CooldownCoroutine()
     {
         isOnCooldown = true;
-        float waitTime = Random.Range(45f, 90f);
+        float waitTime = Random.Range(45f, 60f);
         yield return new WaitForSeconds(waitTime);
         isOnCooldown = false;
     }
@@ -96,8 +96,8 @@ public class DovinaAudioManager : MonoBehaviour
     private IEnumerator CooldownCoroutineAfterClip(float clipLength)
     {
         isOnCooldown = true;
-        yield return new WaitForSeconds(clipLength); // wait for clip to finish
-        float waitTime = Random.Range(45f, 90f);
+        yield return new WaitForSeconds(clipLength);
+        float waitTime = Random.Range(45f, 60f);
         yield return new WaitForSeconds(waitTime);
         isOnCooldown = false;
     }
