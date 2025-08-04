@@ -176,7 +176,6 @@ public class DoveCompanion : MonoBehaviour
         Vector3 direction = (lookPoint - transform.position).normalized;
         Quaternion targetRot = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSmoothing);
-        // dovinaAudioManager.PlayRandom("gp_changes/movement/gliding");
     }
 
 #endregion
@@ -314,12 +313,10 @@ public class DoveCompanion : MonoBehaviour
 
         liveTargetPosition = targetPos;
     }
-
     private void Avoid()
     {
         liveTargetPosition = escapeTarget;
     }
-
     // Obstacle check and navigating around obstacle
     private void ObstacleCheck()
     {
@@ -340,8 +337,6 @@ public class DoveCompanion : MonoBehaviour
             }
         }
     }
-
-
     private IEnumerator NavigateAround(Vector3 hitNormal)
     {
         isEscaping = true;

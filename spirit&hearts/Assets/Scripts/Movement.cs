@@ -179,8 +179,8 @@ public class Movement : MonoBehaviour
             isHovering = false;
         }
 
-        HandleStateTransition(isHovering, ref wasHovering, ref hasPlayedHoverTransition, "gp_changes/movement/gliding/_hovering", 0);
-        HandleStateTransition(isGliding, ref wasGliding, ref hasPlayedGlideTransition, "gp_changes/movement/hovering/_gliding", 0);
+        HandleStateTransition(isHovering, ref wasHovering, ref hasPlayedHoverTransition, "gp_changes/movement/toHovering", 0);
+        HandleStateTransition(isGliding, ref wasGliding, ref hasPlayedGlideTransition, "gp_changes/movement/toGliding", 0);
     }
 
 
@@ -693,7 +693,7 @@ public class Movement : MonoBehaviour
     private void HandleStateTransition(bool currentState, ref bool previousState, ref bool hasPlayedFlag, string category, int clipIndex)
     {
         // Special case: continuously check for hovering condition
-        if (category == "gp_changes/movement/gliding/_hovering")
+        if (category == "gp_changes/movement/toHovering")
         {
             if (currentState && !hasPlayedFlag)
             {
