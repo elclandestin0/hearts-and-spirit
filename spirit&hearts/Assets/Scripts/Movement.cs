@@ -68,6 +68,7 @@ public class Movement : MonoBehaviour
     private float bounceDuration = 1f;
     private float bounceDampFactor = 0.9f;
     private bool inputLockedDuringBounce => recentlyBounced && bounceTimer > 0f;
+
     // Dive->Lift 
     private bool wasDiving = false;
     private float lastDiveEndTime = -10f;
@@ -102,12 +103,19 @@ public class Movement : MonoBehaviour
     private bool wasInWindZoneLastFrame = false;
     private float lastWindExitTime = -10f;
     private float windExitBlendDuration = 2.5f;
-
     // Hover speed
     public float maxHoverSpeed = 10.0f;
 
     // Wind zones
     private SplineWindZone[] zones;
+
+    // State trackers for audio playback
+    [SerializeField] private DovinaAudioManager dovinaAudioManager;
+    private bool wasHovering = false;
+    private bool hasPlayedHoverTransition = false;
+    private bool wasGliding = false;
+    private bool hasPlayedGlideTransition = false;
+
     void Start()
     {
         // Save initial world-space hand positions for motion delta
@@ -161,7 +169,7 @@ public class Movement : MonoBehaviour
         UpdateFlightAudio();
         
         // Really should make a method for the below..
-        if(Input.GetKey(KeyCode.N))
+        if (Input.GetKey(KeyCode.N))
         {
             isHovering = true;
         }
@@ -170,6 +178,10 @@ public class Movement : MonoBehaviour
         {
             isHovering = false;
         }
+
+        HandleStateTransition(isHovering, ref wasHovering, ref hasPlayedHoverTransition, "gp_changes/movement/gliding/_hovering", 0);        
+        HandleStateTransition(isGliding, ref wasGliding, ref hasPlayedGlideTransition, "gp_changes/movement/hovering/_gliding", 0);
+        
     }
 
 
@@ -628,7 +640,6 @@ public class Movement : MonoBehaviour
         }
     }
 
-
     private void PlayFlap()
     {
         if (flapAudioSource == null || flapClip == null) return;
@@ -640,7 +651,6 @@ public class Movement : MonoBehaviour
 
         StartCoroutine(StopAudioAfter(flapAudioSource, 0.665f)); // 0.85 - 0.185
     }
-
 
     private IEnumerator StopAudioAfter(AudioSource source, float seconds)
     {
@@ -679,4 +689,21 @@ public class Movement : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(endPoint, sphereRadius);    // end of cast sphere
     }
+
+    private void HandleStateTransition(bool currentState, ref bool previousState, ref bool hasPlayedFlag, string category, int clipIndex)
+    {
+        if (currentState && !previousState && !hasPlayedFlag)
+        {
+            dovinaAudioManager.PlayPriority(category, 0, 999);
+            hasPlayedFlag = true;
+        }
+        else if (!currentState && previousState)
+        {
+            hasPlayedFlag = false;
+        }
+
+        previousState = currentState;
+    }
+
+
 }

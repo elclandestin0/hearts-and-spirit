@@ -20,11 +20,6 @@ public class AmbientLightManager : MonoBehaviour
     {
         allLights = GameObject.FindGameObjectsWithTag("Light");
         total = allLights.Length;
-        for (int i = 0; i < total; i++)
-        {
-            Debug.Log("Found Light: " + allLights[i].name);
-        }
-        Debug.Log("Number of lights in the scene: " + total);
     }
 
     private void Update()

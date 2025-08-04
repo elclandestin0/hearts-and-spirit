@@ -214,7 +214,6 @@ public class DoveCompanion : MonoBehaviour
 
             // Phase 1: magnitude-based smooth approach
             yield return StartCoroutine(SmoothHoverApproach(offset));
-            Debug.Log("Approached successfully.");
 
             // Phase 2: idle bobbing
             isHoverIdle = true;
@@ -236,7 +235,6 @@ public class DoveCompanion : MonoBehaviour
                 timer += Time.deltaTime;
                 yield return null;
             }
-            Debug.Log("Out of loop");
             isHoverIdle = false;
         }
     }
@@ -252,14 +250,12 @@ public class DoveCompanion : MonoBehaviour
         while (!movementScript.isGliding)
         {
             Vector3 targetPos = player.position + offset;
-            Debug.Log("SmoothHoverApproach - IsGliding is false");
             liveTargetPosition = targetPos;
             float distance = Vector3.Distance(transform.position, targetPos);
             float arrivalThreshold = 50.0f;
 
             if (distance <= arrivalThreshold)
             {
-                Debug.Log("Reached target hover offset. Exiting SmoothHoverApproach.");
                 yield break;
             }
 
@@ -287,7 +283,6 @@ public class DoveCompanion : MonoBehaviour
 
             Vector3 moveDir = (targetPos - transform.position).normalized;
             transform.position += moveDir * currentSpeed * Time.deltaTime;
-            Debug.Log("Moved a little bit");
 
             // Look toward movement direction
             Quaternion targetRot = Quaternion.LookRotation(moveDir);
@@ -338,11 +333,8 @@ public class DoveCompanion : MonoBehaviour
 
         if (Physics.SphereCast(rayOrigin, radius: dangerRange, direction: toTarget, out hit, dangerRange, obstacleLayers))
         {
-            Debug.Log($"Obstacle detected: {hit.collider.name}");
-
             if (!isEscaping)
             {
-                Debug.Log("Navigating around obstacle");
                 Debug.DrawRay(rayOrigin, toTarget * dangerRange, Color.red);
                 StartCoroutine(NavigateAround(hit.normal));
             }

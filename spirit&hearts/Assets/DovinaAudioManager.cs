@@ -24,7 +24,9 @@ public class DovinaAudioManager : MonoBehaviour
             "gp_changes/wind",
             "gp_changes/world",
             "gp_changes/movement/hovering",
+            "gp_changes/movement/hovering/_gliding",
             "gp_changes/movement/gliding",
+            "gp_changes/movement/gliding/_hovering",
             "gp_changes/movement/bouncing",
             "gp_changes/light",
             "parables"
@@ -40,8 +42,8 @@ public class DovinaAudioManager : MonoBehaviour
 
     public void PlayRandom(string category)
     {
-        // if (isOnCooldown || audioSource.isPlaying) return;
-        if (audioSource.isPlaying) return;
+        if (isOnCooldown || audioSource.isPlaying) return;
+        // if (audioSource.isPlaying) return;
 
         if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
 
@@ -72,12 +74,15 @@ public class DovinaAudioManager : MonoBehaviour
 
     public void PlayPriority(string category, int index = 0, int endIndex = -1)
     {
+        Debug.Log($"[DovinaAudioManager] Attempting to return clips.");
         if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0)
             return;
-
+        
+        Debug.Log($"[DovinaAudioManager] Returned clips from category " + category + ".");
         // If endIndex is -1 (default), just play the specific index
         if (endIndex == -1)
         {
+            Debug.Log($"[DovinaAudioManager] Trying to play track.");
             if (index < 0 || index >= clips.Length) return;
 
             if (audioSource.isPlaying)
@@ -85,7 +90,7 @@ public class DovinaAudioManager : MonoBehaviour
 
             audioSource.clip = clips[index];
             audioSource.Play();
-            Debug.Log($"[DovinaAudioManager] Playing PRIORITY: {category} #{index}");
+            Debug.Log($"[DovinaAudioManager] Playing PRIORITY: {category} #{index}.");
 
             if (cooldownCoroutine != null)
                 StopCoroutine(cooldownCoroutine);

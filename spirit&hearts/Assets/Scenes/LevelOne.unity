@@ -3650,9 +3650,13 @@ PrefabInstance:
       propertyPath: glideAudioSource
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 2130433395076051474, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+      propertyPath: dovinaAudioManager
+      value: 
+      objectReference: {fileID: 278844195}
     - target: {fileID: 2701794966790270928, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -335.99997
+      value: -336
       objectReference: {fileID: 0}
     - target: {fileID: 2888324562922148630, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_Volume

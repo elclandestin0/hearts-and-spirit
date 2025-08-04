@@ -36,18 +36,15 @@ public class SeedBehavior : MonoBehaviour
         switch (currentState)
         {
             case State.Idle:
-                Debug.Log("Idle");
                 CheckForPlayerProximity();
                 break;
 
             case State.AttractToPlayer:
-                Debug.Log("Moving to player");
                 MoveToward(seedHolster);
                 CheckForAttachment();
                 break;
 
             case State.AttachedToPlayer:
-                Debug.Log("Attached to player");
                 SearchForNearbyLight();
                 break;
 
@@ -70,12 +67,6 @@ public class SeedBehavior : MonoBehaviour
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
                             dovinaAudioManager.PlayPriority("gp_changes/light", 1, 12);
                             Destroy(this.gameObject);
-                        }
-
-                        else
-                        {
-                            Debug.Log(light == null ? "Light null" : "Light not null");
-                            Debug.Log(!light?.isLit ?? false ? "Not lit" : "It's lit");
                         }
                     }
                 }
