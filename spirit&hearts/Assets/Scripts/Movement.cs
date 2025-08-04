@@ -167,21 +167,20 @@ public class Movement : MonoBehaviour
         UpdateSpeedBoost();
         CapSpeed();
         UpdateFlightAudio();
-        
+
         // Really should make a method for the below..
         if (Input.GetKey(KeyCode.N))
         {
             isHovering = true;
         }
-        
+
         else
         {
             isHovering = false;
         }
 
-        HandleStateTransition(isHovering, ref wasHovering, ref hasPlayedHoverTransition, "gp_changes/movement/gliding/_hovering", 0);        
+        HandleStateTransition(isHovering, ref wasHovering, ref hasPlayedHoverTransition, "gp_changes/movement/gliding/_hovering", 0);
         HandleStateTransition(isGliding, ref wasGliding, ref hasPlayedGlideTransition, "gp_changes/movement/hovering/_gliding", 0);
-        
     }
 
 
@@ -258,8 +257,8 @@ public class Movement : MonoBehaviour
         if (isCurrentlyDiving)
         {
             // PlayDive();
-            
-            if (!wasDiving) 
+
+            if (!wasDiving)
             {
                 diveStartTime = Time.time;
                 lastRecordedDiveSpeed = velocity.magnitude;
@@ -310,7 +309,7 @@ public class Movement : MonoBehaviour
             OnFlap?.Invoke();
             PlayFlap();
         }
-        
+
         // ✅ Ensure both hand objects are assigned and active
         if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
         if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
@@ -365,11 +364,11 @@ public class Movement : MonoBehaviour
         bool wingsOutstretched = handDistance > minHandSpread;
         isGliding = wingsOutstretched;
 
-        if(Input.GetKey(KeyCode.M)) 
+        if (Input.GetKey(KeyCode.M))
         {
             isGliding = true;
-        } 
-        else 
+        }
+        else
         {
             isGliding = false;
             return;
@@ -537,7 +536,7 @@ public class Movement : MonoBehaviour
     {
         Debug.DrawLine(head.position, head.position + velocity.normalized * 50f, Color.cyan, 0f, false);
         Debug.DrawLine(head.position, head.position + headFwd * 3f * 30f, Color.red, 0f, false);
-        
+
         // Gravity direction
         Vector3 gravityDirection = Vector3.down * 0.75f + head.forward.normalized * 0.25f;
         gravityDirection.Normalize();
@@ -690,20 +689,48 @@ public class Movement : MonoBehaviour
         Gizmos.DrawWireSphere(endPoint, sphereRadius);    // end of cast sphere
     }
 
+    // Movement Audio
     private void HandleStateTransition(bool currentState, ref bool previousState, ref bool hasPlayedFlag, string category, int clipIndex)
     {
-        if (currentState && !previousState && !hasPlayedFlag)
+        // Special case: continuously check for hovering condition
+        if (category == "gp_changes/movement/gliding/_hovering")
         {
-            dovinaAudioManager.PlayPriority(category, 0, 999);
-            hasPlayedFlag = true;
+            if (currentState && !hasPlayedFlag)
+            {
+                Debug.Log($"Hovering: {velocity.magnitude}");
+
+                if (velocity.magnitude <= 30f)
+                {
+                    dovinaAudioManager.PlayPriority(category, 0, 999);
+                    hasPlayedFlag = true;
+                }
+            }
+            else if (!currentState)
+            {
+                hasPlayedFlag = false;
+            }
         }
-        else if (!currentState && previousState)
+        else
         {
-            hasPlayedFlag = false;
+            // Regular state-based triggering
+            if (currentState && !previousState && !hasPlayedFlag)
+            {
+                float randomThreshold = Mathf.Lerp(0.15f, 0.25f, Random.value);
+                if (Random.value <= randomThreshold)
+                {
+                    dovinaAudioManager.PlayPriority(category, 0, 999);
+                    hasPlayedFlag = true;
+                }
+            }
+            else if (!currentState && previousState)
+            {
+                hasPlayedFlag = false;
+            }
         }
 
         previousState = currentState;
     }
+
 
 
 }
