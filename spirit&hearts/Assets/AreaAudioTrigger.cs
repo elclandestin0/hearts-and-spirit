@@ -4,7 +4,10 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class AreaAudioTrigger : MonoBehaviour
 {
+    public enum AreaAudioType { Landmark, LightPuzzle, Chill }
+
     [Header("Audio Settings")]
+    public AreaAudioType audioType;
     public string audioCategory = "gp_changes/locations";
     public string locationType;
     public float cooldown = 1f;
@@ -12,34 +15,51 @@ public class AreaAudioTrigger : MonoBehaviour
     private float lastPlayTime;
     [SerializeField] private DovinaAudioManager dovinaAudioManager;
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
-
-        // if (Time.time - lastPlayTime < cooldown) return;
-        // lastPlayTime = Time.time;
+        if (!other.CompareTag("Player") || Time.time - lastPlayTime < cooldown) return;
+        lastPlayTime = Time.time;
 
         var clips = dovinaAudioManager.GetClips(audioCategory);
         if (clips == null || clips.Length == 0) return;
 
-        LightController light = GetComponentInChildren<LightController>();
-        string litSuffix = light != null && light.isLit ? "_lit" : "_unlit";
-
-        // Find matching clips like "lighthouse_lit", "altar_unlit", etc.
-        var matchingClips = clips
-            .Where(clip =>
-                clip != null &&
-                clip.name.ToLower().Contains(locationType.ToLower()) &&
-                clip.name.ToLower().EndsWith(litSuffix))
-            .ToArray();
-
-        if (matchingClips.Length == 0)
+        if (TryGetMatchingClip(clips, out var selectedClip))
         {
-            Debug.LogWarning($"No matching clips found for {locationType}{litSuffix}");
-            return;
+            dovinaAudioManager.PlayPriorityClip(selectedClip);
+        }
+    }
+
+    private bool TryGetMatchingClip(AudioClip[] clips, out AudioClip selectedClip)
+    {
+        selectedClip = null;
+        var locationTypeLower = locationType.ToLower();
+        var clip = clips.Where(c => c != null);
+
+        LightController light = GetComponentInChildren<LightController>();
+
+        switch (audioType)
+        {
+            case AreaAudioType.Landmark:
+                string suffix = (light != null && light.isLit) ? "_lit" : "_unlit";
+                selectedClip = clip
+                    .FirstOrDefault(c => c.name.ToLower().Contains(locationTypeLower) && c.name.ToLower().EndsWith(suffix));
+                if (!selectedClip) Debug.LogWarning($"No matching Landmark clip: {locationType}{suffix}");
+                break;
+
+            case AreaAudioType.LightPuzzle:
+                if (light == null || light.isLit) return false;
+                var lightClips = clip.Where(c => c.name.ToLower().Contains("lantern")).ToArray();
+                if (lightClips.Length == 0) return false;
+                selectedClip = lightClips[Random.Range(0, lightClips.Length)];
+                break;
+
+            case AreaAudioType.Chill:
+                var chillClips = clip.Where(c => c.name.ToLower().Contains("chill")).ToArray();
+                if (chillClips.Length == 0) return false;
+                selectedClip = chillClips[Random.Range(0, chillClips.Length)];
+                break;
         }
 
-        var selectedClip = matchingClips[Random.Range(0, matchingClips.Length)];
-        dovinaAudioManager.PlayPriorityClip(selectedClip);
+        return selectedClip != null;
     }
 }
