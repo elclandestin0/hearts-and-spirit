@@ -697,8 +697,6 @@ public class Movement : MonoBehaviour
         {
             if (currentState && !hasPlayedFlag)
             {
-                Debug.Log($"Hovering: {velocity.magnitude}");
-
                 if (velocity.magnitude <= 30f)
                 {
                     dovinaAudioManager.PlayPriority(category, 0, 999);
