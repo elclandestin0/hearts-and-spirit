@@ -80,6 +80,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _WindVMask:
+        m_Texture: {fileID: 2800000, guid: 641fb149acd3c2941a2472290f339c30, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -141,14 +145,20 @@ Material:
     - _Speed: -0.05
     - _SrcBlend: 5
     - _SrcBlendAlpha: 1
+    - _StepWindV: 0.1
     - _Surface: 1
     - _Tiling: -1.08
     - _TilingDetail: 50
+    - _VVoronoiTiling: 0.5
+    - _WindVSpeed: -0.5
     - _WorkflowMode: 1
     - _ZTest: 4
     - _ZWrite: 0
     - _ZWriteControl: 0
+    - _offset: 0.308
     - _step: 0.25
+    - _windVTiling: 0.2
+    - _windvfade: 0.00001
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
@@ -158,6 +168,7 @@ Material:
     - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _Tiling: {r: 15, g: 0.1, b: 0, a: 0}
+    - _WindvTiling: {r: 0.5, g: 0.004, b: 0, a: 0}
     - _tiling: {r: 0.5, g: 0.0001, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
