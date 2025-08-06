@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 35781237}
   - component: {fileID: 35781239}
   - component: {fileID: 35781238}
+  - component: {fileID: 35781240}
   m_Layer: 0
   m_Name: ChillCoordinateFour
   m_TagString: Untagged
@@ -203,6 +204,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 699.2029, y: 718.30176, z: 697.6121}
   m_Center: {x: -196.68698, y: -415.33997, z: -193.58612}
+--- !u!114 &35781240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 35781236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c53b5b3654bf28746b15bd861c7c395a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioType: 2
+  audioCategory: gp_changes/locations
+  locationType: 
+  cooldown: 1
+  dovinaAudioManager: {fileID: 278844195}
 --- !u!1001 &42533185
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1278,6 +1296,7 @@ GameObject:
   - component: {fileID: 113275006}
   - component: {fileID: 113275008}
   - component: {fileID: 113275007}
+  - component: {fileID: 113275009}
   m_Layer: 0
   m_Name: ChillCoordinateTwo
   m_TagString: Untagged
@@ -1351,6 +1370,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 564.8969, y: 718.30176, z: 744.3275}
   m_Center: {x: -366.02963, y: -415.33997, z: -132.2724}
+--- !u!114 &113275009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 113275005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c53b5b3654bf28746b15bd861c7c395a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioType: 2
+  audioCategory: gp_changes/locations
+  locationType: 
+  cooldown: 1
+  dovinaAudioManager: {fileID: 278844195}
 --- !u!4 &117840590 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1297643215736824615, guid: d796a4c29dc38824996c52494564093c, type: 3}
@@ -3927,6 +3963,7 @@ GameObject:
   - component: {fileID: 243513171}
   - component: {fileID: 243513170}
   - component: {fileID: 243513169}
+  - component: {fileID: 243513172}
   m_Layer: 0
   m_Name: Altar_Obstacle_Course
   m_TagString: Untagged
@@ -3988,6 +4025,33 @@ Transform:
   - {fileID: 1085200715}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &243513172
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 243513168}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1001 &254785895
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15240,6 +15304,7 @@ GameObject:
   - component: {fileID: 1305157608}
   - component: {fileID: 1305157610}
   - component: {fileID: 1305157609}
+  - component: {fileID: 1305157611}
   m_Layer: 0
   m_Name: ChillCoordinateThree
   m_TagString: Untagged
@@ -15313,6 +15378,23 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 755.5177, y: 718.30176, z: 839.6378}
   m_Center: {x: -345.30988, y: -415.33997, z: -84.61725}
+--- !u!114 &1305157611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1305157607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c53b5b3654bf28746b15bd861c7c395a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioType: 2
+  audioCategory: gp_changes/locations
+  locationType: 
+  cooldown: 1
+  dovinaAudioManager: {fileID: 278844195}
 --- !u!114 &1306312357 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2973532644350483649, guid: d796a4c29dc38824996c52494564093c, type: 3}
