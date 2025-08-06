@@ -7,6 +7,7 @@ public class DovinaAudioManager : MonoBehaviour
     public AudioSource audioSource;
 
     private Dictionary<string, AudioClip[]> audioCategories = new();
+    private Queue<AudioClip> clipQueue = new();
     private bool isOnCooldown = false;
     private bool isPriorityPlaying = false;
 
@@ -40,20 +41,18 @@ public class DovinaAudioManager : MonoBehaviour
         foreach (var path in categories)
         {
             AudioClip[] clips = Resources.LoadAll<AudioClip>($"Dovina/Audio/{path}");
-
-            // Filter: only keep clips whose path matches the exact folder
             List<AudioClip> validClips = new();
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
             foreach (var clip in clips)
             {
                 string assetPath = UnityEditor.AssetDatabase.GetAssetPath(clip);
-                if (assetPath.Replace("\\", "/").Contains($"/{path}/")) // exclude _gliding
+                if (assetPath.Replace("\\", "/").Contains($"/{path}/"))
                     validClips.Add(clip);
             }
-    #else
-            validClips.AddRange(clips); // fallback at runtime (no filtering)
-    #endif
+#else
+            validClips.AddRange(clips);
+#endif
 
             if (validClips.Count > 0)
                 audioCategories[path] = validClips.ToArray();
@@ -67,37 +66,46 @@ public class DovinaAudioManager : MonoBehaviour
         return null;
     }
 
+    public void PlayClip(AudioClip clip)
+    {
+        if (clip == null) return;
+
+        if (isPriorityPlaying)
+        {
+            clipQueue.Enqueue(clip);
+            return;
+        }
+
+        if (isOnCooldown || audioSource.isPlaying) return;
+
+        audioSource.clip = clip;
+        audioSource.Play();
+
+        StartNewCooldown();
+    }
+
     public void PlayRandom(string category)
     {
-        if (isOnCooldown || isPriorityPlaying || audioSource.isPlaying) return;
-
         if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
 
         AudioClip chosen = clips[Random.Range(0, clips.Length)];
-        audioSource.clip = chosen;
-        audioSource.Play();
 
-        StartNewCooldown(); // starts a fresh cooldown
+        PlayClip(chosen);
     }
 
     public void PlaySpecific(string category, int index)
     {
-        if (isOnCooldown || isPriorityPlaying || audioSource.isPlaying) return;
-
         if (!audioCategories.TryGetValue(category, out var clips) || index < 0 || index >= clips.Length) return;
 
-        audioSource.clip = clips[index];
-        audioSource.Play();
+        AudioClip chosen = clips[index];
 
-        StartNewCooldown(); // starts a fresh cooldown
+        PlayClip(chosen);
     }
 
     public void PlayPriority(string category, int index = 0, int endIndex = -1)
     {
-
         if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
 
-        // Select clip
         int selectedIndex = endIndex == -1
             ? index
             : Random.Range(Mathf.Clamp(index, 0, clips.Length - 1), Mathf.Clamp(endIndex + 1, 0, clips.Length));
@@ -105,24 +113,7 @@ public class DovinaAudioManager : MonoBehaviour
         if (selectedIndex < 0 || selectedIndex >= clips.Length) return;
 
         AudioClip clip = clips[selectedIndex];
-
-        // Interrupt current line
-        if (audioSource.isPlaying)
-            audioSource.Stop();
-
-        // Flag that priority is now playing
-        isPriorityPlaying = true;
-        audioSource.clip = clip;
-        audioSource.Play();
-
-        if (cooldownCoroutine != null)
-        {
-            StopCoroutine(cooldownCoroutine);
-            // Keep track of how much cooldown is left
-            cooldownRemaining = Mathf.Max(cooldownRemaining, 0f);
-        }
-
-        StartCoroutine(ResumeCooldownAfterPriority(clip.length));
+        PlayPriorityClip(clip);
     }
 
     public void PlayPriorityClip(AudioClip clip)
@@ -145,6 +136,39 @@ public class DovinaAudioManager : MonoBehaviour
         StartCoroutine(ResumeCooldownAfterPriority(clip.length));
     }
 
+    private IEnumerator ResumeCooldownAfterPriority(float clipLength)
+    {
+        float timer = 0f;
+        while (timer < clipLength)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        isPriorityPlaying = false;
+
+        if (clipQueue.Count > 0)
+        {
+            PlayNextQueuedClip();
+        }
+        else if (cooldownRemaining > 0f)
+        {
+            cooldownCoroutine = StartCoroutine(CooldownTimer());
+        }
+    }
+
+    private void PlayNextQueuedClip()
+    {
+        if (clipQueue.Count == 0) return;
+
+        var nextClip = clipQueue.Dequeue();
+        if (nextClip == null) return;
+
+        audioSource.clip = nextClip;
+        audioSource.Play();
+
+        StartNewCooldown();
+    }
 
     private void StartNewCooldown()
     {
@@ -163,10 +187,7 @@ public class DovinaAudioManager : MonoBehaviour
         while (cooldownRemaining > 0f)
         {
             if (isPriorityPlaying)
-            {
-                // Pause cooldown until priority finishes
                 yield break;
-            }
 
             cooldownRemaining -= Time.deltaTime;
             yield return null;
@@ -174,21 +195,6 @@ public class DovinaAudioManager : MonoBehaviour
 
         isOnCooldown = false;
     }
-
-    private IEnumerator ResumeCooldownAfterPriority(float clipLength)
-    {
-        float timer = 0f;
-        while (timer < clipLength)
-        {
-            timer += Time.deltaTime;
-            yield return null;
-        }
-        isPriorityPlaying = false;
-
-        if (cooldownRemaining > 0f)
-            cooldownCoroutine = StartCoroutine(CooldownTimer());
-    }
-
 
     public bool IsPlaying => audioSource.isPlaying;
     public bool IsOnCooldown => isOnCooldown;
