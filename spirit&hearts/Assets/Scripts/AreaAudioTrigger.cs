@@ -17,15 +17,19 @@ public class AreaAudioTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player") || Time.time - lastPlayTime < cooldown) return;
-        lastPlayTime = Time.time;
+        // if (!other.CompareTag("Player") || Time.time - lastPlayTime < cooldown) return;
+        // lastPlayTime = Time.time;
+        Debug.Log("Attempting to play area trigger for " + locationType + " with object name: " + other.gameObject.name);
+        if (!other.CompareTag("Player")) return;
 
+        Debug.Log("Attempting to play area trigger for " + locationType);
         var clips = dovinaAudioManager.GetClips(audioCategory);
         if (clips == null || clips.Length == 0) return;
 
         if (TryGetMatchingClip(clips, out var selectedClip))
         {
-            dovinaAudioManager.PlayPriorityClip(selectedClip);
+            Debug.Log("Playing area trigger for " + locationType);
+            dovinaAudioManager.PlayClip(selectedClip, 1);
         }
     }
 

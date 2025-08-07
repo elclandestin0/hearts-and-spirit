@@ -178,12 +178,16 @@ public class DoveCompanion : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSmoothing);
     }
 
-#endregion
-#region Hovering
+    #endregion
+    #region Hovering
+    private void BaseChatter()
+    {
+        var selectedClip = dovinaAudioManager.GetClip("gp_changes/movement/hovering");
+        dovinaAudioManager.PlayClip(selectedClip, 0);
+    }
     private void Hover()
     {
-
-        dovinaAudioManager.PlayRandom("gp_changes/movement/hovering");
+        BaseChatter();
         bool isIdle = !movementScript.isGliding;
 
         if (isIdle && currentState != DoveState.Hovering)
