@@ -12,7 +12,6 @@ public class DoveCompanion : MonoBehaviour
     [Header("Flight Settings")]
     public float rotationSmoothing = 1f;
     public float currentSpeed = 0.0f;
-
     [Header("Hovering")]
     public float hoverAmplitude = 0.1f;
     public float hoverFrequency = 1f;
