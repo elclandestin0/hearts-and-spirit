@@ -47,7 +47,7 @@ public class Movement : MonoBehaviour
     [Header("Debug variables")]
     public bool isGliding = false;
     public bool isFlapping = false;
-    private bool isHovering = false;
+    public bool isHovering = false;
 
     // Publicly accessible variables for reference
     public Vector3 CurrentVelocity => velocity;

@@ -10,25 +10,21 @@ public class AreaAudioTrigger : MonoBehaviour
     public AreaAudioType audioType;
     public string audioCategory = "gp_changes/locations";
     public string locationType;
-    public float cooldown = 1f;
-
+    public float cooldown = 10f;
     private float lastPlayTime;
     [SerializeField] private DovinaAudioManager dovinaAudioManager;
+    [SerializeField] private Movement movementScript;
 
     private void OnTriggerEnter(Collider other)
     {
-        // if (!other.CompareTag("Player") || Time.time - lastPlayTime < cooldown) return;
-        // lastPlayTime = Time.time;
-        Debug.Log("Attempting to play area trigger for " + locationType + " with object name: " + other.gameObject.name);
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player") || Time.time - lastPlayTime < cooldown) return;
+        lastPlayTime = Time.time;
 
-        Debug.Log("Attempting to play area trigger for " + locationType);
         var clips = dovinaAudioManager.GetClips(audioCategory);
         if (clips == null || clips.Length == 0) return;
 
         if (TryGetMatchingClip(clips, out var selectedClip))
         {
-            Debug.Log("Playing area trigger for " + locationType);
             dovinaAudioManager.PlayClip(selectedClip, 1);
         }
     }
@@ -59,7 +55,7 @@ public class AreaAudioTrigger : MonoBehaviour
 
             case AreaAudioType.Chill:
                 var chillClips = clip.Where(c => c.name.ToLower().Contains("chill")).ToArray();
-                if (chillClips.Length == 0) return false;
+                if (chillClips.Length == 0 || movementScript.isHovering) return false;
                 selectedClip = chillClips[Random.Range(0, chillClips.Length)];
                 break;
         }

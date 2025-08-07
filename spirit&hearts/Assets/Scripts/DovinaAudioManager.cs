@@ -25,7 +25,8 @@ public class DovinaAudioManager : MonoBehaviour
         string[] categories = {
             "intro",
             "gp_changes/seed",
-            "gp_changes/speed",
+            "gp_changes/speed/slow",
+            "gp_changes/speed/fast",
             "gp_changes/wind",
             "gp_changes/world",
             "gp_changes/locations",
@@ -83,13 +84,22 @@ public class DovinaAudioManager : MonoBehaviour
 
         // ✅ BLOCK priority 0 clips if cooldown or something is playing
         if (priority == 0 && (isPriorityPlaying || isOnCooldown))
+        {
+            clipQueue.Enqueue(clip);
             return;
+        }
 
         if (isPriorityPlaying && priority < currentPriority)
+        {
+            clipQueue.Enqueue(clip);
             return;
+        }
 
         if (isPriorityPlaying && priority == currentPriority)
+        {
+            clipQueue.Enqueue(clip);
             return;
+        }
 
         if (isPriorityPlaying && priority > currentPriority)
         {
@@ -169,6 +179,7 @@ public class DovinaAudioManager : MonoBehaviour
     private IEnumerator ResumeCooldownAfterPriority(float clipLength)
     {
         float timer = 0f;
+        Debug.Log("Lasting " + clipLength + "...");
         while (timer < clipLength)
         {
             timer += Time.deltaTime;
@@ -176,9 +187,10 @@ public class DovinaAudioManager : MonoBehaviour
         }
 
         isPriorityPlaying = false;
-
+        Debug.Log("Clip Queue > 0?");
         if (clipQueue.Count > 0)
         {
+            Debug.Log("Playing next clip..");
             PlayNextQueuedClip();
         }
         else if (cooldownRemaining > 0f)
@@ -196,7 +208,8 @@ public class DovinaAudioManager : MonoBehaviour
 
         audioSource.clip = nextClip;
         audioSource.Play();
-
+        
+        Debug.Log("Playing...");
         StartNewCooldown();
     }
 

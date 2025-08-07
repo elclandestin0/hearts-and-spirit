@@ -67,6 +67,9 @@ public class DoveCompanion : MonoBehaviour
     private Vector3 doveVelocity = Vector3.zero;
     private float lastKnownSpeed;
     private DovinaAudioManager dovinaAudioManager;
+    // Chatter
+    private bool hasPlayedFastChatter = false;
+    private bool hasPlayedSlowChatter = false;
 
 #region Loop
     void Start()
@@ -81,7 +84,7 @@ public class DoveCompanion : MonoBehaviour
     void Update()
     {
         Hover();
-
+        TryPlaySpeedChatter();
         switch (currentState)
         {
             case DoveState.Orbiting:
@@ -185,6 +188,41 @@ public class DoveCompanion : MonoBehaviour
         var selectedClip = dovinaAudioManager.GetClip("gp_changes/movement/hovering");
         dovinaAudioManager.PlayClip(selectedClip, 0);
     }
+
+    private void TryPlaySpeedChatter()
+    {
+        float speed = movementScript.CurrentVelocity.magnitude;
+        // Fast zone
+        if (speed >= 60f)
+        {
+            if (!hasPlayedFastChatter)
+            {
+                var clip = dovinaAudioManager.GetClip("gp_changes/speed/fast");
+                dovinaAudioManager.PlayClip(clip, 0);
+                hasPlayedFastChatter = true;
+                hasPlayedSlowChatter = false;
+            }
+        }
+        // Slow zone
+        else if (speed <= 50f)
+        {
+            Debug.Log("Hit slow speed " + speed);
+            if (!hasPlayedSlowChatter)
+            {
+                var clip = dovinaAudioManager.GetClip("gp_changes/speed/slow");
+                dovinaAudioManager.PlayClip(clip, 0);
+                hasPlayedSlowChatter = true;
+                hasPlayedFastChatter = false;
+            }
+        }
+        // Mid-range, reset both
+        else
+        {
+            hasPlayedFastChatter = false;
+            hasPlayedSlowChatter = false;
+        }
+    }
+
     private void Hover()
     {
         BaseChatter();
@@ -389,7 +427,7 @@ public class DoveCompanion : MonoBehaviour
             timer += navStepInterval;
             if (timer > 3f)
             {
-                Debug.LogWarning("[DOVE] Navigation timeout, reattempting orbit");
+                Debug.LogWarning("[DOVE] Navigation timeout, re-attempting orbit");
                 currentState = DoveState.Orbiting;
                 isEscaping = false;
                 yield break;
