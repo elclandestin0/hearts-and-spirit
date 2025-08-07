@@ -79,26 +79,20 @@ public class DovinaAudioManager : MonoBehaviour
 
     public void PlayClip(AudioClip clip, int priority, string context = null)
     {
+        if (clip == null) return;
+
+        // ✅ BLOCK priority 0 clips if cooldown or something is playing
         if (priority == 0 && (isPriorityPlaying || isOnCooldown))
-        {
             return;
-        }
 
         if (isPriorityPlaying && priority < currentPriority)
-        {
-            // Block lower-priority
             return;
-        }
 
         if (isPriorityPlaying && priority == currentPriority)
-        {
-            // Already playing a clip of the same priority
             return;
-        }
 
         if (isPriorityPlaying && priority > currentPriority)
         {
-            // Interrupt and ghost old clip
             // GhostCurrentIfContext(context);
         }
 
@@ -107,6 +101,7 @@ public class DovinaAudioManager : MonoBehaviour
         isPriorityPlaying = true;
         audioSource.clip = clip;
         audioSource.Play();
+
         if (priority == 0)
         {
             isOnCooldown = true;
@@ -114,8 +109,19 @@ public class DovinaAudioManager : MonoBehaviour
             cooldownRemaining = cooldownTotal;
             StartCoroutine(ResumeCooldownAfterPriority(clip.length));
         }
+        else
+        {
+            StartCoroutine(EndPriorityAfterClip(clip.length));
+        }
     }
+    private IEnumerator EndPriorityAfterClip(float clipLength)
+    {
+        yield return new WaitForSeconds(clipLength);
+        isPriorityPlaying = false;
 
+        if (cooldownRemaining > 0f)
+            cooldownCoroutine = StartCoroutine(CooldownTimer());
+    }
 
     public void PlaySpecific(string category, int index)
     {
