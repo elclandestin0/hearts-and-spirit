@@ -82,7 +82,9 @@ public class Movement : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private AudioSource flapAudioSource;
     [SerializeField] private AudioSource diveAudioSource;
+    [SerializeField] private AudioSource bounceAudioSource;
     [SerializeField] private AudioClip flapClip;
+    [SerializeField] private AudioClip bounceClip;
     [SerializeField] private float targetVolumeDive;
     [SerializeField] private float targetVolumeGlide;
 
@@ -532,6 +534,7 @@ public class Movement : MonoBehaviour
             );
         }
     }
+
     private void DrawDebugLines()
     {
         Debug.DrawLine(head.position, head.position + velocity.normalized * 50f, Color.cyan, 0f, false);
@@ -550,7 +553,7 @@ public class Movement : MonoBehaviour
         speedBoostStartTime = Time.time;
         speedBoostDirection = head.forward.normalized; // starting point
     }
-
+    
     private void UpdateSpeedBoost()
     {
         if (!isSpeedBoosted) return;
@@ -573,6 +576,7 @@ public class Movement : MonoBehaviour
 
             velocity += speedBoostDirection * fadedSpeed;
         }
+
         else
         {
             isSpeedBoosted = false;
@@ -591,7 +595,7 @@ public class Movement : MonoBehaviour
         if (speed > maxDiveSpeed)
         {
             // Gradually reduce speed toward maxDiveSpeed
-            float decaySpeed = 2.5f; // adjust for how quickly you want it to settle
+            float decaySpeed = 2.5f;
             float newSpeed = Mathf.Lerp(speed, maxDiveSpeed, Time.deltaTime * decaySpeed);
             velocity = velocity.normalized * newSpeed;
         }
@@ -616,26 +620,29 @@ public class Movement : MonoBehaviour
 
         if (Physics.SphereCast(origin, sphereRadius, direction, out RaycastHit hit, dynamicDistance, impactLayer, QueryTriggerInteraction.Ignore))
         {
+            // Bounce sound effect
+            PlayBounce();
             float speed = velocity.magnitude;
             float approachDot = Vector3.Dot(direction, -hit.normal);
-            Debug.Log($"Impact detected. Approach dot: {approachDot}");
 
             if (approachDot > 0.2f) // more forgiving threshold
             {
-
                 // Calculate bounce blend from 1.25 to 2.5 based on speed
                 float bounceBlend = Mathf.Lerp(1.25f, 2.5f, velocity.magnitude);
 
                 // Apply the dynamic bounce
                 Vector3 bounce = hit.normal * speed * bounceBlend;
                 velocity += bounce;
-
+                
                 recentlyBounced = true;
                 bounceTimer = bounceDuration;
 
                 Debug.DrawLine(origin, hit.point, Color.green, 1f);
-            }
 
+                // Dovina audio
+                AudioClip clip = dovinaAudioManager.GetClip("gp_changes/bouncing");
+                dovinaAudioManager.PlayClip(clip, 2);
+            }
         }
     }
 
@@ -649,6 +656,16 @@ public class Movement : MonoBehaviour
         flapAudioSource.Play();
 
         StartCoroutine(StopAudioAfter(flapAudioSource, 0.665f)); // 0.85 - 0.185
+    }
+
+    private void PlayBounce()
+    {
+        if (bounceAudioSource == null || bounceClip == null) return;
+
+        bounceAudioSource.Stop(); // ensure it's reset
+        bounceAudioSource.clip = bounceClip;
+        bounceAudioSource.time = 0.075f;
+        bounceAudioSource.Play();
     }
 
     private IEnumerator StopAudioAfter(AudioSource source, float seconds)
@@ -699,7 +716,8 @@ public class Movement : MonoBehaviour
             {
                 if (velocity.magnitude <= 30f)
                 {
-                    dovinaAudioManager.PlayPriority(category, 0, 999);
+                    AudioClip clip = dovinaAudioManager.GetClip(category);
+                    dovinaAudioManager.PlayClip(clip, 0);
                     hasPlayedFlag = true;
                 }
             }
@@ -716,7 +734,8 @@ public class Movement : MonoBehaviour
                 float randomThreshold = Mathf.Lerp(0.15f, 0.25f, Random.value);
                 if (Random.value <= randomThreshold)
                 {
-                    dovinaAudioManager.PlayPriority(category, 0, 999);
+                    AudioClip clip = dovinaAudioManager.GetClip(category);
+                    dovinaAudioManager.PlayClip(clip, 0);
                     hasPlayedFlag = true;
                 }
             }
@@ -725,10 +744,6 @@ public class Movement : MonoBehaviour
                 hasPlayedFlag = false;
             }
         }
-
         previousState = currentState;
     }
-
-
-
 }

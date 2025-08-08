@@ -34,7 +34,7 @@ public class DovinaAudioManager : MonoBehaviour
             "gp_changes/movement/toGliding",
             "gp_changes/movement/gliding",
             "gp_changes/movement/toHovering",
-            "gp_changes/movement/bouncing",
+            "gp_changes/bouncing",
             "gp_changes/light",
             "parables"
         };
