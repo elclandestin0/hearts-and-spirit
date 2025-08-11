@@ -28,6 +28,7 @@ public class Movement : MonoBehaviour
     public float diveAngle = 0f;
     [Header("Recorder")]
     [SerializeField] private GhostFlightRecorder recorder;
+    
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1f;

@@ -14,7 +14,6 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private float minSpeed;
     [SerializeField] private float maxSpeed;
     [SerializeField] private Transform seedHolster;
-
     [Header("Light Seeking Settings")]
     [SerializeField] private float lightSeekRadius;
     [SerializeField] private string lightTag = "Light";
