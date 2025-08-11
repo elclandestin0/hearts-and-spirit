@@ -184,9 +184,11 @@ public class DoveCompanion : MonoBehaviour
     #region Hovering
     private void BaseChatter()
     {
-        var selectedClip = dovinaAudioManager.GetClip("gp_changes/movement/hovering");
-        dovinaAudioManager.PlayClip(selectedClip, 0);
+        if (dovinaAudioManager.IsPriorityPlaying || dovinaAudioManager.IsOnCooldown) return;
+        var selected = dovinaAudioManager.GetClip("gp_changes/movement/hovering");
+        dovinaAudioManager.PlayClip(selected, 0);
     }
+
 
     private void TryPlaySpeedChatter()
     {
@@ -205,10 +207,9 @@ public class DoveCompanion : MonoBehaviour
         // Slow zone
         else if (speed <= 50f)
         {
-            Debug.Log("Hit slow speed " + speed);
             if (!hasPlayedSlowChatter)
             {
-                var clip = dovinaAudioManager.GetClip("gp_changes/speed/slow");
+                var clip = dovinaAudioManager.GetClip("gp_chanfges/speed/slow");
                 dovinaAudioManager.PlayClip(clip, 0);
                 hasPlayedSlowChatter = true;
                 hasPlayedFastChatter = false;

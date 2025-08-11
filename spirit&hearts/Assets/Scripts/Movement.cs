@@ -640,8 +640,7 @@ public class Movement : MonoBehaviour
                 Debug.DrawLine(origin, hit.point, Color.green, 1f);
 
                 // Dovina audio
-                AudioClip clip = dovinaAudioManager.GetClip("gp_changes/bouncing");
-                dovinaAudioManager.PlayClip(clip, 2);
+                dovinaAudioManager.PlayPriority("gp_changes/bouncing", 0, 999);
             }
         }
     }
@@ -716,8 +715,7 @@ public class Movement : MonoBehaviour
             {
                 if (velocity.magnitude <= 30f)
                 {
-                    AudioClip clip = dovinaAudioManager.GetClip(category);
-                    dovinaAudioManager.PlayClip(clip, 0);
+                    dovinaAudioManager.PlayPriority(category, 0, 999, 1);
                     hasPlayedFlag = true;
                 }
             }
@@ -734,8 +732,7 @@ public class Movement : MonoBehaviour
                 float randomThreshold = Mathf.Lerp(0.15f, 0.25f, Random.value);
                 if (Random.value <= randomThreshold)
                 {
-                    AudioClip clip = dovinaAudioManager.GetClip(category);
-                    dovinaAudioManager.PlayClip(clip, 0);
+                    dovinaAudioManager.PlayPriority(category, 0, 999, 1);
                     hasPlayedFlag = true;
                 }
             }

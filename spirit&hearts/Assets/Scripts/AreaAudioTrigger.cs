@@ -55,7 +55,7 @@ public class AreaAudioTrigger : MonoBehaviour
 
             case AreaAudioType.Chill:
                 var chillClips = clip.Where(c => c.name.ToLower().Contains("chill")).ToArray();
-                if (chillClips.Length == 0 || movementScript.isHovering) return false;
+                if (chillClips.Length == 0) return false;
                 selectedClip = chillClips[Random.Range(0, chillClips.Length)];
                 break;
         }

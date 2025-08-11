@@ -3842,7 +3842,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1422.7903
+      value: 2562
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4543,7 +4543,7 @@ AudioSource:
   MinDistance: 100
   MaxDistance: 1000
   Pan2D: 0
-  rolloffMode: 2
+  rolloffMode: 0
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -13537,6 +13537,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1029670550}
   - component: {fileID: 1029670549}
+  - component: {fileID: 1029670551}
   m_Layer: 0
   m_Name: AmbientLightManager
   m_TagString: Untagged
@@ -13561,6 +13562,7 @@ MonoBehaviour:
   total: 0
   lit: 0
   transitionDuration: 1.5
+  litPercent: 0
 --- !u!4 &1029670550
 Transform:
   m_ObjectHideFlags: 0
@@ -13576,6 +13578,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1029670551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1029670548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da1faf7c329bc4b68a8d5ea966518d6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dovinaAudioManager: {fileID: 278844209}
+  lightManager: {fileID: 1029670549}
+  category: gp_changes/world
 --- !u!4 &1036356132 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1297643215736824615, guid: d796a4c29dc38824996c52494564093c, type: 3}

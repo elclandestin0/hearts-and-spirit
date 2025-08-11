@@ -4,24 +4,41 @@ using System.Collections.Generic;
 
 public class DovinaAudioManager : MonoBehaviour
 {
+    [System.Serializable]
+    private struct ClipRequest
+    {
+        public AudioClip clip;
+        public int priority;
+        public string context;
+        public ClipRequest(AudioClip c, int p, string ctx = null) { clip = c; priority = p; context = ctx; }
+    }
+
     public AudioSource audioSource;
 
-    private Dictionary<string, AudioClip[]> audioCategories = new();
-    private Queue<AudioClip> clipQueue = new();
-    private bool isOnCooldown = false;
+    private readonly Dictionary<string, AudioClip[]> audioCategories = new();
+    private readonly Dictionary<string, Queue<AudioClip>> nonRepeatingBags = new(); // shuffle-bag per category
+    private readonly Queue<ClipRequest> clipQueue = new();                        // queued (clip, priority)
+
+    // Priority / state
     private bool isPriorityPlaying = false;
     private int currentPriority = 0;
-    private Coroutine cooldownCoroutine;
-    private float cooldownRemaining = 0f;
-    private float cooldownTotal = 0f;
 
-    private void Awake()
+    // Cooldown (only for priority 0 chatter)
+    private bool isOnCooldown = false;
+    private float cooldownRemaining = 0f;
+    private Coroutine cooldownCoroutine;
+    // categories that should NOT be queued if something is already playing
+    private readonly HashSet<string> doNotQueueWhenBusy = new()
     {
-        LoadAllClips();
-    }
+        "gp_changes/bouncing"
+    };
+
+
+    private void Awake() => LoadAllClips();
 
     private void LoadAllClips()
     {
+        // Register the categories you actually ship
         string[] categories = {
             "intro",
             "gp_changes/seed",
@@ -41,204 +58,195 @@ public class DovinaAudioManager : MonoBehaviour
 
         foreach (var path in categories)
         {
-            AudioClip[] clips = Resources.LoadAll<AudioClip>($"Dovina/Audio/{path}");
-            List<AudioClip> validClips = new();
+            var clips = Resources.LoadAll<AudioClip>($"Dovina/Audio/{path}");
+            var valid = new List<AudioClip>(clips.Length);
 
 #if UNITY_EDITOR
             foreach (var clip in clips)
             {
                 string assetPath = UnityEditor.AssetDatabase.GetAssetPath(clip);
                 if (assetPath.Replace("\\", "/").Contains($"/{path}/"))
-                    validClips.Add(clip);
+                    valid.Add(clip);
             }
 #else
-            validClips.AddRange(clips);
+            valid.AddRange(clips);
 #endif
-
-            if (validClips.Count > 0)
-                audioCategories[path] = validClips.ToArray();
+            if (valid.Count > 0) audioCategories[path] = valid.ToArray();
         }
     }
 
-    public AudioClip[] GetClips(string category)
-    {
-        if (audioCategories.TryGetValue(category, out var clips))
-            return clips;
-        return null;
-    }
+    // -------- Category access --------
+    public AudioClip[] GetClips(string category) =>
+        audioCategories.TryGetValue(category, out var clips) ? clips : null;
 
     public AudioClip GetClip(string category)
     {
-        if (audioCategories.TryGetValue(category, out var clips))
-        {
-            var clip = clips[Random.Range(0, clips.Length)];
-            return clip;
-        }
-            
-        return null;
+        if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return null;
+        return clips[Random.Range(0, clips.Length)];
     }
 
+    // -------- Non-repeating (shuffle bag) --------
+    private void RefillBag(string category)
+    {
+        if (!audioCategories.TryGetValue(category, out var src) || src.Length == 0) return;
+        var list = new List<AudioClip>(src);
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+        nonRepeatingBags[category] = new Queue<AudioClip>(list);
+    }
+
+    public AudioClip GetNonRepeatingClip(string category)
+    {
+        if (!nonRepeatingBags.TryGetValue(category, out var bag) || bag == null || bag.Count == 0)
+        {
+            RefillBag(category);
+            nonRepeatingBags.TryGetValue(category, out bag);
+        }
+        if (bag == null || bag.Count == 0) return null;
+        return bag.Dequeue();
+    }
+
+    public void PlayNonRepeating(string category, int priority)
+    {
+        var clip = GetNonRepeatingClip(category);
+        if (clip != null) PlayClip(clip, priority, category);
+    }
+
+    // -------- High-level helpers --------
+    // Random in category at given priority (uses queue rules)
+    public void PlayFromCategory(string category, int priority)
+    {
+        var clip = GetClip(category);
+        if (clip != null) PlayClip(clip, priority, category);
+    }
+
+    // Index/range in category at given priority (uses queue rules)
+    public void PlayPriority(string category, int startIndex = 0, int endIndexInclusive = -1, int priority = 1)
+    {
+        if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
+
+        int idx = (endIndexInclusive == -1)
+            ? Mathf.Clamp(startIndex, 0, clips.Length - 1)
+            : Random.Range(Mathf.Clamp(startIndex, 0, clips.Length - 1), Mathf.Clamp(endIndexInclusive + 1, 0, clips.Length));
+
+        if (idx < 0 || idx >= clips.Length) return;
+        PlayClip(clips[idx], priority, category);
+    }
+
+    // Back-to-back ordered enqueue helper
+    public void PlayBackToBack(params (string category, int start, int endInclusive, int priority)[] items)
+    {
+        foreach (var it in items)
+        {
+            if (!audioCategories.TryGetValue(it.category, out var clips) || clips.Length == 0) continue;
+            int idx = (it.endInclusive == -1)
+                ? Mathf.Clamp(it.start, 0, clips.Length - 1)
+                : Random.Range(Mathf.Clamp(it.start, 0, clips.Length - 1), Mathf.Clamp(it.endInclusive + 1, 0, clips.Length));
+            if (idx < 0 || idx >= clips.Length) continue;
+            clipQueue.Enqueue(new ClipRequest(clips[idx], it.priority));
+        }
+        if (!isPriorityPlaying) TryPlayNextQueued();
+    }
+
+    // -------- Core play w/ priority & queue rules --------
     public void PlayClip(AudioClip clip, int priority, string context = null)
     {
         if (clip == null) return;
 
-        // ✅ BLOCK priority 0 clips if cooldown or something is playing
-        if (priority == 0 && (isPriorityPlaying || isOnCooldown))
-        {
-            clipQueue.Enqueue(clip);
-            return;
+        // chatter (prio 0) respects cooldown/now-playing → queue
+        if (priority == 0 && (isOnCooldown || isPriorityPlaying))
+        { 
+            clipQueue.Enqueue(new ClipRequest(clip, priority, context));
+            return; 
         }
 
-        if (isPriorityPlaying && priority < currentPriority)
+        if (isPriorityPlaying)
         {
-            clipQueue.Enqueue(clip);
-            return;
+            if (priority > currentPriority) { audioSource.Stop(); }
+            else 
+            {
+                if (doNotQueueWhenBusy.Contains(context))
+                {
+                    Debug.Log("Context is in do-not-queue list, skipping queue.");
+                    return;
+                }
+                clipQueue.Enqueue(new ClipRequest(clip, priority, context)); 
+                return; 
+            }
         }
 
-        if (isPriorityPlaying && priority == currentPriority)
-        {
-            clipQueue.Enqueue(clip);
-            return;
-        }
+        PlayNow(clip, priority);
+    }
 
-        if (isPriorityPlaying && priority > currentPriority)
-        {
-            // GhostCurrentIfContext(context);
-        }
 
+    private void PlayNow(AudioClip clip, int priority)
+    {
         audioSource.Stop();
-        currentPriority = priority;
-        isPriorityPlaying = true;
         audioSource.clip = clip;
         audioSource.Play();
+
+        isPriorityPlaying = true;
+        currentPriority = priority;
 
         if (priority == 0)
         {
             isOnCooldown = true;
-            cooldownTotal = Random.Range(20f, 30f);
-            cooldownRemaining = cooldownTotal;
-            StartCoroutine(ResumeCooldownAfterPriority(clip.length));
+            cooldownRemaining = Random.Range(20f, 30f);
+            StartCoroutine(ResumeCooldownAfterClip(clip.length, /*isChatter*/ true));
         }
         else
         {
-            StartCoroutine(EndPriorityAfterClip(clip.length));
+            StartCoroutine(ResumeCooldownAfterClip(clip.length, /*isChatter*/ false));
         }
     }
-    private IEnumerator EndPriorityAfterClip(float clipLength)
+
+
+    private IEnumerator ResumeCooldownAfterClip(float clipLength, bool isChatter)
     {
         yield return new WaitForSeconds(clipLength);
         isPriorityPlaying = false;
 
-        if (cooldownRemaining > 0f)
-            cooldownCoroutine = StartCoroutine(CooldownTimer());
-    }
-
-    public void PlaySpecific(string category, int index)
-    {
-        if (!audioCategories.TryGetValue(category, out var clips) || index < 0 || index >= clips.Length) return;
-
-        AudioClip chosen = clips[index];
-
-        PlayClip(chosen, 0);
-    }
-
-    public void PlayPriority(string category, int index = 0, int endIndex = -1)
-    {
-        if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
-
-        int selectedIndex = endIndex == -1
-            ? index
-            : Random.Range(Mathf.Clamp(index, 0, clips.Length - 1), Mathf.Clamp(endIndex + 1, 0, clips.Length));
-
-        if (selectedIndex < 0 || selectedIndex >= clips.Length) return;
-
-        AudioClip clip = clips[selectedIndex];
-        PlayPriorityClip(clip);
-    }
-
-    public void PlayPriorityClip(AudioClip clip)
-    {
-        if (clip == null) return;
-
-        if (audioSource.isPlaying)
-            audioSource.Stop();
-
-        isPriorityPlaying = true;
-        audioSource.clip = clip;
-        audioSource.Play();
-
-        if (cooldownCoroutine != null)
+        // After a clip ends, always try queue first
+        if (!TryPlayNextQueued())
         {
-            StopCoroutine(cooldownCoroutine);
-            cooldownRemaining = Mathf.Max(cooldownRemaining, 0f);
-        }
-
-        StartCoroutine(ResumeCooldownAfterPriority(clip.length));
-    }
-
-    private IEnumerator ResumeCooldownAfterPriority(float clipLength)
-    {
-        float timer = 0f;
-        Debug.Log("Lasting " + clipLength + "...");
-        while (timer < clipLength)
-        {
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        isPriorityPlaying = false;
-        Debug.Log("Clip Queue > 0?");
-        if (clipQueue.Count > 0)
-        {
-            Debug.Log("Playing next clip..");
-            PlayNextQueuedClip();
-        }
-        else if (cooldownRemaining > 0f)
-        {
-            cooldownCoroutine = StartCoroutine(CooldownTimer());
+            // If no queued item and we had chatter cooldown to run, tick it down
+            if (isChatter && cooldownRemaining > 0f && cooldownCoroutine == null)
+                cooldownCoroutine = StartCoroutine(CooldownTimer());
         }
     }
 
-    private void PlayNextQueuedClip()
+    private bool TryPlayNextQueued()
     {
-        if (clipQueue.Count == 0) return;
+        while (clipQueue.Count > 0)
+        {
+            var req = clipQueue.Dequeue();
+            // skip chatter if cooldown still active
+            if (req.priority == 0 && isOnCooldown) continue;
 
-        var nextClip = clipQueue.Dequeue();
-        if (nextClip == null) return;
-
-        audioSource.clip = nextClip;
-        audioSource.Play();
-        
-        Debug.Log("Playing...");
-        StartNewCooldown();
+            PlayNow(req.clip, req.priority);
+            return true;
+        }
+        return false;
     }
-
-    private void StartNewCooldown()
-    {
-        if (cooldownCoroutine != null)
-            StopCoroutine(cooldownCoroutine);
-
-        cooldownTotal = Random.Range(20f, 30f);
-        cooldownRemaining = cooldownTotal;
-        cooldownCoroutine = StartCoroutine(CooldownTimer());
-    }
-
     private IEnumerator CooldownTimer()
     {
-        isOnCooldown = true;
-
         while (cooldownRemaining > 0f)
         {
-            if (isPriorityPlaying)
-                yield break;
-
+            if (isPriorityPlaying) { cooldownCoroutine = null; yield break; } // pause while something plays
             cooldownRemaining -= Time.deltaTime;
             yield return null;
         }
-
         isOnCooldown = false;
+        cooldownCoroutine = null;
     }
+    
 
+    // -------- Status --------
     public bool IsPlaying => audioSource.isPlaying;
     public bool IsOnCooldown => isOnCooldown;
+    public bool IsPriorityPlaying => isPriorityPlaying;
+    public int CurrentPriority => currentPriority;
 }

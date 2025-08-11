@@ -14,6 +14,7 @@ public class AmbientLightManager : MonoBehaviour
     private Color currentStartColor;
     private float transitionTimer = 0f;
     private bool isTransitioning = false;
+    public float litPercent = 0f;
     private GameObject[] allLights;
 
     private void Start()
@@ -49,7 +50,7 @@ public class AmbientLightManager : MonoBehaviour
                 lit++;
         }
 
-        float litPercent = total > 0 ? (float)lit / total : 0f;
+        litPercent = total > 0 ? (float)lit / total : 0f;
         currentStartColor = RenderSettings.ambientLight;
         currentTargetColor = Color.Lerp(darkColor, fullLitColor, litPercent);
         transitionTimer = 0f;
