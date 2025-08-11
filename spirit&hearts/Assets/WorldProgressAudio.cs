@@ -20,9 +20,9 @@ public class WorldProgressAudio : MonoBehaviour
         Debug.Log("Lit percent: " + p);
 
         Milestone target =
-            p >= 99f ? Milestone.FullLight :
-            p >= 66f ? Milestone.ModerateLight :
-            p >= 33f ? Milestone.SomeLight :
+            p >= .99f ? Milestone.FullLight :
+            p >= .66f ? Milestone.ModerateLight :
+            p >= .33f ? Milestone.SomeLight :
             Milestone.None;
 
         if (target > highestPlayed && target != Milestone.None)
@@ -39,6 +39,6 @@ public class WorldProgressAudio : MonoBehaviour
             m == Milestone.SomeLight ? 0 :
             m == Milestone.ModerateLight ? 1 : 2;
 
-        dovinaAudioManager.PlayPriority(category, index, index, 1);
+        dovinaAudioManager.PlayPriority(category, index, index, 2);
     }
 }
