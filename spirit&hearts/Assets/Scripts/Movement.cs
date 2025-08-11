@@ -32,7 +32,7 @@ public class Movement : MonoBehaviour
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1f;
     private readonly float maxSpeed = 30f;
-    private readonly float maxDiveSpeed = 120f;
+    private readonly float maxDiveSpeed = 200f;
     private readonly float minHandSpread = 1.0f;
     private float snapAngle = 45f;
     private float turnThreshold = 0.8f;

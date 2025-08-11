@@ -198,8 +198,7 @@ public class DoveCompanion : MonoBehaviour
         {
             if (!hasPlayedFastChatter)
             {
-                var clip = dovinaAudioManager.GetClip("gp_changes/speed/fast");
-                dovinaAudioManager.PlayClip(clip, 0);
+                dovinaAudioManager.PlayPriority("gp_changes/speed/fast", priority: 1);
                 hasPlayedFastChatter = true;
                 hasPlayedSlowChatter = false;
             }
@@ -209,8 +208,7 @@ public class DoveCompanion : MonoBehaviour
         {
             if (!hasPlayedSlowChatter)
             {
-                var clip = dovinaAudioManager.GetClip("gp_chanfges/speed/slow");
-                dovinaAudioManager.PlayClip(clip, 0);
+                dovinaAudioManager.PlayPriority("gp_changes/speed/slow", priority: 1);
                 hasPlayedSlowChatter = true;
                 hasPlayedFastChatter = false;
             }

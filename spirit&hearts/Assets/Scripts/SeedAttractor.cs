@@ -66,7 +66,7 @@ public class SeedBehavior : MonoBehaviour
                             player.gameObject.GetComponent<ItemManager>().RemoveSeed();
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
                             dovinaAudioManager.PlayPriority("gp_changes/light", 1, 12, 2);
-                            dovinaAudioManager.PlayPriority("parables", 0, 999);
+                            dovinaAudioManager.PlayPriority("parables", 0, 999, 2);
                             Destroy(this.gameObject);
                         }
                     }
