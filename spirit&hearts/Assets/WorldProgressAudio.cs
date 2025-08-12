@@ -39,6 +39,6 @@ public class WorldProgressAudio : MonoBehaviour
             m == Milestone.SomeLight ? 0 :
             m == Milestone.ModerateLight ? 1 : 2;
 
-        dovinaAudioManager.PlayPriority(category, index, index, 2);
+        dovinaAudioManager.PlayPriority(category, 2, index, index);
     }
 }

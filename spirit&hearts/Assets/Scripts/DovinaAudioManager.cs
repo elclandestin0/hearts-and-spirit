@@ -124,7 +124,7 @@ public class DovinaAudioManager : MonoBehaviour
     }
 
     // Index/range in category at given priority (uses queue rules)
-    public void PlayPriority(string category, int startIndex = 0, int endIndexInclusive = -1, int priority = 1)
+    public void PlayPriority(string category, int priority, int startIndex = 0, int endIndexInclusive = -1)
     {
         if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
 
@@ -158,23 +158,27 @@ public class DovinaAudioManager : MonoBehaviour
 
         // chatter (prio 0) respects cooldown/now-playing → queue
         if (priority == 0 && (isOnCooldown || isPriorityPlaying))
-        { 
+        {
             clipQueue.Enqueue(new ClipRequest(clip, priority, context));
-            return; 
+            return;
         }
 
         if (isPriorityPlaying)
         {
-            if (priority > currentPriority) { audioSource.Stop(); }
-            else 
+            if (priority > currentPriority) 
+            { 
+                Debug.Log("stopping audio"); 
+                audioSource.Stop();
+            }
+            else
             {
                 if (doNotQueueWhenBusy.Contains(context))
                 {
                     Debug.Log("Context is in do-not-queue list, skipping queue.");
                     return;
                 }
-                clipQueue.Enqueue(new ClipRequest(clip, priority, context)); 
-                return; 
+                clipQueue.Enqueue(new ClipRequest(clip, priority, context));
+                return;
             }
         }
 
@@ -242,7 +246,7 @@ public class DovinaAudioManager : MonoBehaviour
         isOnCooldown = false;
         cooldownCoroutine = null;
     }
-    
+
 
     // -------- Status --------
     public bool IsPlaying => audioSource.isPlaying;

@@ -28,7 +28,7 @@ public class Movement : MonoBehaviour
     public float diveAngle = 0f;
     [Header("Recorder")]
     [SerializeField] private GhostFlightRecorder recorder;
-    
+
     // 🔒 Script-controlled flight values
     private readonly float flapStrength = 1f;
     private readonly float forwardPropulsionStrength = 1f;
@@ -641,7 +641,7 @@ public class Movement : MonoBehaviour
                 Debug.DrawLine(origin, hit.point, Color.green, 1f);
 
                 // Dovina audio
-                dovinaAudioManager.PlayPriority("gp_changes/bouncing", 0, 999);
+                dovinaAudioManager.PlayPriority("gp_changes/bouncing", 0, 0, 999);
             }
         }
     }
@@ -716,7 +716,7 @@ public class Movement : MonoBehaviour
             {
                 if (velocity.magnitude <= 30f)
                 {
-                    dovinaAudioManager.PlayPriority(category, 0, 999, 1);
+                    dovinaAudioManager.PlayPriority(category, 1, 0, 999);
                     hasPlayedFlag = true;
                 }
             }
@@ -733,7 +733,7 @@ public class Movement : MonoBehaviour
                 float randomThreshold = Mathf.Lerp(0.15f, 0.25f, Random.value);
                 if (Random.value <= randomThreshold)
                 {
-                    dovinaAudioManager.PlayPriority(category, 0, 999, 1);
+                    dovinaAudioManager.PlayPriority(category, 1, 0, 999);
                     hasPlayedFlag = true;
                 }
             }

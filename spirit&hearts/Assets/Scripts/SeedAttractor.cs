@@ -64,8 +64,8 @@ public class SeedBehavior : MonoBehaviour
                             light.isLit = true;
                             player.gameObject.GetComponent<ItemManager>().RemoveSeed();
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
-                            dovinaAudioManager.PlayPriority("gp_changes/light", 1, 12, 2);
-                            dovinaAudioManager.PlayPriority("parables", 0, 999, 2);
+                            dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
+                            dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
                             lightManager.UpdateAmbientLight();
                             Destroy(this.gameObject);
                         }
@@ -94,7 +94,7 @@ public class SeedBehavior : MonoBehaviour
             transform.localPosition = new Vector3(0f, 0f, 0f);
             player.gameObject.GetComponent<ItemManager>().AddSeed();
             player.gameObject.GetComponent<ItemManager>().PlayPickUpSound();
-            dovinaAudioManager.PlayPriority("gp_changes/seed", 2, 14, 2);
+            dovinaAudioManager.PlayPriority("gp_changes/seed", 2, 2, 14);
         }
     }
 
