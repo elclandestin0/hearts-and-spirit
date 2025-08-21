@@ -357,25 +357,25 @@ public class Movement : MonoBehaviour
     private void HandleGlideLogic()
     {
         // ✅ Ensure both hand objects are assigned and active
-        // if (leftHand == null || rightHand == null) return;
-        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        // {
-        //     isGliding = false;
-        //     return;
-        // }
-        float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
-        bool wingsOutstretched = handDistance > minHandSpread;
-        isGliding = wingsOutstretched;
-
-        if (Input.GetKey(KeyCode.M))
-        {
-            isGliding = true;
-        }
-        else
+        if (leftHand == null || rightHand == null) return;
+        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
         {
             isGliding = false;
             return;
         }
+        float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
+        bool wingsOutstretched = handDistance > minHandSpread;
+        isGliding = wingsOutstretched;
+
+        // if (Input.GetKey(KeyCode.M))
+        // {
+        //     isGliding = true;
+        // }
+        // else
+        // {
+        //     isGliding = false;
+        //     return;
+        // }
         Vector3 leftToHead = leftHand.position - head.position;
         Vector3 rightToHead = rightHand.position - head.position;
 
@@ -426,7 +426,7 @@ public class Movement : MonoBehaviour
             Vector3 forwardBoost = lastDiveForward * forwardForce * Time.deltaTime;
             Vector3 upwardBoost = Vector3.up * upwardForce * Time.deltaTime;
 
-            velocity += forwardBoost;
+            velocity += forwardBoost + upwardBoost;
         }
 
         // ✅ Optionally reset boost duration after use
