@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System.Collections.Generic;
 
 // TO-DO: We need to divide this script into multiple scripts.
 // Non-movement, glide movement and diving and everything else here.
@@ -34,7 +35,7 @@ public class Movement : MonoBehaviour
     private readonly float forwardPropulsionStrength = 1f;
     private readonly float maxSpeed = 30f;
     private readonly float maxDiveSpeed = 200f;
-    private readonly float minHandSpread = 1.0f;
+    private readonly float minHandSpread = 30f;
     private float snapAngle = 45f;
     private float turnThreshold = 0.8f;
     private float turnCooldown = 0.5f;
@@ -106,6 +107,7 @@ public class Movement : MonoBehaviour
     private bool wasInWindZoneLastFrame = false;
     private float lastWindExitTime = -10f;
     private float windExitBlendDuration = 2.5f;
+
     // Hover speed
     public float maxHoverSpeed = 10.0f;
 
@@ -118,6 +120,14 @@ public class Movement : MonoBehaviour
     private bool hasPlayedHoverTransition = false;
     private bool wasGliding = false;
     private bool hasPlayedGlideTransition = false;
+
+    // --- Glide/Flap cohesion ---
+    [SerializeField] private float glideHoldDuration = 1f; // seconds to keep gliding after a flap
+    private float glideHoldUntil = -1f;
+    [SerializeField] private float minHandSpreadEnter = 30f;  // was 30f
+    [SerializeField] private float minHandSpreadStay  = 24f;  // a bit lower to avoid flicker
+    [SerializeField] private float spreadSmoothing    = 10f;  // higher = snappier smoothing
+    private float smoothedHandSpread = 0f;
 
     void Start()
     {
@@ -153,7 +163,7 @@ public class Movement : MonoBehaviour
         }
 
         // Reactivate later
-        // DetectControllerInput();
+        DetectControllerInput();
 
         // Normal flight update
         UpdateDeltaValues();
@@ -170,6 +180,8 @@ public class Movement : MonoBehaviour
         UpdateSpeedBoost();
         CapSpeed();
         UpdateFlightAudio();
+
+        Debug.Log("isGliding " + isGliding);
 
         // Really should make a method for the below..
         if (Input.GetKey(KeyCode.N))
@@ -197,16 +209,12 @@ public class Movement : MonoBehaviour
     {
         float leftGripValue = leftGrip != null ? leftGrip.action.ReadValue<float>() : 0f;
         float rightGripValue = rightGrip != null ? rightGrip.action.ReadValue<float>() : 0f;
-
+        Debug.Log("left grip value " + leftGripValue);
+        Debug.Log("right grip value " + rightGripValue);
         bool leftHeld = leftGripValue > 0.5f;
         bool rightHeld = rightGripValue > 0.5f;
 
         isHovering = leftHeld && rightHeld;
-
-        if (isHovering)
-        {
-            // DO stuff
-        }
 
         DetectSnapTurn();
     }
@@ -298,28 +306,29 @@ public class Movement : MonoBehaviour
 
         // Enough time passed
         bool enoughTimePassed = Time.time - lastFlapTime >= 0.665f;
-        if (Input.GetKeyDown(KeyCode.F) && enoughTimePassed)
-        {
-            velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
-                head.forward,
-                flapMagnitude,
-                flapStrength,
-                forwardPropulsionStrength
-            );
-            Debug.Log("Flappity flap.");
-            glideTime = 0f;
-            lastFlapTime = Time.time;
-            OnFlap?.Invoke();
-            PlayFlap();
-        }
+        // if (Input.GetKeyDown(KeyCode.F) && enoughTimePassed)
+        // {
+        //     velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
+        //         head.forward,
+        //         flapMagnitude,
+        //         flapStrength,
+        //         forwardPropulsionStrength
+        //     );
+        //     Debug.Log("Flappity flap.");
+        //     glideTime = 0f;
+        //     lastFlapTime = Time.time;
+        //     OnFlap?.Invoke();
+        //     PlayFlap();
+        // }
 
         // ✅ Ensure both hand objects are assigned and active
         if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
         if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
         {
-            isGliding = false;
+            isFlapping = false;
             return;
         }
+
         float leftDown = -leftVelocity.SmoothedVelocity.y;
         float rightDown = -rightVelocity.SmoothedVelocity.y;
 
@@ -363,29 +372,42 @@ public class Movement : MonoBehaviour
             isGliding = false;
             return;
         }
-        float handDistance = Vector3.Distance(currentLeftRel, currentRightRel);
-        bool wingsOutstretched = handDistance > minHandSpread;
+        // --- Hand spread calculation ---
+        Vector3 lPos = currentLeftRel;
+        Vector3 rPos = currentRightRel;
+
+        // Optional: project onto a plane perpendicular to UP or the head's forward to reduce false “close” when lifting.
+        // Choose one of these lines (uncomment one):
+        Vector3 wingVec = Vector3.ProjectOnPlane(rPos - lPos, head.up);                       // ignore motion along head's up
+        float rawSpread = wingVec.magnitude;
+
+        // Smooth the spread so quick dips don’t kill glide immediately
+        smoothedHandSpread = Mathf.Lerp(smoothedHandSpread <= 0 ? rawSpread : smoothedHandSpread,
+                                        rawSpread,
+                                        Time.deltaTime * spreadSmoothing);
+
+        // Hysteresis: enter vs. stay thresholds
+        float threshold = isGliding ? minHandSpreadStay : minHandSpreadEnter;
+        bool wingsOutstretched = smoothedHandSpread > threshold;
+
+        if (Time.time < glideHoldUntil)
+        {
+            wingsOutstretched = true;
+        }
+
         isGliding = wingsOutstretched;
 
-        // if (Input.GetKey(KeyCode.M))
-        // {
-        //     isGliding = true;
-        // }
-        // else
-        // {
-        //     isGliding = false;
-        //     return;
-        // }
-        Vector3 leftToHead = leftHand.position - head.position;
-        Vector3 rightToHead = rightHand.position - head.position;
+        // Probably can uncomment when the game is closer to final release... who knows mayne
+        // Vector3 leftToHead = leftHand.position - head.position;
+        // Vector3 rightToHead = rightHand.position - head.position;
 
-        float leftDot = Vector3.Dot(leftToHead, head.forward);
-        float rightDot = Vector3.Dot(rightToHead, head.forward);
+        // float leftDot = Vector3.Dot(leftToHead, head.forward);
+        // float rightDot = Vector3.Dot(rightToHead, head.forward);
 
-        bool leftBehind = leftDot < -0.2f;
-        bool rightBehind = rightDot < -0.2f;
+        // bool leftBehind = leftDot < -0.2f;
+        // bool rightBehind = rightDot < -0.2f;
 
-        bool isManualDivePose = leftBehind && rightBehind;
+        // bool isManualDivePose = leftBehind && rightBehind;
 
         float timeSinceDive = Time.time - lastDiveEndTime;
         velocity = FlightPhysics.CalculateGlideVelocity(
@@ -489,6 +511,11 @@ public class Movement : MonoBehaviour
             gravityDirection.Normalize();
 
             velocity += gravityDirection * gravity * Time.deltaTime;
+        }
+
+        if (isHovering)
+        {
+            velocity += lastKnownWindDir
         }
 
         // Optional — revisit later
