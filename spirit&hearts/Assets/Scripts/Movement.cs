@@ -141,6 +141,21 @@ public class Movement : MonoBehaviour
     private Quaternion headRot;
     private Vector3 headFwd, headPos, headDown;
 
+    // Tutorial variables to control movement
+    // --- ADDED (top of class fields) ---
+    private IMovementPolicyProvider policyProvider;
+    private MovementEventHub eventHub;
+    private MovementPolicy Policy => policyProvider != null
+        ? policyProvider.CurrentPolicy
+        : new MovementPolicy { Allowed = (MovementAbility)(-1) };
+    private bool Allowed(MovementAbility a) => (Policy.Allowed & a) != 0;
+
+    void Awake()
+    {
+        policyProvider = GetComponentInParent<IMovementPolicyProvider>();
+        eventHub = GetComponent<MovementEventHub>() ?? gameObject.AddComponent<MovementEventHub>();
+    }
+
     void Start()
     {
         head = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Transform>();
@@ -151,12 +166,23 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        // Apply wind
-        foreach (var zone in zones)
+        // Still read inputs/poses; but if translate is locked, zero out motion and skip forces.
+        bool allowTranslate = Allowed(MovementAbility.Translate);
+
+        if (!allowTranslate)
         {
-            velocity += zone.GetWindForceAtPosition(transform.position) * Time.deltaTime;
+            velocity = Vector3.zero; // freeze translation
+            // Emit "end" events if we were in active states
+            if (wasGliding)  { eventHub.RaiseGlideEnd();  wasGliding = false; }
+            if (wasHovering) { eventHub.RaiseHoverEnd();  wasHovering = false; }
+            if (wasDiving)   { eventHub.RaiseDiveEnd();   wasDiving  = false; }
+            // Skip physics & movement when locked:
+            DrawDebugLines();
+            UpdateFlightAudio();
+            return;
         }
 
+        ApplyWindForces();
         CheckSurfaceImpact();
         DetectControllerInput();
 
@@ -188,8 +214,7 @@ public class Movement : MonoBehaviour
         bool leftHeld  = leftGripValue  > 0.5f;
         bool rightHeld = rightGripValue > 0.5f;
 
-        isHovering = leftHeld && rightHeld;
-
+        isHovering = Allowed(MovementAbility.Hover) && leftHeld && rightHeld;
         DetectSnapTurn();
     }
 
@@ -267,6 +292,7 @@ public class Movement : MonoBehaviour
 
     private void HandleFlapDetection()
     {
+        if (!Allowed(MovementAbility.Flap)) { isFlapping = false; return; }
         // Debug flap magnitude
         float flapMagnitude = 2.0f;
         float speed = velocity.magnitude;
@@ -323,6 +349,12 @@ public class Movement : MonoBehaviour
 
     private void HandleGlideLogic()
     {
+        if (!Allowed(MovementAbility.Glide)) { 
+            if (isGliding || wasGlidingLastFrame) { eventHub.RaiseGlideEnd(); }
+            isGliding = false; wasGlidingLastFrame = false; 
+            return;
+        }
+
         if (leftHand == null || rightHand == null) return;
         if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
         {
@@ -354,8 +386,13 @@ public class Movement : MonoBehaviour
         // If not gliding, don't apply glide forces
         if (!isGliding)
         {
+            eventHub.RaiseGlideEnd();
             wasGlidingLastFrame = false;
             return;
+        }
+        else
+        {
+            eventHub.RaiseGlideTick(Time.deltaTime); // hub will auto-emit start on first tick
         }
 
         // Steering direction: in hover keep travel/wind heading; otherwise head
@@ -420,13 +457,23 @@ public class Movement : MonoBehaviour
 
     private void HandleHoverLogic()
     {
-        // Only cap speed while truly hovering AND gliding
+        if (!Allowed(MovementAbility.Hover)) {
+            if (isHovering) { eventHub.RaiseHoverEnd(); }
+            isHovering = false; 
+            return;
+        }
+
         if (isHovering && isGliding)
         {
+            eventHub.RaiseHoverTick(Time.deltaTime);
             float currentSpeed  = velocity.magnitude;
             float targetSpeed   = Mathf.Min(currentSpeed, maxHoverSpeed);
             float smoothedSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 4f);
             velocity = velocity.normalized * smoothedSpeed;
+        }
+        else if (!isHovering && wasHovering)
+        {
+            eventHub.RaiseHoverEnd();
         }
     }
 
@@ -678,6 +725,19 @@ public class Movement : MonoBehaviour
         Gizmos.DrawWireSphere(origin, sphereRadius);
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(endPoint, sphereRadius);
+    }
+
+    private void ApplyWindForces()
+    {
+        foreach (var zone in zones)
+        {
+            velocity += zone.GetWindForceAtPosition(transform.position) * Time.deltaTime;
+        }
+    }
+
+    public void SetMovementEnabled(bool enabled)
+    {
+        if (!enabled) velocity = Vector3.zero;
     }
 
     // Movement Audio
