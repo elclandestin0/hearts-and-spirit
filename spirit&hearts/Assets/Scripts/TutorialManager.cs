@@ -104,6 +104,18 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         Debug.LogWarning($"TutorialManager: Unsupported step type at index {StepIndex}: {so}");
         Advance();
     }
+    
+    [System.Serializable]
+    public struct NamedPoint { public string id; public Transform transform; }
+
+    [SerializeField] private NamedPoint[] scenePoints; // fill in inspector
+
+    private Transform ResolvePoint(string id)
+    {
+        for (int i = 0; i < scenePoints.Length; i++)
+            if (scenePoints[i].id == id) return scenePoints[i].transform;
+        return null;
+    }
 
     private IEnumerator RunCinematic(CinematicStep cine)
     {
@@ -112,8 +124,10 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         {
             playerHead = playerHead,
             playerRoot = transform,
-            dove       = doveController,
-            speaker    = doveSpeaker
+            arrivalPoint = doveArrivalPoint,
+            dove = doveController,
+            speaker = doveSpeaker,
+            ResolveTarget = ResolvePoint
         };
 
         // Inject scene refs that can't live in assets (e.g., arrival point)
@@ -121,8 +135,14 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         {
             foreach (var act in cine.actions)
             {
-                if (act is CineMoveDoveTo move && move.target == null)
-                    move.target = doveArrivalPoint;
+                if (act == null) continue;
+
+                var runtimeAct = ScriptableObject.Instantiate(act); // clone the asset
+                if (runtimeAct is CineMoveDoveTo move && move.target == null)
+                    move.target = doveArrivalPoint;                 // assign on the clone
+
+                yield return StartCoroutine(runtimeAct.Execute(ctx));
+                Destroy(runtimeAct);
             }
 
             // Execute actions in order

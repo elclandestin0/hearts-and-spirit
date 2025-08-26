@@ -21,18 +21,37 @@ public class CineContext
 {
     public Transform playerHead;
     public Transform playerRoot;
+    public Transform arrivalPoint;
     public DoveCompanion dove;
     public DovinaAudioManager speaker;
+    public System.Func<string, Transform> ResolveTarget; // optional ID → Transform
 }
 
-[CreateAssetMenu(menuName = "Tutorial/Cinematic/Move Dove To")]
+
+[CreateAssetMenu(menuName="Tutorial/Cinematic/Move Dove To")]
 public class CineMoveDoveTo : CineAction
 {
-    public Transform target;
+    public string targetId;                       // optional: "Arrival"
+    public bool useArrivalPointIfMissing = true;  // uses ctx.arrivalPoint
+    public bool usePlayerHeadIfMissing  = true;
+    public Vector3 headOffset = new Vector3(0, -0.1f, 0.6f);
+
     public override IEnumerator Execute(CineContext ctx)
     {
-        Debug.Log("game obnject name " + target.gameObject.name);
-        yield return ctx.dove.SmoothHoverApproach(target.position);
+        Transform t = null;
+
+        if (!string.IsNullOrEmpty(targetId) && ctx.ResolveTarget != null)
+            t = ctx.ResolveTarget(targetId);
+
+        Vector3 dest;
+        if (t != null)                           dest = t.position;
+        else if (useArrivalPointIfMissing && ctx.arrivalPoint)
+                                                 dest = ctx.arrivalPoint.position;
+        else if (usePlayerHeadIfMissing && ctx.playerHead)
+                                                 dest = ctx.playerHead.TransformPoint(headOffset);
+        else                                      dest = ctx.playerRoot.position;
+
+        yield return ctx.dove.SmoothHoverApproach(dest);
     }
 }
 
