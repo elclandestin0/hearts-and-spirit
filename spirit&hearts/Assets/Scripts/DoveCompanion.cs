@@ -278,7 +278,7 @@ public class DoveCompanion : MonoBehaviour
         }
     }
 
-    private IEnumerator SmoothHoverApproach(Vector3 offset) 
+    public IEnumerator SmoothHoverApproach(Vector3 offset) 
     {
         float maxCatchupDistance = 1000f;
         float blendDownDuration = 1.0f;

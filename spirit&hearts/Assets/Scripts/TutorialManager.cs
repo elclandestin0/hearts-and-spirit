@@ -1,13 +1,20 @@
 using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(MovementEventHub))]
 public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 {
-    [SerializeField] private TutorialStep[] steps;   // assign in Inspector
-    [SerializeField] private DovinaAudioManager dove;       // optional VO/subtitles bridge
+    [Header("Steps (CinematicStep and TutorialStep assets)")]
+    [SerializeField] private ScriptableObject[] steps;
+
+    [Header("Scene Refs")]
+    [SerializeField] private DovinaAudioManager doveSpeaker;   // optional; not required for compile
+    [SerializeField] private DoveCompanion doveController;     // your dove mover/brain
+    [SerializeField] private Transform doveArrivalPoint;       // empty near player head height
+    [SerializeField] private Transform playerHead;
     [SerializeField] private bool autoStart = true;
 
-    // Progress (expose for UI if needed)
+    // Progress
     public int StepIndex { get; private set; } = -1;
     public bool IsRunning { get; private set; }
 
@@ -15,28 +22,30 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     private MovementPolicy _policy;
     public MovementPolicy CurrentPolicy => _policy;
 
-    // Internals
-    private MovementEventHub _eventHub;
-    private int flapCount;
+    // Events & counters for interactive steps
+    private MovementEventHub _events;
+    private int   flapCount;
     private float glideSec, diveSec, hoverSec;
     private float stepClock;
 
+    // Current step handles
+    private TutorialStep  currentInteractive = null;
+    private CinematicStep currentCinematic   = null;
+    private Coroutine     cinematicRoutine   = null;
+
     void Awake()
     {
-        _eventHub = GetComponent<MovementEventHub>();
-        _eventHub.OnFlap.AddListener(() => flapCount++);
-        _eventHub.OnGlideTick.AddListener(dt => glideSec += dt);
-        _eventHub.OnDiveTick.AddListener(dt  => diveSec  += dt);
-        _eventHub.OnHoverTick.AddListener(dt => hoverSec += dt);
+        _events = GetComponent<MovementEventHub>();
+        // counters for interactive completion
+        _events.OnFlap.AddListener(() => flapCount++);
+        _events.OnGlideTick.AddListener(dt => glideSec += dt);
+        _events.OnDiveTick.AddListener(dt  => diveSec  += dt);
+        _events.OnHoverTick.AddListener(dt => hoverSec += dt);
     }
 
     void Start()
     {
-        if (autoStart)
-        {
-            // Optional: skip tutorial if already completed in a prior session
-            StartTutorial();
-        }
+        if (autoStart) StartTutorial();
     }
 
     public void StartTutorial()
@@ -46,60 +55,133 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         Advance();
     }
 
-    void Advance()
+    private void Advance()
     {
+        // clear current step refs
+        currentInteractive = null;
+        currentCinematic   = null;
+
         StepIndex++;
-        if (StepIndex >= steps.Length) { EndTutorialToFreeFlight(); return; }
+        if (steps == null || StepIndex >= steps.Length)
+        {
+            EndTutorialToFreeFlight();
+            return;
+        }
 
-        var s = steps[StepIndex];
-        _policy = new MovementPolicy { Allowed = s.allowedAbilities};
+        var so = steps[StepIndex];
 
-        // reset counters for this step
-        flapCount = 0; glideSec = diveSec = hoverSec = 0f; stepClock = 0f;
+        // Try cinematic first
+        currentCinematic = so as CinematicStep;
+        if (currentCinematic != null)
+        {
+            // lock to cinematic policy (usually Look only)
+            _policy = new MovementPolicy { Allowed = currentCinematic.allowedAbilities };
+
+            if (cinematicRoutine != null) StopCoroutine(cinematicRoutine);
+            cinematicRoutine = StartCoroutine(RunCinematic(currentCinematic));
+            return;
+        }
+
+        // Then interactive
+        currentInteractive = so as TutorialStep;
+        if (currentInteractive != null)
+        {
+            _policy = new MovementPolicy { Allowed = currentInteractive.allowedAbilities };
+
+            // reset counters & clock for this interactive step
+            flapCount = 0;
+            glideSec = diveSec = hoverSec = 0f;
+            stepClock = 0f;
+
+            // (Optional) present text/VO here using your own system, but kept out for compile-safety.
+            // Example (only if your DovinaAudioManager has a safe API):
+            // doveSpeaker?.PlayLine(currentInteractive.subtitleText, currentInteractive.doveVO);
+
+            return;
+        }
+
+        // Unsupported asset type—skip forward safely.
+        Debug.LogWarning($"TutorialManager: Unsupported step type at index {StepIndex}: {so}");
+        Advance();
     }
 
-    void EndTutorialToFreeFlight()
+    private IEnumerator RunCinematic(CinematicStep cine)
     {
-        // Grant everything
-        _policy = new MovementPolicy {
-            Allowed = MovementAbility.Look | MovementAbility.Translate | MovementAbility.Flap | MovementAbility.Glide | MovementAbility.Dive | MovementAbility.Hover
+        // Build context for actions (requires your CineContext class)
+        var ctx = new CineContext
+        {
+            playerHead = playerHead,
+            playerRoot = transform,
+            dove       = doveController,
+            speaker    = doveSpeaker
         };
-        IsRunning = false;
 
+        // Inject scene refs that can't live in assets (e.g., arrival point)
+        if (cine.actions != null)
+        {
+            foreach (var act in cine.actions)
+            {
+                if (act is CineMoveDoveTo move && move.target == null)
+                    move.target = doveArrivalPoint;
+            }
+
+            // Execute actions in order
+            foreach (var act in cine.actions)
+            {
+                if (act != null)
+                    yield return StartCoroutine(act.Execute(ctx));
+            }
+        }
+
+        cinematicRoutine = null;
+        Advance(); // continue to next step (likely the first interactive one)
+    }
+
+    private void EndTutorialToFreeFlight()
+    {
+        _policy = new MovementPolicy
+        {
+            Allowed = MovementAbility.Look | MovementAbility.Translate |
+                      MovementAbility.Flap | MovementAbility.Glide |
+                      MovementAbility.Dive | MovementAbility.Hover
+        };
+
+        IsRunning = false;
         enabled = false; // manager no longer needs to tick
     }
 
     void Update()
     {
-        if (!IsRunning) return;
+        if (!IsRunning || currentInteractive == null) return;
+
         stepClock += Time.deltaTime;
 
-        var s = steps[StepIndex];
-        if (stepClock < s.minSecondsBeforeAdvance) return;
+        // Guard: ensure we don't read before min delay
+        if (stepClock < currentInteractive.minSecondsBeforeAdvance) return;
 
-        // Optional: auto-advance when VO finishes for “None” steps
-        // bool voDone = !dove || dove.IsLineFinished;
+        // If you later expose "VO finished" from doveSpeaker, you can add it in the None case.
 
-        switch (s.completionType)
+        switch (currentInteractive.completionType)
         {
             case TutorialCompletionType.None:
-                // if (voDone) Advance();
+                // Auto-advance once minSecondsBeforeAdvance has passed.
+                Advance();
                 break;
 
             case TutorialCompletionType.FlapCount:
-                if (flapCount >= s.targetFlapCount) Advance();
+                if (flapCount >= currentInteractive.targetFlapCount) Advance();
                 break;
 
             case TutorialCompletionType.GlideDuration:
-                if (glideSec >= s.targetSeconds) Advance();
+                if (glideSec >= currentInteractive.targetSeconds) Advance();
                 break;
 
             case TutorialCompletionType.DiveDuration:
-                if (diveSec >= s.targetSeconds) Advance();
+                if (diveSec >= currentInteractive.targetSeconds) Advance();
                 break;
 
             case TutorialCompletionType.HoverDuration:
-                if (hoverSec >= s.targetSeconds) Advance();
+                if (hoverSec >= currentInteractive.targetSeconds) Advance();
                 break;
         }
     }
