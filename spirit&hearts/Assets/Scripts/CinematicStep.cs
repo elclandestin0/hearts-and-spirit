@@ -25,24 +25,41 @@ public class CineContext
     public DovinaAudioManager speaker;
 }
 
-
 [CreateAssetMenu(menuName = "Tutorial/Cinematic/Move Dove To")]
 public class CineMoveDoveTo : CineAction
 {
-    public Transform target; // assign a scene ref via a runtime setter (see note below)
+    public Transform target;
     public override IEnumerator Execute(CineContext ctx)
     {
+        Debug.Log("game obnject name " + target.gameObject.name);
         yield return ctx.dove.SmoothHoverApproach(target.position);
     }
 }
 
-[CreateAssetMenu(menuName="Tutorial/Cinematic/Face Player")]
-public class CineFacePlayer : CineAction
-{
-    public float duration = 1.5f;
-    public override IEnumerator Execute(CineContext ctx)
+    [CreateAssetMenu(menuName="Tutorial/Cinematic/Face Player")]
+    public class CineFacePlayer : CineAction
     {
-        // yield return ctx.dove.Face(ctx.playerHead, duration);
-        yield return null;
+        public float duration = 1.5f;
+        public override IEnumerator Execute(CineContext ctx)
+        {
+            // yield return ctx.dove.Face(ctx.playerHead, duration);
+            yield return null;
+        }
     }
-}
+
+
+    [CreateAssetMenu(menuName="Tutorial/Cinematic/Speak")]
+    public class CineSay : CineAction
+    {
+        [TextArea] public string subtitle;
+        public AudioClip voice;
+        public float minHold = 0.5f;
+
+        public override IEnumerator Execute(CineContext ctx)
+        {
+            float t = 0f;
+            Debug.Log("Hello...?");
+            ctx.speaker?.PlayClip(voice, 2);
+            yield return null;
+        }
+    }

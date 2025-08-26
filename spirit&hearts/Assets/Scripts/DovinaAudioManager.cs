@@ -191,6 +191,7 @@ public class DovinaAudioManager : MonoBehaviour
         audioSource.Stop();
         audioSource.clip = clip;
         audioSource.Play();
+        Debug.Log("Playing clip " + clip.name);
 
         isPriorityPlaying = true;
         currentPriority = priority;

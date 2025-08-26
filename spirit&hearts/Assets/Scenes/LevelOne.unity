@@ -4622,7 +4622,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -4631,10 +4631,10 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 0
   DopplerLevel: 0
-  MinDistance: 100
+  MinDistance: 1
   MaxDistance: 1000
   Pan2D: 0
-  rolloffMode: 2
+  rolloffMode: 0
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -4709,7 +4709,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 0.0018333334
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -4780,6 +4780,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioSource: {fileID: 278844196}
+--- !u!114 &278844212 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3684215988008648832, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
+  m_PrefabInstance: {fileID: 422952628}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278844190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 485912b13998e4ba592abcca35113f33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &290346814
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6858,15 +6869,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2243.5933
+      value: 852
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1355
+      value: 1556
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1463
+      value: -790
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalRotation.w
@@ -24546,13 +24557,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   steps:
+  - {fileID: 11400000, guid: 3ca0a5fa1c4933048b5f63dbcc79d7d5, type: 2}
   - {fileID: 11400000, guid: 8ed20bd291f03f44c916d31ddba91b01, type: 2}
   - {fileID: 11400000, guid: ded2fdb18716bcc4198a02be8a52206f, type: 2}
   - {fileID: 11400000, guid: f000008837178d44e87da936e4cf54fe, type: 2}
   - {fileID: 11400000, guid: f90c283535b5a9a4da989684ba96b64b, type: 2}
   - {fileID: 11400000, guid: 18a7d9f8738b55b40b2a9131ecbce30d, type: 2}
   - {fileID: 11400000, guid: fbca5527b4ce1784e918f7946a8b24dd, type: 2}
-  dove: {fileID: 0}
+  doveSpeaker: {fileID: 278844209}
+  doveController: {fileID: 278844212}
+  doveArrivalPoint: {fileID: 475700256}
+  playerHead: {fileID: 513363057}
   autoStart: 1
 --- !u!114 &2015689900
 MonoBehaviour:

@@ -231,7 +231,7 @@ public class DoveCompanion : MonoBehaviour
             FlapInfinite();
             currentState = DoveState.Hovering;
             if (hoverRoutine != null) StopCoroutine(hoverRoutine);
-            hoverRoutine = StartCoroutine(IdleHoverLoop());
+            // hoverRoutine = StartCoroutine(IdleHoverLoop());
         }
         else if (!isIdle && currentState == DoveState.Hovering)
         {

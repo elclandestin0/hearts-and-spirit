@@ -17,7 +17,6 @@ public class WorldProgressAudio : MonoBehaviour
         if (!lightManager || !dovinaAudioManager) return;
 
         float p = lightManager.litPercent;
-        Debug.Log("Lit percent: " + p);
 
         Milestone target =
             p >= .99f ? Milestone.FullLight :
