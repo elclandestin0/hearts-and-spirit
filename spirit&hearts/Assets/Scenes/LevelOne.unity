@@ -3762,7 +3762,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 599592655388924379, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 599592655388924379, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_TagString
@@ -14426,6 +14426,33 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d796a4c29dc38824996c52494564093c, type: 3}
+--- !u!1 &1179731420 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 65eaf8e861bfa7f4f822e054f026ba1e, type: 3}
+  m_PrefabInstance: {fileID: 1240770455}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &1179731424
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1179731420}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -7987524602476548872, guid: 65eaf8e861bfa7f4f822e054f026ba1e, type: 3}
 --- !u!1 &1181984658 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4444339085915659014, guid: 5528dc5fcf3f24d2cb7b7b928d138407, type: 3}
@@ -14850,10 +14877,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Island_Small_11
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 65eaf8e861bfa7f4f822e054f026ba1e, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 65eaf8e861bfa7f4f822e054f026ba1e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1179731424}
   m_SourcePrefab: {fileID: 100100000, guid: 65eaf8e861bfa7f4f822e054f026ba1e, type: 3}
 --- !u!1001 &1246475999
 PrefabInstance:
@@ -16449,7 +16483,7 @@ Transform:
   m_GameObject: {fileID: 1411013980}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2255, y: 1267, z: -1971}
+  m_LocalPosition: {x: 2255, y: 1413, z: -1971}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
