@@ -222,7 +222,7 @@ public class DoveCompanion : MonoBehaviour
 
     private void Hover()
     {
-        BaseChatter();
+        // BaseChatter();
         bool isIdle = !movementScript.isGliding;
 
         if (isIdle && currentState != DoveState.Hovering)

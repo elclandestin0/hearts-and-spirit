@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using TMPro;
 
 [CreateAssetMenu(menuName = "Tutorial/Cinematic Step")]
 public class CinematicStep : ScriptableObject
@@ -19,4 +20,5 @@ public class CineContext
     public DoveCompanion dove;
     public DovinaAudioManager speaker;
     public System.Func<string, Transform> ResolveTarget; // optional ID → Transform
+    public TMP_Text subtitleUI;
 }

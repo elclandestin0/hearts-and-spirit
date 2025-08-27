@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using TMPro;
 
 [RequireComponent(typeof(MovementEventHub))]
 public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
@@ -13,6 +14,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     [SerializeField] private Transform doveArrivalPoint;       // empty near player head height
     [SerializeField] private Transform playerHead;
     [SerializeField] private bool autoStart = true;
+    [SerializeField] private TMP_Text subtitleUI;
 
     // Progress
     public int StepIndex { get; private set; } = -1;
@@ -126,7 +128,8 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             arrivalPoint = doveArrivalPoint,
             dove = doveController,
             speaker = doveSpeaker,
-            ResolveTarget = ResolvePoint
+            ResolveTarget = ResolvePoint,
+            subtitleUI = subtitleUI,
         };
 
         if (cine.actions != null)
@@ -197,9 +200,6 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             case TutorialCompletionType.HoverDuration:
                 if (hoverSec >= currentInteractive.targetSeconds) Advance();
                 break;
-            
-            // case TutorialCompletionType.NoddingDuration:
-            //     if (noddin) 
         }
     }
 }

@@ -13,13 +13,22 @@ public class CineSay : CineAction
 
     public override IEnumerator Execute(CineContext ctx)
     {
-        // TODO: hook your actual subtitle/audio here (e.g., ctx.speaker.PlayPriority(...))
-        Debug.Log($"[CineSay] {subtitle}");
-        Debug.Log("Playing clip " + voice.name);
-        ctx.speaker?.PlayClip(voice, 2);
-        yield return null;
-        // Minimal, compile-safe wait (prefer voice.length if you can access it)
-        // float hold = Mathf.Max(minHold, voice ? voice.length : 0f);
-        // if (hold > 0f) yield return new WaitForSeconds(hold);
+        if (ctx.subtitleUI)
+        {
+            ctx.subtitleUI.text = subtitle;
+        }
+
+        if (voice)
+        {
+            ctx.speaker?.PlayClip(voice, 2);
+            float hold = Mathf.Max(minHold, voice.length);
+            yield return new WaitForSeconds(hold);
+            yield return new WaitForSeconds(0.5f);
+        }
+        else
+        {
+            // still hold for minHold even if no audio
+            yield return new WaitForSeconds(minHold + 0.5f);
+        }
     }
 }
