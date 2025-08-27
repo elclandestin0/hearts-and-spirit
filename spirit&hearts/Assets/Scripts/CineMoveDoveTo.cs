@@ -9,7 +9,6 @@ public class CineMoveDoveTo : CineAction
     public string targetId;
     public bool useArrivalPointIfMissing = true;
     public bool usePlayerHeadIfMissing = true;
-    public Vector3 headOffset = new Vector3(0, -0.1f, 0.6f);
 
     public override IEnumerator Execute(CineContext ctx)
     {
@@ -20,7 +19,8 @@ public class CineMoveDoveTo : CineAction
         Vector3 randomDir = Random.onUnitSphere;
         randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.5f);
         Vector3 offset = randomDir.normalized * 200f;
+        Vector3 testOffset = new Vector3(0, 200.0f, -200.0f);
 
-        yield return ctx.dove.SmoothHoverApproach(offset);
+        yield return ctx.dove.SmoothHoverApproach(testOffset);
     }
 }
