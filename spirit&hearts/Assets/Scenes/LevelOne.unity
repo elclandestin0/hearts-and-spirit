@@ -6873,7 +6873,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1556
+      value: 1583.4
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -24569,6 +24569,9 @@ MonoBehaviour:
   doveArrivalPoint: {fileID: 475700256}
   playerHead: {fileID: 513363057}
   autoStart: 1
+  scenePoints:
+  - id: PlayerHead
+    transform: {fileID: 513363057}
 --- !u!114 &2015689900
 MonoBehaviour:
   m_ObjectHideFlags: 0

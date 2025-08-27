@@ -24,14 +24,14 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     // Events & counters for interactive steps
     private MovementEventHub _events;
-    private int   flapCount;
+    private int flapCount;
     private float glideSec, diveSec, hoverSec;
     private float stepClock;
 
     // Current step handles
-    private TutorialStep  currentInteractive = null;
-    private CinematicStep currentCinematic   = null;
-    private Coroutine     cinematicRoutine   = null;
+    private TutorialStep currentInteractive = null;
+    private CinematicStep currentCinematic = null;
+    private Coroutine cinematicRoutine = null;
 
     void Awake()
     {
@@ -39,7 +39,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         // counters for interactive completion
         _events.OnFlap.AddListener(() => flapCount++);
         _events.OnGlideTick.AddListener(dt => glideSec += dt);
-        _events.OnDiveTick.AddListener(dt  => diveSec  += dt);
+        _events.OnDiveTick.AddListener(dt => diveSec += dt);
         _events.OnHoverTick.AddListener(dt => hoverSec += dt);
     }
 
@@ -59,7 +59,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     {
         // clear current step refs
         currentInteractive = null;
-        currentCinematic   = null;
+        currentCinematic = null;
 
         StepIndex++;
         if (steps == null || StepIndex >= steps.Length)
@@ -104,7 +104,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         Debug.LogWarning($"TutorialManager: Unsupported step type at index {StepIndex}: {so}");
         Advance();
     }
-    
+
     [System.Serializable]
     public struct NamedPoint { public string id; public Transform transform; }
 
@@ -119,7 +119,6 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     private IEnumerator RunCinematic(CinematicStep cine)
     {
-        // Build context for actions (requires your CineContext class)
         var ctx = new CineContext
         {
             playerHead = playerHead,
@@ -130,32 +129,27 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             ResolveTarget = ResolvePoint
         };
 
-        // Inject scene refs that can't live in assets (e.g., arrival point)
         if (cine.actions != null)
         {
             foreach (var act in cine.actions)
             {
                 if (act == null) continue;
 
-                var runtimeAct = ScriptableObject.Instantiate(act); // clone the asset
-                if (runtimeAct is CineMoveDoveTo move && move.target == null)
-                    move.target = doveArrivalPoint;                 // assign on the clone
+                // Clone the asset so we mutate nothing on disk (safe for builds)
+                var runtimeAct = ScriptableObject.Instantiate(act);
 
+                // No target assignment here — CineMoveDoveTo resolves via ctx
                 yield return StartCoroutine(runtimeAct.Execute(ctx));
-                Destroy(runtimeAct);
-            }
 
-            // Execute actions in order
-            foreach (var act in cine.actions)
-            {
-                if (act != null)
-                    yield return StartCoroutine(act.Execute(ctx));
+                // Optional cleanup
+                Destroy(runtimeAct);
             }
         }
 
         cinematicRoutine = null;
-        Advance(); // continue to next step (likely the first interactive one)
+        Advance();
     }
+
 
     private void EndTutorialToFreeFlight()
     {
