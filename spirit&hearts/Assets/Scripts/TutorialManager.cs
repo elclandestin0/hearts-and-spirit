@@ -197,6 +197,9 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             case TutorialCompletionType.HoverDuration:
                 if (hoverSec >= currentInteractive.targetSeconds) Advance();
                 break;
+            
+            // case TutorialCompletionType.NoddingDuration:
+            //     if (noddin) 
         }
     }
 }

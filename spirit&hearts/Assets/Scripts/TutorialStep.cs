@@ -10,6 +10,7 @@ public enum TutorialCompletionType
     HoverDuration,      // hover for >= seconds (idle airborne)
     FallDuration,       // How long the player needs to fall for before completing a step 
     LookDuration,       // How long the player needs to look
+    Nodding
 }
 
 [CreateAssetMenu(menuName="Tutorial/Step")]

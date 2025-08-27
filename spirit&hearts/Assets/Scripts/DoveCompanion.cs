@@ -70,7 +70,7 @@ public class DoveCompanion : MonoBehaviour
     private bool hasPlayedFastChatter = false;
     private bool hasPlayedSlowChatter = false;
 
-#region Loop
+    #region Loop
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
@@ -137,8 +137,8 @@ public class DoveCompanion : MonoBehaviour
 
         ObstacleCheck();
     }
-#endregion
-#region Orbit
+    #endregion
+    #region Orbit
     private void Orbit()
     {
         float playerSpeed = movementScript.CurrentVelocity.magnitude;
@@ -188,7 +188,6 @@ public class DoveCompanion : MonoBehaviour
         var selected = dovinaAudioManager.GetClip("gp_changes/movement/hovering");
         dovinaAudioManager.PlayClip(selected, 0);
     }
-
 
     private void TryPlaySpeedChatter()
     {
@@ -240,7 +239,8 @@ public class DoveCompanion : MonoBehaviour
             hoverRoutine = null;
             isHoverIdle = false;
         }
-    }    
+    }
+
     private IEnumerator IdleHoverLoop()
     {
         while (true)
@@ -266,10 +266,9 @@ public class DoveCompanion : MonoBehaviour
                 liveTargetPosition = bobTarget;
                 transform.position = Vector3.SmoothDamp(transform.position, bobTarget, ref doveVelocity, 0.15f);
 
-
-                Vector3 lookDir = (player.position - movementScript.head.forward * 2f) - transform.position;
-                Quaternion rot = Quaternion.LookRotation(lookDir.normalized);
-                transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 2f);
+                // Instead of manual look math:
+                Vector3 localLookAhead = new Vector3(0f, 0f, -2f); // 2m "in front of" the player's face direction
+                FaceTowardsPoint(player.TransformPoint(localLookAhead), 2f);
 
                 timer += Time.deltaTime;
                 yield return null;
@@ -278,7 +277,7 @@ public class DoveCompanion : MonoBehaviour
         }
     }
 
-    public IEnumerator SmoothHoverApproach(Vector3 offset) 
+    public IEnumerator SmoothHoverApproach(Vector3 offset)
     {
         float maxCatchupDistance = 1000f;
         float blendDownDuration = 1.0f;
@@ -331,9 +330,36 @@ public class DoveCompanion : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Smoothly rotates the dove to face a world-space point this frame.
+    /// Call every frame you want the dove to keep turning.
+    /// </summary>
+    public void FaceTowardsPoint(Vector3 worldPoint, float turnSpeed = 6f)
+    {
+        Vector3 dir = worldPoint - transform.position;
+        if (dir.sqrMagnitude < 0.000001f) return;
 
-#endregion
-#region Following and avoiding
+        Quaternion target = Quaternion.LookRotation(dir.normalized, Vector3.up);
+        transform.rotation = Quaternion.Slerp(transform.rotation, target, Time.deltaTime * turnSpeed);
+    }
+
+    /// <summary>
+    /// Coroutine: keep facing a target Transform for a duration.
+    /// 'localLookAtOffset' is in the target's local space (e.g., (0,0,-2) = 2m *behind* target forward).
+    /// </summary>
+    public IEnumerator Face(Transform target, float duration, Vector3 localLookAtOffset, float turnSpeed = 6f)
+    {
+        float t = 0f;
+        while (t < duration && target != null)
+        {
+            Vector3 lookAt = target.TransformPoint(localLookAtOffset);
+            FaceTowardsPoint(lookAt, 3f);
+            t += Time.deltaTime;
+            yield return null;
+        }
+    }
+    #endregion
+    #region Following and avoiding
     private void Follow()
     {
         float playerSpeed = movementScript.CurrentVelocity.magnitude;
@@ -446,8 +472,8 @@ public class DoveCompanion : MonoBehaviour
         currentState = previousState;
         isEscaping = false;
     }
-#endregion
-#region Flap region
+    #endregion
+    #region Flap region
     private void HandleFlap()
     {
         flapQueue++;
@@ -471,7 +497,7 @@ public class DoveCompanion : MonoBehaviour
         isFlappingLoop = false;
     }
 
-    private IEnumerator FlapInfinite() 
+    private IEnumerator FlapInfinite()
     {
         while (true)
         {
@@ -482,8 +508,8 @@ public class DoveCompanion : MonoBehaviour
             yield return new WaitForSeconds(flapDuration);
         }
     }
-#endregion
-#region Helpers
+    #endregion
+    #region Helpers
     private float GetAdjustedClipLength(string clipName)
     {
         foreach (var clip in animator.runtimeAnimatorController.animationClips)
@@ -495,7 +521,7 @@ public class DoveCompanion : MonoBehaviour
         }
         return 1f;
     }
-#endregion
+    #endregion
     void OnDestroy()
     {
         movementScript.OnFlap -= HandleFlap;

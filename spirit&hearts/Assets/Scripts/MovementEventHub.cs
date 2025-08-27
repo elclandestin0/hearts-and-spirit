@@ -10,12 +10,19 @@ public class MovementEventHub : MonoBehaviour
     public UnityEvent<float> OnGlideTick = new(); // dt
     public UnityEvent<float> OnDiveTick  = new(); // dt
     public UnityEvent<float> OnHoverTick = new(); // dt
-
+    public UnityEvent OnNod = new();
     public void RaiseFlap()
     {
         _flapCount++;
         OnFlap?.Invoke();
         OnFlapCountChanged?.Invoke(_flapCount);
+    }
+
+    public void RaiseNod()
+    {
+        _nodCount++;
+        OnNod?.Invoke();
+
     }
 
     public void RaiseGlideTick(float dt)
@@ -68,6 +75,7 @@ public class MovementEventHub : MonoBehaviour
 
     // -------- Optional aggregates (listeners can subscribe directly) --------
     public UnityEvent<int>   OnFlapCountChanged     = new();
+    public UnityEvent<int> OnNodCountChanged = new();
     public UnityEvent<float> OnGlideSecondsChanged  = new();
     public UnityEvent<float> OnDiveSecondsChanged   = new();
     public UnityEvent<float> OnHoverSecondsChanged  = new();
@@ -98,7 +106,7 @@ public class MovementEventHub : MonoBehaviour
     }
 
     // -------- Internals --------
-    int _flapCount;
+    int _flapCount, _nodCount;
     float _glideSec, _diveSec, _hoverSec;
     bool _isGliding, _isDiving, _isHovering;
 }

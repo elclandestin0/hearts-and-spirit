@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 // This cinematic step is made so that the dove speaks to the player
 [CreateAssetMenu(menuName="Tutorial/Cinematic/Speak")]
