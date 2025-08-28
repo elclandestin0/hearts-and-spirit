@@ -25,7 +25,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     // Events & counters for interactive steps
     private MovementEventHub _events;
-    private int flapCount;
+    private int flapCount, nodCount;
     private float glideSec, diveSec, hoverSec;
     private float stepClock;
 
@@ -37,11 +37,13 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     void Awake()
     {
         _events = GetComponent<MovementEventHub>();
+
         // counters for interactive completion
         _events.OnFlap.AddListener(() => flapCount++);
         _events.OnGlideTick.AddListener(dt => glideSec += dt);
         _events.OnDiveTick.AddListener(dt => diveSec += dt);
         _events.OnHoverTick.AddListener(dt => hoverSec += dt);
+        _events.OnNod.AddListener(() => nodCount++);
     }
 
     void Start()
@@ -70,6 +72,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         }
 
         var so = steps[StepIndex];
+        Debug.Log(so);
 
         // Try cinematic first
         currentCinematic = so as CinematicStep;
@@ -92,12 +95,10 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             // reset counters & clock for this interactive step
             flapCount = 0;
             glideSec = diveSec = hoverSec = 0f;
+            nodCount = 0;                 // <— add this
             stepClock = 0f;
 
-            // (Optional) present text/VO here using your own system, but kept out for compile-safety.
-            // Example (only if your DovinaAudioManager has a safe API):
-            // doveSpeaker?.PlayLine(currentInteractive.subtitleText, currentInteractive.doveVO);
-
+            doveSpeaker?.PlayClip(currentInteractive.doveVO, 2);
             return;
         }
 
@@ -185,7 +186,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
                 break;
 
             case TutorialCompletionType.FlapCount:
-                if (flapCount >= currentInteractive.targetFlapCount) Advance();
+                if (flapCount >= currentInteractive.targetCount) Advance();
                 break;
 
             case TutorialCompletionType.GlideDuration:
@@ -198,6 +199,10 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
             case TutorialCompletionType.HoverDuration:
                 if (hoverSec >= currentInteractive.targetSeconds) Advance();
+                break;
+
+            case TutorialCompletionType.Nodding:
+                if (nodCount >= currentInteractive.targetCount) Advance();
                 break;
         }
     }

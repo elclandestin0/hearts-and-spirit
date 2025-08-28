@@ -22,7 +22,7 @@ public class MovementEventHub : MonoBehaviour
     {
         _nodCount++;
         OnNod?.Invoke();
-
+        OnNodCountChanged?.Invoke(_nodCount);
     }
 
     public void RaiseGlideTick(float dt)

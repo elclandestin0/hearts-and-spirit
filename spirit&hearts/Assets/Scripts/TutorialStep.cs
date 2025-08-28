@@ -21,11 +21,11 @@ public class TutorialStep : ScriptableObject
 
     [Header("What finishes this step")]
     public TutorialCompletionType completionType = TutorialCompletionType.None;
-    public int targetFlapCount = 0;
-    public float targetSeconds   = 0f;
+    public int targetCount = 0;
+    public float targetSeconds = 0f;
 
     [Header("Presentation")]
-    public string subtitleText;
+    [TextArea] public string subtitleText;
     public AudioClip doveVO; // optional
     public float minSecondsBeforeAdvance = 0.5f; // avoid instant skip
 }

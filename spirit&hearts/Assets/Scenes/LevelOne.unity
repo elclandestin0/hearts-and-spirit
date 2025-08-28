@@ -3762,7 +3762,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 599592655388924379, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 599592655388924379, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_TagString
@@ -3860,9 +3860,21 @@ PrefabInstance:
       propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3898654243179883074, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+      propertyPath: m_UiScaleMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3898654243179883074, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+      propertyPath: m_ReferenceResolution.x
+      value: 1920
+      objectReference: {fileID: 0}
+    - target: {fileID: 3898654243179883074, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+      propertyPath: m_ReferenceResolution.y
+      value: 1080
+      objectReference: {fileID: 0}
     - target: {fileID: 4050361358464795741, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_RenderMode
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4437184341960193451, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_text
@@ -4661,6 +4673,11 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -1364422231387031554, guid: 7ab4977417bc0c545a67f1a6728c3966, type: 3}
+--- !u!4 &274303674 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4090304680515650816, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+  m_PrefabInstance: {fileID: 230877922}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &278844190 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6506568721181362649, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
@@ -4687,8 +4704,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 0
   DopplerLevel: 0
-  MinDistance: 1
-  MaxDistance: 1000
+  MinDistance: 100
+  MaxDistance: 800
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -4750,7 +4767,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -4765,7 +4782,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.0018333334
+      value: 0.00055555557
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -24713,7 +24730,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee0294aa7fc9a4eee94f338d0ce59310, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  head: {fileID: 513363057}
+  head: {fileID: 274303674}
   speedThreshold: 50
   angleThreshold: 15
   maxNodInterval: 0.6
