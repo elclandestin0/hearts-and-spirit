@@ -20,7 +20,7 @@ public class LookDetector : MonoBehaviour
 
         Vector3 toTarget = (target.position - head.position).normalized;
         float dot = Vector3.Dot(head.forward, toTarget);
-
+        Debug.Log("dot " + dot);
         bool isLooking = dot > dotThreshold;
         if (isLooking)
         {

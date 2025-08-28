@@ -205,6 +205,10 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             case TutorialCompletionType.Nodding:
                 if (nodCount >= currentInteractive.targetCount) Advance();
                 break;
+            
+            case TutorialCompletionType.LookDuration:
+                if (lookSec >= currentInteractive.targetSeconds) Advance();
+                break;
         }
     }
 }

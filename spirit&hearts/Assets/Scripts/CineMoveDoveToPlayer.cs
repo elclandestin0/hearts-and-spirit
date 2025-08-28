@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 // This cinematic step is so that the dove eventually moves towards the player
-[CreateAssetMenu(menuName = "Tutorial/Cinematic/Move Dove To")]
+[CreateAssetMenu(menuName = "Tutorial/Cinematic/Move Dove To Player")]
 public class CineMoveDoveToPlayer : CineAction
 {
     public string targetId;
@@ -17,6 +17,6 @@ public class CineMoveDoveToPlayer : CineAction
         if (!string.IsNullOrEmpty(targetId) && ctx.ResolveTarget != null)
             t = ctx.ResolveTarget(targetId);
 
-        yield return ctx.dove.SmoothHoverApproach(offset);
+        yield return ctx.dove.SmoothHoverApproachToPlayer(offset);
     }
 }

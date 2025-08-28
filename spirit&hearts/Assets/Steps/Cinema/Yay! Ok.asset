@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca047f8323e3746bf84b08c675e130fb, type: 3}
+  m_Name: Yay! Ok
+  m_EditorClassIdentifier: 
+  subtitle: Yay! Ok, first, can you follow me with your eyes?
+  voice: {fileID: 8300000, guid: a7bee34b799264ca3b64e18652385898, type: 3}
+  minHold: 0.5

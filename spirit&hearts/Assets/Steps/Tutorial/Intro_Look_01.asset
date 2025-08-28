@@ -10,13 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ffba571ab303489ca3e148d5061e589, type: 3}
-  m_Name: Nodding
+  m_Name: Intro_Look_01
   m_EditorClassIdentifier: 
   allowedAbilities: 1
-  completionType: 7
-  targetCount: 3
-  targetSeconds: 0
-  subtitleText: When you're ready, give me a little nod, and I'll show you what to
-    do!
-  doveVO: {fileID: 8300000, guid: 527109673d7f841a28d46a1515e134b3, type: 3}
+  completionType: 6
+  targetCount: 0
+  targetSeconds: 3
+  subtitleText: 
+  doveVO: {fileID: 8300000, guid: a7bee34b799264ca3b64e18652385898, type: 3}
   minSecondsBeforeAdvance: 0.5

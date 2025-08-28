@@ -1,5 +1,6 @@
-using System.Collections;
 using UnityEngine;
+using System;
+using System.Collections;
 
 public class DoveCompanion : MonoBehaviour
 {
@@ -157,7 +158,7 @@ public class DoveCompanion : MonoBehaviour
         orbitRadiusChangeTimer += Time.deltaTime;
         if (orbitRadiusChangeTimer >= orbitRadiusChangeInterval)
         {
-            targetOrbitRadius = Random.Range(orbitRadius - 5f, orbitRadius);
+            targetOrbitRadius = UnityEngine.Random.Range(orbitRadius - 5f, orbitRadius);
             orbitRadiusChangeTimer = 0f;
         }
 
@@ -245,14 +246,14 @@ public class DoveCompanion : MonoBehaviour
     {
         while (true)
         {
-            Vector3 randomDir = Random.onUnitSphere;
+            Vector3 randomDir = UnityEngine.Random.onUnitSphere;
             randomDir.y = Mathf.Clamp(randomDir.y, -0.1f, 0.5f);
             Vector3 offset = randomDir.normalized * wanderDistance;
 
             currentHoverOffset = offset;
 
             // Phase 1: magnitude-based smooth approach
-            yield return StartCoroutine(SmoothHoverApproach(offset));
+            yield return StartCoroutine(SmoothHoverApproachToPlayer(offset));
 
             // Phase 2: idle bobbing
             isHoverIdle = true;
@@ -276,8 +277,32 @@ public class DoveCompanion : MonoBehaviour
             isHoverIdle = false;
         }
     }
+    
+        /// Approach the **player** using a local-space offset (e.g., (0, -0.1, 0.6)).
+    public IEnumerator SmoothHoverApproachToPlayer(Vector3 localOffset)
+    {
+        yield return SmoothHoverApproachInternal(
+            () => player.position + localOffset
+        );
+    }
 
-    public IEnumerator SmoothHoverApproach(Vector3 offset)
+    /// Approach a **target Transform**. If useLocalOffset is true, offset is in target's local space.
+    public IEnumerator SmoothHoverApproachTo(Transform target, Vector3 offset, bool useLocalOffset = true)
+    {
+        if (!target) yield break;
+
+        yield return SmoothHoverApproachInternal(
+            () => useLocalOffset ? target.TransformPoint(offset) : (target.position + offset)
+        );
+    }
+
+    /// Approach a **world position** directly.
+    public IEnumerator SmoothHoverApproachWorld(Vector3 worldPos)
+    {
+        yield return SmoothHoverApproachInternal(() => worldPos);
+    }
+
+    private IEnumerator SmoothHoverApproachInternal(Func<Vector3> getTargetPos)
     {
         float maxCatchupDistance = 1000f;
         float blendDownDuration = 1.0f;
@@ -287,27 +312,26 @@ public class DoveCompanion : MonoBehaviour
 
         while (!movementScript.isGliding)
         {
-            Vector3 targetPos = player.position + offset;
+            Vector3 targetPos = getTargetPos();
             liveTargetPosition = targetPos;
+
             float distance = Vector3.Distance(transform.position, targetPos);
-            float arrivalThreshold = 50.0f;
+            float arrivalThreshold = 50f; // (tune this! 50 is very large)
 
             if (distance <= arrivalThreshold)
-            {
                 yield break;
-            }
 
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
             float maxPlayerSpeed = movementScript.MaxSpeed;
 
-            // Desired hover speed when close (slow and gentle)
+            // “Near” speed (when close) — you had it set to max; adjust if you want gentler arrival
             float nearHoverSpeed = maxPlayerSpeed;
 
-            // Distance-based catch-up factor
-            float distanceRatio = Mathf.Clamp01(distance / maxCatchupDistance); // 0 when close, 1 when far
+            // Distance-based catch-up
+            float distanceRatio = Mathf.Clamp01(distance / maxCatchupDistance);
             float catchupSpeed = Mathf.Lerp(nearHoverSpeed, maxPlayerSpeed, distanceRatio);
 
-            // Smoothly blend from high speed to gentle hover speed
+            // Smooth blend
             if (blendTimer < blendDownDuration)
             {
                 float t = blendTimer / blendDownDuration;
@@ -322,8 +346,8 @@ public class DoveCompanion : MonoBehaviour
             Vector3 moveDir = (targetPos - transform.position).normalized;
             transform.position += moveDir * currentSpeed * Time.deltaTime;
 
-            // Look toward movement direction
-            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+            // Face movement direction
+            Quaternion targetRot = Quaternion.LookRotation(moveDir, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 2f);
 
             yield return null;
