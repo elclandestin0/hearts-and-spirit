@@ -26,7 +26,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     // Events & counters for interactive steps
     private MovementEventHub _events;
     private int flapCount, nodCount;
-    private float glideSec, diveSec, hoverSec;
+    private float glideSec, diveSec, hoverSec, lookSec;
     private float stepClock;
 
     // Current step handles
@@ -39,6 +39,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         _events = GetComponent<MovementEventHub>();
 
         // counters for interactive completion
+        _events.OnLookTick.AddListener(dt => lookSec += dt);
         _events.OnFlap.AddListener(() => flapCount++);
         _events.OnGlideTick.AddListener(dt => glideSec += dt);
         _events.OnDiveTick.AddListener(dt => diveSec += dt);
@@ -94,8 +95,8 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
             // reset counters & clock for this interactive step
             flapCount = 0;
-            glideSec = diveSec = hoverSec = 0f;
-            nodCount = 0;                 // <— add this
+            glideSec = diveSec = hoverSec = lookSec = 0f;
+            nodCount = 0;
             stepClock = 0f;
 
             doveSpeaker?.PlayClip(currentInteractive.doveVO, 2);

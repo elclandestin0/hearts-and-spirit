@@ -8,9 +8,11 @@ public class MovementEventHub : MonoBehaviour
     // -------- Existing API (kept) --------
     public UnityEvent OnFlap = new();
     public UnityEvent<float> OnGlideTick = new(); // dt
-    public UnityEvent<float> OnDiveTick  = new(); // dt
+    public UnityEvent<float> OnDiveTick = new(); // dt
     public UnityEvent<float> OnHoverTick = new(); // dt
+    public UnityEvent<float> OnLookTick = new();
     public UnityEvent OnNod = new();
+
     public void RaiseFlap()
     {
         _flapCount++;
@@ -65,25 +67,40 @@ public class MovementEventHub : MonoBehaviour
         if (_isHovering) { _isHovering = false; OnHoverEnd?.Invoke(); }
     }
 
+    public void RaiseLookTick(float dt)
+    {
+        if (!_isLooking) { _isLooking = true; OnLookStart?.Invoke(); }
+        _lookSec += dt;
+        OnLookTick?.Invoke(dt);
+    }
+
+    public void RaiseLookEnd()
+    {
+        if (_isLooking) { _isLooking = false; OnLookEnd?.Invoke(); }
+    }
+
+    public float LookSeconds => _lookSec;
+
     // -------- New Start/End events --------
     public UnityEvent OnGlideStart = new();
-    public UnityEvent OnGlideEnd   = new();
-    public UnityEvent OnDiveStart  = new();
-    public UnityEvent OnDiveEnd    = new();
+    public UnityEvent OnGlideEnd = new();
+    public UnityEvent OnDiveStart = new();
+    public UnityEvent OnDiveEnd = new();
     public UnityEvent OnHoverStart = new();
-    public UnityEvent OnHoverEnd   = new();
+    public UnityEvent OnHoverEnd = new(); public UnityEvent OnLookStart = new();
+    public UnityEvent OnLookEnd = new();
 
     // -------- Optional aggregates (listeners can subscribe directly) --------
-    public UnityEvent<int>   OnFlapCountChanged     = new();
+    public UnityEvent<int> OnFlapCountChanged = new();
     public UnityEvent<int> OnNodCountChanged = new();
-    public UnityEvent<float> OnGlideSecondsChanged  = new();
-    public UnityEvent<float> OnDiveSecondsChanged   = new();
-    public UnityEvent<float> OnHoverSecondsChanged  = new();
+    public UnityEvent<float> OnGlideSecondsChanged = new();
+    public UnityEvent<float> OnDiveSecondsChanged = new();
+    public UnityEvent<float> OnHoverSecondsChanged = new();
 
     // Read-only props for UI/debug
-    public int   FlapCount    => _flapCount;
+    public int FlapCount => _flapCount;
     public float GlideSeconds => _glideSec;
-    public float DiveSeconds  => _diveSec;
+    public float DiveSeconds => _diveSec;
     public float HoverSeconds => _hoverSec;
 
     // Reset totals and (optionally) force end of active states
@@ -107,6 +124,6 @@ public class MovementEventHub : MonoBehaviour
 
     // -------- Internals --------
     int _flapCount, _nodCount;
-    float _glideSec, _diveSec, _hoverSec;
-    bool _isGliding, _isDiving, _isHovering;
+    float _glideSec, _diveSec, _hoverSec, _lookSec;
+    bool _isGliding, _isDiving, _isHovering, _isLooking;
 }
