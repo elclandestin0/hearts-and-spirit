@@ -7,7 +7,6 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 {
     [Header("Steps (CinematicStep and TutorialStep assets)")]
     [SerializeField] private ScriptableObject[] steps;
-
     [Header("Scene Refs")]
     [SerializeField] private DovinaAudioManager doveSpeaker;   // optional; not required for compile
     [SerializeField] private DoveCompanion doveController;     // your dove mover/brain
