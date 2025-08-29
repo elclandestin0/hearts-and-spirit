@@ -81,9 +81,9 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         if (currentCinematic != null)
         {
             // lock to cinematic policy (usually Look only)
-            _policy = new MovementPolicy 
-            { 
-                Allowed = currentCinematic.allowedAbilities, 
+            _policy = new MovementPolicy
+            {
+                Allowed = currentCinematic.allowedAbilities,
                 GravityEnabled = currentInteractive ? currentInteractive.gravityEnabled : false
             };
 
@@ -94,9 +94,14 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
         // Then interactive
         currentInteractive = so as TutorialStep;
-        if (currentInteractive != null)
+        if (currentInteractive != null || currentCinematic != null)
         {
-            _policy = new MovementPolicy { Allowed = currentInteractive.allowedAbilities };
+            if (currentInteractive != null)
+                _policy = new MovementPolicy
+                {
+                    Allowed = currentInteractive.allowedAbilities,
+                    GravityEnabled = currentInteractive.gravityEnabled
+                };
 
             // reset counters & clock for this interactive step
             flapCount = 0;
