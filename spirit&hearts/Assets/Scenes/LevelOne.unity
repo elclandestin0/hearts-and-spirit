@@ -4676,11 +4676,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -1364422231387031554, guid: 7ab4977417bc0c545a67f1a6728c3966, type: 3}
---- !u!4 &274303674 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4090304680515650816, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
-  m_PrefabInstance: {fileID: 230877922}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &278844190 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6506568721181362649, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
@@ -17106,6 +17101,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a96a04af86d8d4cc7b6cf36c56a55a5f, type: 3}
+--- !u!4 &1527897013 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 9121314136482061895, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+  m_PrefabInstance: {fileID: 230877922}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1528504607
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24690,6 +24690,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 587c306e5b3bd9748915484ca0ed5123, type: 2}
   - {fileID: 11400000, guid: 97a5420c14e9c414a937e2ab0f3111bd, type: 2}
   - {fileID: 11400000, guid: 318d46b737eafd448977ed475e75da36, type: 2}
+  - {fileID: 11400000, guid: ac37934270b4048959573f95ed8268cb, type: 2}
   - {fileID: 11400000, guid: ded2fdb18716bcc4198a02be8a52206f, type: 2}
   - {fileID: 11400000, guid: f000008837178d44e87da936e4cf54fe, type: 2}
   - {fileID: 11400000, guid: f90c283535b5a9a4da989684ba96b64b, type: 2}
@@ -24788,7 +24789,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee0294aa7fc9a4eee94f338d0ce59310, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  head: {fileID: 274303674}
+  head: {fileID: 1527897013}
   speedThreshold: 50
   angleThreshold: 15
   maxNodInterval: 0.6
@@ -24804,7 +24805,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 016ff458dcb5a184aae5f9644792d964, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  head: {fileID: 274303674}
+  head: {fileID: 1527897013}
   target: {fileID: 278844215}
   dotThreshold: 0.9
 --- !u!1 &2019602357

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca047f8323e3746bf84b08c675e130fb, type: 3}
+  m_Name: Flapping intro
+  m_EditorClassIdentifier: 
+  subtitle: See? That's gravity. It will turn back on again when you are ready. You
+    will feel it.
+  voice: {fileID: 8300000, guid: b96674b8e5f2e45c8b836ec34e2a1ad2, type: 3}
+  minHold: 0.25

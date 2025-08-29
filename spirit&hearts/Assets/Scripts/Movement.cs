@@ -298,12 +298,12 @@ public class Movement : MonoBehaviour
         float speed = velocity.magnitude;
         float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(1f, maxDiveSpeed, speed));
 
-        if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
-        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        {
-            isFlapping = false;
-            return;
-        }
+        // if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
+        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        // {
+        //     isFlapping = false;
+        //     return;
+        // }
 
         // ↓ movement (downward stroke) detection
         float leftDown = -leftVelocity.SmoothedVelocity.y;
@@ -327,6 +327,8 @@ public class Movement : MonoBehaviour
             lastFlapTime = Time.time;
             OnFlap?.Invoke();
             PlayFlap();
+
+            eventHub.RaiseFlap();
 
             // Latch gliding through the flap
             glideHoldUntil = Mathf.Max(glideHoldUntil, Time.time + glideHoldDuration);

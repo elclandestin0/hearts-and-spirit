@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Teach_Dive
   m_EditorClassIdentifier: 
   allowedAbilities: 15
+  gravityEnabled: 1
   completionType: 3
-  targetFlapCount: 5
-  targetSeconds: 0
+  targetCount: 0
+  targetSeconds: 5
   subtitleText: 
   doveVO: {fileID: 8300000, guid: c112118cf48274ea29de059f8401ab5b, type: 3}
   minSecondsBeforeAdvance: 0.5

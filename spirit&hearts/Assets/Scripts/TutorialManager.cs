@@ -94,14 +94,13 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
         // Then interactive
         currentInteractive = so as TutorialStep;
-        if (currentInteractive != null || currentCinematic != null)
+        if (currentInteractive != null)
         {
-            if (currentInteractive != null)
-                _policy = new MovementPolicy
-                {
-                    Allowed = currentInteractive.allowedAbilities,
-                    GravityEnabled = currentInteractive.gravityEnabled
-                };
+            _policy = new MovementPolicy
+            {
+                Allowed = currentInteractive.allowedAbilities,
+                GravityEnabled = currentInteractive.gravityEnabled
+            };
 
             // reset counters & clock for this interactive step
             flapCount = 0;

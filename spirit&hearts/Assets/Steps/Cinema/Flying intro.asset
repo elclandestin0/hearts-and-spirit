@@ -9,14 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ffba571ab303489ca3e148d5061e589, type: 3}
-  m_Name: Teach_Gravity
+  m_Script: {fileID: 11500000, guid: ca047f8323e3746bf84b08c675e130fb, type: 3}
+  m_Name: Flying intro
   m_EditorClassIdentifier: 
-  allowedAbilities: 33
-  gravityEnabled: 1
-  completionType: 7
-  targetCount: 0
-  targetSeconds: 2
-  subtitleText: 
-  doveVO: {fileID: 0}
-  minSecondsBeforeAdvance: 0.25
+  subtitle: See? That's gravity. It will turn back on again when you are ready. You
+    will feel it.
+  voice: {fileID: 8300000, guid: b96674b8e5f2e45c8b836ec34e2a1ad2, type: 3}
+  minHold: 0.25
