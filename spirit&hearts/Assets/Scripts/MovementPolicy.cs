@@ -16,9 +16,13 @@ public enum MovementAbility
 public struct MovementPolicy
 {
     public MovementAbility Allowed; // bitmask
-    public static MovementPolicy LockedLookOnly => new MovementPolicy {
-        Allowed = MovementAbility.Look
-    };
+    public bool GravityEnabled;  // NEW
+
+    public static MovementPolicy Everything =>
+        new MovementPolicy {
+            Allowed = (MovementAbility)(-1),
+            GravityEnabled = true
+        };
 }
 
 public interface IMovementPolicyProvider

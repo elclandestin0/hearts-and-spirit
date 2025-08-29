@@ -81,7 +81,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         if (currentCinematic != null)
         {
             // lock to cinematic policy (usually Look only)
-            _policy = new MovementPolicy { Allowed = currentCinematic.allowedAbilities };
+            _policy = new MovementPolicy { Allowed = currentCinematic.allowedAbilities, GravityEnabled = currentInteractive.gravityEnabled };
 
             if (cinematicRoutine != null) StopCoroutine(cinematicRoutine);
             cinematicRoutine = StartCoroutine(RunCinematic(currentCinematic));

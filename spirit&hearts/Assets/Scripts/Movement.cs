@@ -147,7 +147,7 @@ public class Movement : MonoBehaviour
     private MovementEventHub eventHub;
     private MovementPolicy Policy => policyProvider != null
         ? policyProvider.CurrentPolicy
-        : new MovementPolicy { Allowed = (MovementAbility)(-1) };
+        : new MovementPolicy { Allowed = (MovementAbility)(-1), GravityEnabled = true };
     private bool Allowed(MovementAbility a) => (Policy.Allowed & a) != 0;
 
     void Awake()
@@ -479,6 +479,12 @@ public class Movement : MonoBehaviour
 
     private void ApplyGravityIfNeeded()
     {
+        if (!Policy.GravityEnabled)
+        {
+            // If you fire a gravity tick event elsewhere, make sure not to raise it here.
+            // Also keep your wind exit bookkeeping if you need it.
+            return;
+        }
         bool appliedGravityThisFrame = false;
         bool isInWindZone = false;
 

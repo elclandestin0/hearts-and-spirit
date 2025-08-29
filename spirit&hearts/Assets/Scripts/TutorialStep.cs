@@ -20,6 +20,9 @@ public class TutorialStep : ScriptableObject
     [Header("What is allowed in this step")]
     public MovementAbility allowedAbilities = MovementAbility.Look;
 
+    [Header("Physics")]
+    public bool gravityEnabled = true;
+
     [Header("What finishes this step")]
     public TutorialCompletionType completionType = TutorialCompletionType.None;
     public int targetCount = 0;
