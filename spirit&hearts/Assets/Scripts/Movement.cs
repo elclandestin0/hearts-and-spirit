@@ -479,6 +479,7 @@ public class Movement : MonoBehaviour
 
     private void ApplyGravityIfNeeded()
     {
+        bool appliedGravityThisFrame = false;
         bool isInWindZone = false;
 
         foreach (var zone in zones)
@@ -513,7 +514,12 @@ public class Movement : MonoBehaviour
             Vector3 gravityDirection = Vector3.down * 0.75f + head.forward.normalized * 0.25f;
             gravityDirection.Normalize();
             velocity += gravityDirection * gravity * Time.deltaTime;
+
+            appliedGravityThisFrame = true;
         }
+
+        if (appliedGravityThisFrame)
+            eventHub?.RaiseGravityTick(Time.deltaTime);
     }
 
     private void ApplyAirPocketEffect()

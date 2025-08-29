@@ -26,7 +26,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     // Events & counters for interactive steps
     private MovementEventHub _events;
     private int flapCount, nodCount;
-    private float glideSec, diveSec, hoverSec, lookSec;
+    private float glideSec, diveSec, hoverSec, lookSec, gravitySec;
     private float stepClock;
 
     // Current step handles
@@ -45,6 +45,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         _events.OnDiveTick.AddListener(dt => diveSec += dt);
         _events.OnHoverTick.AddListener(dt => hoverSec += dt);
         _events.OnNod.AddListener(() => nodCount++);
+        _events.OnGravityTick.AddListener(dt => gravitySec += dt);
     }
 
     void Start()
@@ -95,7 +96,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
             // reset counters & clock for this interactive step
             flapCount = 0;
-            glideSec = diveSec = hoverSec = lookSec = 0f;
+            glideSec = diveSec = hoverSec = lookSec = gravitySec = 0f;
             nodCount = 0;
             stepClock = 0f;
 
@@ -131,6 +132,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             speaker = doveSpeaker,
             ResolveTarget = ResolvePoint,
             subtitleUI = subtitleUI,
+            runner = this
         };
 
         if (cine.actions != null)
@@ -205,9 +207,12 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             case TutorialCompletionType.Nodding:
                 if (nodCount >= currentInteractive.targetCount) Advance();
                 break;
-            
+
             case TutorialCompletionType.LookDuration:
                 if (lookSec >= currentInteractive.targetSeconds) Advance();
+                break;
+            case TutorialCompletionType.GravityDuration:
+                if (gravitySec >= currentInteractive.targetSeconds) Advance();
                 break;
         }
     }

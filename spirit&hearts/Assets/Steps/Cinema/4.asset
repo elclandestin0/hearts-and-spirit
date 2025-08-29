@@ -9,9 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ca047f8323e3746bf84b08c675e130fb, type: 3}
-  m_Name: Nice!
+  m_Script: {fileID: 11500000, guid: 1a43a77629bb4db4e823a2be883bb97c, type: 3}
+  m_Name: 4
   m_EditorClassIdentifier: 
-  subtitle: Good job! Here I go again.
-  voice: {fileID: 8300000, guid: 787d9bfc458284a7db42529139403f9f, type: 3}
-  minHold: 0.5
+  displayName: Intro
+  allowedAbilities: 1
+  actions:
+  - {fileID: 11400000, guid: ce58e58ace306414390648dc97d2a0c3, type: 2}
+  - {fileID: 11400000, guid: 7b8f1012f755646569218dcff3488f0c, type: 2}

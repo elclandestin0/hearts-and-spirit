@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a43a77629bb4db4e823a2be883bb97c, type: 3}
-  m_Name: 3
+  m_Script: {fileID: 11500000, guid: ca047f8323e3746bf84b08c675e130fb, type: 3}
+  m_Name: Gravity intro
   m_EditorClassIdentifier: 
-  displayName: Intro
-  allowedAbilities: 1
-  actions:
-  - {fileID: 11400000, guid: 37e14f34c65618148afa3107e5e21e5a, type: 2}
-  - {fileID: 11400000, guid: 7b8f1012f755646569218dcff3488f0c, type: 2}
+  subtitle: 'This world has gravity. It pulls everything down... like this!
+
+'
+  voice: {fileID: 8300000, guid: c24221cfc49bf40c0b70b3632fa25f8c, type: 3}
+  minHold: 0

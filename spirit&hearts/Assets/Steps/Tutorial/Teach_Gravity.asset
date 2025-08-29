@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ffba571ab303489ca3e148d5061e589, type: 3}
-  m_Name: Intro_Look_01
+  m_Name: Teach_Gravity
   m_EditorClassIdentifier: 
-  allowedAbilities: 1
-  completionType: 6
+  allowedAbilities: 33
+  completionType: 7
   targetCount: 0
-  targetSeconds: 3
+  targetSeconds: 2
   subtitleText: 
-  doveVO: {fileID: 8300000, guid: 787d9bfc458284a7db42529139403f9f, type: 3}
-  minSecondsBeforeAdvance: 0
+  doveVO: {fileID: 8300000, guid: bc1f94c1285a8ac40b8bb256f2a2001a, type: 3}
+  minSecondsBeforeAdvance: 0.25

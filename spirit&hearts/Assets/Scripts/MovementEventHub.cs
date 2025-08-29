@@ -7,10 +7,11 @@ public class MovementEventHub : MonoBehaviour
 {
     // -------- Existing API (kept) --------
     public UnityEvent OnFlap = new();
-    public UnityEvent<float> OnGlideTick = new(); // dt
-    public UnityEvent<float> OnDiveTick = new(); // dt
-    public UnityEvent<float> OnHoverTick = new(); // dt
+    public UnityEvent<float> OnGlideTick = new();
+    public UnityEvent<float> OnDiveTick = new();
+    public UnityEvent<float> OnHoverTick = new();
     public UnityEvent<float> OnLookTick = new();
+    public UnityEvent<float> OnGravityTick = new();
     public UnityEvent OnNod = new();
 
     public void RaiseFlap()
@@ -49,6 +50,11 @@ public class MovementEventHub : MonoBehaviour
         _hoverSec += dt;
         OnHoverTick?.Invoke(dt);
         OnHoverSecondsChanged?.Invoke(_hoverSec);
+    }
+
+    public void RaiseGravityTick(float dt)
+    {
+        OnGravityTick?.Invoke(dt);
     }
 
     // -------- New End methods (call once when state turns off) --------

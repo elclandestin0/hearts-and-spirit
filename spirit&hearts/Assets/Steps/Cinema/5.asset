@@ -9,13 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ffba571ab303489ca3e148d5061e589, type: 3}
-  m_Name: Intro_Look_01
+  m_Script: {fileID: 11500000, guid: 1a43a77629bb4db4e823a2be883bb97c, type: 3}
+  m_Name: 5
   m_EditorClassIdentifier: 
+  displayName: Intro
   allowedAbilities: 1
-  completionType: 6
-  targetCount: 0
-  targetSeconds: 3
-  subtitleText: 
-  doveVO: {fileID: 8300000, guid: 787d9bfc458284a7db42529139403f9f, type: 3}
-  minSecondsBeforeAdvance: 0
+  actions:
+  - {fileID: 11400000, guid: c4afc05ddcc156f409ea9e29d05f2220, type: 2}
+  - {fileID: 11400000, guid: 71221511dc101964a9ccedc7415e751a, type: 2}

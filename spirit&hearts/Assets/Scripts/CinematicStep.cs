@@ -21,4 +21,5 @@ public class CineContext
     public DovinaAudioManager speaker;
     public System.Func<string, Transform> ResolveTarget; // optional ID → Transform
     public TMP_Text subtitleUI;
+    public MonoBehaviour runner;
 }

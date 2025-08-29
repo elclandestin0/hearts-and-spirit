@@ -25,7 +25,7 @@ RenderSettings:
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 3
-  m_SubtractiveShadowColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  m_SubtractiveShadowColor: {r: 0, g: 0, b: 0, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 3dbc312449a9e184e9ca00c224e4554b, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
@@ -3922,15 +3922,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2406
+      value: 2501
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1355
+      value: 1596
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2002.8
+      value: -2128
       objectReference: {fileID: 0}
     - target: {fileID: 7884089959465694439, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3986,7 +3986,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8526492151438153135, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 8526492151438153135, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_LocalPosition.z
@@ -24685,7 +24685,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 19b2803e2da8f8f4e9d13cd883ce0a73, type: 2}
   - {fileID: 11400000, guid: 8ed20bd291f03f44c916d31ddba91b01, type: 2}
   - {fileID: 11400000, guid: 107d89c46d15b7145b83d68cd75d5ae3, type: 2}
-  - {fileID: 11400000, guid: 8ed20bd291f03f44c916d31ddba91b01, type: 2}
+  - {fileID: 11400000, guid: 31943b0df9c8402448aa4bd476c63c9a, type: 2}
+  - {fileID: 11400000, guid: ad44da36e7b634e44a553b1ffb92c1e8, type: 2}
+  - {fileID: 11400000, guid: 587c306e5b3bd9748915484ca0ed5123, type: 2}
+  - {fileID: 11400000, guid: 97a5420c14e9c414a937e2ab0f3111bd, type: 2}
+  - {fileID: 11400000, guid: 318d46b737eafd448977ed475e75da36, type: 2}
   - {fileID: 11400000, guid: ded2fdb18716bcc4198a02be8a52206f, type: 2}
   - {fileID: 11400000, guid: f000008837178d44e87da936e4cf54fe, type: 2}
   - {fileID: 11400000, guid: f90c283535b5a9a4da989684ba96b64b, type: 2}
@@ -24725,6 +24729,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnLookTick:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGravityTick:
     m_PersistentCalls:
       m_Calls: []
   OnNod:
