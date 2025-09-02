@@ -351,18 +351,20 @@ public class Movement : MonoBehaviour
 
     private void HandleGlideLogic()
     {
+        Debug.Log("Attempting to glide.");
         if (!Allowed(MovementAbility.Glide)) { 
             if (isGliding || wasGlidingLastFrame) { eventHub.RaiseGlideEnd(); }
             isGliding = false; wasGlidingLastFrame = false; 
             return;
         }
-
-        if (leftHand == null || rightHand == null) return;
-        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        {
-            isGliding = false;
-            return;
-        }
+        Debug.Log("Can glide.");
+        
+        // if (leftHand == null || rightHand == null) return;
+        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        // {
+        //     isGliding = false;
+        //     return;
+        // }
 
         // --- Hand spread calculation (projected to ignore vertical "squeeze") ---
         Vector3 lPos = currentLeftRel;
@@ -384,6 +386,12 @@ public class Movement : MonoBehaviour
             wingsOutstretched = true;
 
         isGliding = wingsOutstretched;
+        Debug.Log("Attempting to glide.");
+        if (Input.GetKey(KeyCode.M))
+        {
+            Debug.Log("Gliding is now true.");
+            isGliding = true;
+        }
 
         // If not gliding, don't apply glide forces
         if (!isGliding)
@@ -392,6 +400,7 @@ public class Movement : MonoBehaviour
             wasGlidingLastFrame = false;
             return;
         }
+
         else
         {
             eventHub.RaiseGlideTick(Time.deltaTime); // hub will auto-emit start on first tick

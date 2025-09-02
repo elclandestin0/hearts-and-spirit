@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96bbac5fd65a17e4c91540672d486f49, type: 3}
-  m_Name: MoveAndTalkOne
+  m_Script: {fileID: 11500000, guid: 1a43a77629bb4db4e823a2be883bb97c, type: 3}
+  m_Name: 7
   m_EditorClassIdentifier: 
+  displayName: Intro
+  allowedAbilities: 1
   actions:
-  - {fileID: 11400000, guid: c8e35b8164d3f3a459540738442cc0d1, type: 2}
-  - {fileID: 11400000, guid: f8c159d74af3a0f41879a12cd627f6a5, type: 2}
+  - {fileID: 11400000, guid: 63b6ab686534a4e269119f04c7886b4d, type: 2}

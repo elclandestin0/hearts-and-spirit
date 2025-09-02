@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96bbac5fd65a17e4c91540672d486f49, type: 3}
-  m_Name: MoveAndTalkTwo
+  m_Script: {fileID: 11500000, guid: ca047f8323e3746bf84b08c675e130fb, type: 3}
+  m_Name: Yes, yes!
   m_EditorClassIdentifier: 
-  actions:
-  - {fileID: 11400000, guid: 664d1966ddb992649878851c0272f2f8, type: 2}
-  - {fileID: 11400000, guid: 37e14f34c65618148afa3107e5e21e5a, type: 2}
+  subtitle: Yes, yes!
+  voice: {fileID: 8300000, guid: 62664bfc76f8e43a7bfad2cee6769a16, type: 3}
+  minHold: 0.25
