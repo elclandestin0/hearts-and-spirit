@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Intro_Look_01
   m_EditorClassIdentifier: 
   allowedAbilities: 1
+  gravityEnabled: 1
   completionType: 6
   targetCount: 0
   targetSeconds: 3
   subtitleText: 
-  doveVO: {fileID: 8300000, guid: 787d9bfc458284a7db42529139403f9f, type: 3}
+  doveVO: {fileID: 0}
   minSecondsBeforeAdvance: 0

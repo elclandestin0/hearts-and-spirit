@@ -3874,7 +3874,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4050361358464795741, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_RenderMode
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4437184341960193451, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       propertyPath: m_text
@@ -24486,13 +24486,13 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: 5b910f3eb578647a9845d3ee81165b5d, type: 3}
   m_Resource: {fileID: 8300000, guid: 5b910f3eb578647a9845d3ee81165b5d, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.2
+  m_Volume: 0.05
   m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
+  Priority: 211
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 500
