@@ -83,6 +83,7 @@ public class DoveCompanion : MonoBehaviour
 
     void Update()
     {
+        if (!movementScript.isGliding) { FlapInfinite(); currentState = DoveState.Hovering; } 
         Hover();
         TryPlaySpeedChatter();
         switch (currentState)
@@ -228,7 +229,6 @@ public class DoveCompanion : MonoBehaviour
 
         if (isIdle && currentState != DoveState.Hovering)
         {
-            FlapInfinite();
             currentState = DoveState.Hovering;
             if (hoverRoutine != null) StopCoroutine(hoverRoutine);
             // hoverRoutine = StartCoroutine(IdleHoverLoop());
@@ -525,8 +525,11 @@ public class DoveCompanion : MonoBehaviour
 
     private IEnumerator FlapInfinite()
     {
+        Debug.Log("In flap infinite()");
         while (true)
         {
+
+            Debug.Log("Flapping infinitely.. I hope...");
             animator.ResetTrigger("Flap");
             animator.SetTrigger("Flap");
 
