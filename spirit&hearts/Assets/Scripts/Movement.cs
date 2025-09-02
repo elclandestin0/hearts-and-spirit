@@ -128,8 +128,8 @@ public class Movement : MonoBehaviour
     private float glideHoldUntil = -1f;
 
     [SerializeField] private float minHandSpreadEnter = 40f;
-    [SerializeField] private float minHandSpreadStay  = 20f;
-    [SerializeField] private float spreadSmoothing    = 10f;
+    [SerializeField] private float minHandSpreadStay = 20f;
+    [SerializeField] private float spreadSmoothing = 10f;
     private float smoothedHandSpread = 0f;
     private bool wasGlidingLastFrame = false;
 
@@ -173,9 +173,9 @@ public class Movement : MonoBehaviour
         {
             velocity = Vector3.zero; // freeze translation
             // Emit "end" events if we were in active states
-            if (wasGliding)  { eventHub.RaiseGlideEnd();  wasGliding = false; }
-            if (wasHovering) { eventHub.RaiseHoverEnd();  wasHovering = false; }
-            if (wasDiving)   { eventHub.RaiseDiveEnd();   wasDiving  = false; }
+            if (wasGliding) { eventHub.RaiseGlideEnd(); wasGliding = false; }
+            if (wasHovering) { eventHub.RaiseHoverEnd(); wasHovering = false; }
+            if (wasDiving) { eventHub.RaiseDiveEnd(); wasDiving = false; }
             // Skip physics & movement when locked:
             DrawDebugLines();
             UpdateFlightAudio();
@@ -208,10 +208,10 @@ public class Movement : MonoBehaviour
 
     private void DetectControllerInput()
     {
-        float leftGripValue  = leftGrip  != null ? leftGrip.action.ReadValue<float>()  : 0f;
+        float leftGripValue = leftGrip != null ? leftGrip.action.ReadValue<float>() : 0f;
         float rightGripValue = rightGrip != null ? rightGrip.action.ReadValue<float>() : 0f;
 
-        bool leftHeld  = leftGripValue  > 0.5f;
+        bool leftHeld = leftGripValue > 0.5f;
         bool rightHeld = rightGripValue > 0.5f;
 
         isHovering = Allowed(MovementAbility.Hover) && leftHeld && rightHeld;
@@ -244,10 +244,10 @@ public class Movement : MonoBehaviour
 
     private void UpdateDeltaValues()
     {
-        currentLeftRel  = leftHand.position;
+        currentLeftRel = leftHand.position;
         currentRightRel = rightHand.position;
-        leftHandDelta   = (currentLeftRel  - prevLeftPos)  / Time.deltaTime;
-        rightHandDelta  = (currentRightRel - prevRightPos) / Time.deltaTime;
+        leftHandDelta = (currentLeftRel - prevLeftPos) / Time.deltaTime;
+        rightHandDelta = (currentRightRel - prevRightPos) / Time.deltaTime;
 
         headPos = head.position;
         headFwd = head.forward;
@@ -337,9 +337,9 @@ public class Movement : MonoBehaviour
         // Stroke latch (arms moving strongly up OR down keeps glide alive briefly)
         float ly = leftVelocity.SmoothedVelocity.y;
         float ry = rightVelocity.SmoothedVelocity.y;
-        bool goingUpFast   =  ly >  strokeSpeedThreshold && ry >  strokeSpeedThreshold;
-        bool goingDownFast =  ly < -strokeSpeedThreshold && ry < -strokeSpeedThreshold;
-        bool strokeActive  = goingUpFast || goingDownFast;
+        bool goingUpFast = ly > strokeSpeedThreshold && ry > strokeSpeedThreshold;
+        bool goingDownFast = ly < -strokeSpeedThreshold && ry < -strokeSpeedThreshold;
+        bool strokeActive = goingUpFast || goingDownFast;
 
         if ((isGliding || wasGlidingLastFrame) && strokeActive)
         {
@@ -351,14 +351,15 @@ public class Movement : MonoBehaviour
 
     private void HandleGlideLogic()
     {
-        Debug.Log("Attempting to glide.");
-        if (!Allowed(MovementAbility.Glide)) { 
+        Debug.Log("isGliding. " + isGliding);
+        if (!Allowed(MovementAbility.Glide))
+        {
             if (isGliding || wasGlidingLastFrame) { eventHub.RaiseGlideEnd(); }
-            isGliding = false; wasGlidingLastFrame = false; 
+            isGliding = false; 
+            wasGlidingLastFrame = false;
             return;
         }
-        Debug.Log("Can glide.");
-        
+
         // if (leftHand == null || rightHand == null) return;
         // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
         // {
@@ -386,10 +387,8 @@ public class Movement : MonoBehaviour
             wingsOutstretched = true;
 
         isGliding = wingsOutstretched;
-        Debug.Log("Attempting to glide.");
         if (Input.GetKey(KeyCode.M))
         {
-            Debug.Log("Gliding is now true.");
             isGliding = true;
         }
 
@@ -403,7 +402,7 @@ public class Movement : MonoBehaviour
 
         else
         {
-            eventHub.RaiseGlideTick(Time.deltaTime); // hub will auto-emit start on first tick
+            eventHub.RaiseGlideTick(Time.deltaTime);
         }
 
         // Steering direction: in hover keep travel/wind heading; otherwise head
@@ -443,19 +442,19 @@ public class Movement : MonoBehaviour
             float liftPercent = 1f - (timeSinceDive / postDiveLiftBoostDuration);
 
             float forwardBonus = Mathf.Lerp(2f, 10f, liftPercent);
-            float upwardBonus  = Mathf.Lerp(1f, 10f, liftPercent);
+            float upwardBonus = Mathf.Lerp(1f, 10f, liftPercent);
 
             float pitchY = head.forward.y;
 
             float forwardWeight = Mathf.Clamp01(5 - Mathf.InverseLerp(0.8f, 1.2f, pitchY));
-            float climbWeight   = Mathf.Clamp01(Mathf.InverseLerp(0.2f, 0.7f, pitchY));
-            float stallWeight   = Mathf.Clamp01(Mathf.InverseLerp(0.7f, 0.9f, pitchY));
+            float climbWeight = Mathf.Clamp01(Mathf.InverseLerp(0.2f, 0.7f, pitchY));
+            float stallWeight = Mathf.Clamp01(Mathf.InverseLerp(0.7f, 0.9f, pitchY));
 
             float forwardForce = forwardBonus * forwardWeight;
-            float upwardForce  = upwardBonus  * climbWeight * (1f - stallWeight);
+            float upwardForce = upwardBonus * climbWeight * (1f - stallWeight);
 
             Vector3 forwardBoost = lastDiveForward * forwardForce * Time.deltaTime;
-            Vector3 upwardBoost  = Vector3.up    * upwardForce  * Time.deltaTime;
+            Vector3 upwardBoost = Vector3.up * upwardForce * Time.deltaTime;
 
             velocity += forwardBoost + upwardBoost;
         }
@@ -468,17 +467,18 @@ public class Movement : MonoBehaviour
 
     private void HandleHoverLogic()
     {
-        if (!Allowed(MovementAbility.Hover)) {
+        if (!Allowed(MovementAbility.Hover))
+        {
             if (isHovering) { eventHub.RaiseHoverEnd(); }
-            isHovering = false; 
+            isHovering = false;
             return;
         }
 
         if (isHovering && isGliding)
         {
             eventHub.RaiseHoverTick(Time.deltaTime);
-            float currentSpeed  = velocity.magnitude;
-            float targetSpeed   = Mathf.Min(currentSpeed, maxHoverSpeed);
+            float currentSpeed = velocity.magnitude;
+            float targetSpeed = Mathf.Min(currentSpeed, maxHoverSpeed);
             float smoothedSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 4f);
             velocity = velocity.normalized * smoothedSpeed;
         }

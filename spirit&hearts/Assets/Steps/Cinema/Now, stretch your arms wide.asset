@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca047f8323e3746bf84b08c675e130fb, type: 3}
+  m_Name: Now, stretch your arms wide
+  m_EditorClassIdentifier: 
+  subtitle: 'Now, stretch your arms wide and glide.
+
+'
+  voice: {fileID: 8300000, guid: 5ef42a53f424849d0a20fd7f419e71a8, type: 3}
+  minHold: 0.25
