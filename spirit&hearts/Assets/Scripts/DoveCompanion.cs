@@ -253,7 +253,7 @@ public class DoveCompanion : MonoBehaviour
             currentHoverOffset = offset;
 
             // Phase 1: magnitude-based smooth approach
-            yield return StartCoroutine(SmoothHoverApproachToPlayer(offset));
+            yield return StartCoroutine(SmoothHoverApproachToPlayer(offset, false));
 
             // Phase 2: idle bobbing
             isHoverIdle = true;
@@ -279,10 +279,11 @@ public class DoveCompanion : MonoBehaviour
     }
     
         /// Approach the **player** using a local-space offset (e.g., (0, -0.1, 0.6)).
-    public IEnumerator SmoothHoverApproachToPlayer(Vector3 localOffset)
+    public IEnumerator SmoothHoverApproachToPlayer(Vector3 localOffset, bool isCinema)
     {
         yield return SmoothHoverApproachInternal(
-            () => player.position + localOffset
+            () => player.position + localOffset,
+            isCinema
         );
     }
 
@@ -292,17 +293,18 @@ public class DoveCompanion : MonoBehaviour
         if (!target) yield break;
 
         yield return SmoothHoverApproachInternal(
-            () => useLocalOffset ? target.TransformPoint(offset) : (target.position + offset)
+            () => useLocalOffset ? target.TransformPoint(offset) : (target.position + offset),
+            true
         );
     }
 
     /// Approach a **world position** directly.
     public IEnumerator SmoothHoverApproachWorld(Vector3 worldPos)
     {
-        yield return SmoothHoverApproachInternal(() => worldPos);
+        yield return SmoothHoverApproachInternal(() => worldPos, true);
     }
 
-    private IEnumerator SmoothHoverApproachInternal(Func<Vector3> getTargetPos)
+    private IEnumerator SmoothHoverApproachInternal(Func<Vector3> getTargetPos, bool isCinema)
     {
         float maxCatchupDistance = 1000f;
         float blendDownDuration = 1.0f;
@@ -310,7 +312,7 @@ public class DoveCompanion : MonoBehaviour
         currentSpeed = lastKnownSpeed;
         float blendTimer = 0f;
 
-        while (!movementScript.isGliding)
+        while (!movementScript.isGliding || isCinema)
         {
             Vector3 targetPos = getTargetPos();
             liveTargetPosition = targetPos;

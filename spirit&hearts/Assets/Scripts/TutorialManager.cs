@@ -108,6 +108,12 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             nodCount = 0;
             stepClock = 0f;
 
+            var movementScript = GetComponent<Movement>();
+
+            movementScript.isGliding = false;
+            movementScript.isHovering = false;
+            movementScript.isFlapping = false;
+
             doveSpeaker?.PlayClip(currentInteractive.doveVO, 2);
             var subtitles = currentInteractive.subtitleText;
             if (subtitles != null && subtitleUI != null)

@@ -17,6 +17,6 @@ public class CineMoveDoveToPlayer : CineAction
         if (!string.IsNullOrEmpty(targetId) && ctx.ResolveTarget != null)
             t = ctx.ResolveTarget(targetId);
 
-        yield return ctx.dove.SmoothHoverApproachToPlayer(offset);
+        yield return ctx.dove.SmoothHoverApproachToPlayer(offset, true);
     }
 }

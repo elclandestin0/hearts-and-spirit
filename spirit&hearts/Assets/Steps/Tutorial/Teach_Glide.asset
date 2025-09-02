@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ffba571ab303489ca3e148d5061e589, type: 3}
   m_Name: Teach_Glide
   m_EditorClassIdentifier: 
-  allowedAbilities: 39
-  gravityEnabled: 1
+  allowedAbilities: 55
+  gravityEnabled: 0
   completionType: 2
   targetCount: 0
   targetSeconds: 5
-  subtitleText: Now, stretch your arms wide and glide.
-  doveVO: {fileID: 8300000, guid: 5ef42a53f424849d0a20fd7f419e71a8, type: 3}
-  minSecondsBeforeAdvance: 0.5
+  subtitleText: 
+  doveVO: {fileID: 0}
+  minSecondsBeforeAdvance: 0.25

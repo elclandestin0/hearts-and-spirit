@@ -173,8 +173,8 @@ public class Movement : MonoBehaviour
         {
             velocity = Vector3.zero; // freeze translation
             // Emit "end" events if we were in active states
-            if (wasGliding) { eventHub.RaiseGlideEnd(); wasGliding = false; }
-            if (wasHovering) { eventHub.RaiseHoverEnd(); wasHovering = false; }
+            if (wasGliding) { eventHub.RaiseGlideEnd(); wasGliding = false; isGliding = false; }
+            if (wasHovering) { eventHub.RaiseHoverEnd(); wasHovering = false; isHovering = false; }
             if (wasDiving) { eventHub.RaiseDiveEnd(); wasDiving = false; }
             // Skip physics & movement when locked:
             DrawDebugLines();
@@ -185,7 +185,6 @@ public class Movement : MonoBehaviour
         ApplyWindForces();
         CheckSurfaceImpact();
         DetectControllerInput();
-
         UpdateDeltaValues();
         UpdateDiveAngle();
         HandleFlapDetection();
@@ -354,9 +353,11 @@ public class Movement : MonoBehaviour
         Debug.Log("isGliding. " + isGliding);
         if (!Allowed(MovementAbility.Glide))
         {
+            Debug.Log("Switching to isGliding = false");
             if (isGliding || wasGlidingLastFrame) { eventHub.RaiseGlideEnd(); }
-            isGliding = false; 
+            isGliding = false;
             wasGlidingLastFrame = false;
+            Debug.Log("isGliding " + isGliding);
             return;
         }
 
