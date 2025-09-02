@@ -109,6 +109,12 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             stepClock = 0f;
 
             doveSpeaker?.PlayClip(currentInteractive.doveVO, 2);
+            var subtitles = currentInteractive.subtitleText;
+            if (subtitles != null && subtitleUI != null)
+            {
+                subtitleUI.text = subtitles;
+            }
+
             return;
         }
 
