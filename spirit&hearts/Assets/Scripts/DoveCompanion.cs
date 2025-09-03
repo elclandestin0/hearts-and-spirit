@@ -23,7 +23,10 @@ public class DoveCompanion : MonoBehaviour
     private float hoverTimer;
     private bool isHovering = false;
     private Vector3 currentHoverOffset;
+    // Coroutines
     private Coroutine hoverRoutine;
+    private Coroutine flapInfiniteRoutine;
+    private bool prevIsGliding;
     private bool isHoverIdle = false;
 
     [Header("Orbit Mode")]
@@ -83,7 +86,6 @@ public class DoveCompanion : MonoBehaviour
 
     void Update()
     {
-        if (!movementScript.isGliding) { FlapInfinite(); currentState = DoveState.Hovering; } 
         Hover();
         TryPlaySpeedChatter();
         switch (currentState)
@@ -102,6 +104,17 @@ public class DoveCompanion : MonoBehaviour
         }
 
         animator.SetBool("Gliding", movementScript.isGliding);
+
+        if (!movementScript.isGliding && prevIsGliding)
+            StartInfiniteFlap();
+
+        if (movementScript.isGliding && !prevIsGliding)
+            StopInfiniteFlap();
+
+        if (!movementScript.isGliding && flapInfiniteRoutine == null) // safety: ensure running
+            StartInfiniteFlap();
+
+        prevIsGliding = movementScript.isGliding;
 
 
         bool shouldMoveToTarget = currentState == DoveState.Orbiting;
@@ -277,8 +290,8 @@ public class DoveCompanion : MonoBehaviour
             isHoverIdle = false;
         }
     }
-    
-        /// Approach the **player** using a local-space offset (e.g., (0, -0.1, 0.6)).
+
+    /// Approach the **player** using a local-space offset (e.g., (0, -0.1, 0.6)).
     public IEnumerator SmoothHoverApproachToPlayer(Vector3 localOffset, bool isCinema)
     {
         yield return SmoothHoverApproachInternal(
@@ -523,20 +536,46 @@ public class DoveCompanion : MonoBehaviour
         isFlappingLoop = false;
     }
 
-    private IEnumerator FlapInfinite()
+    private void StartInfiniteFlap()
     {
-        Debug.Log("In flap infinite()");
-        while (true)
-        {
+        if (flapInfiniteRoutine == null)
+            flapInfiniteRoutine = StartCoroutine(FlapInfiniteLoop());
+    }
 
-            Debug.Log("Flapping infinitely.. I hope...");
+    private void StopInfiniteFlap()
+    {
+        if (flapInfiniteRoutine != null)
+        {
+            StopCoroutine(flapInfiniteRoutine);
+            flapInfiniteRoutine = null;
+        }
+    }
+
+    private IEnumerator FlapInfiniteLoop()
+    {
+        // yield return new WaitForSeconds(UnityEngine.Random.Range(0f, 0.15f));
+        while (!movementScript.isGliding)
+        {
+            // If a queued flap sequence is running, let it drive the wings this frame
+            if (isFlappingLoop)
+            {
+                yield return null;
+                continue;
+            }
+
             animator.ResetTrigger("Flap");
             animator.SetTrigger("Flap");
 
             float flapDuration = GetAdjustedClipLength("Flap");
-            yield return new WaitForSeconds(flapDuration);
+            // Slight overlap can feel more 'alive'; keep or remove the 0.1f
+            yield return new WaitForSeconds(Mathf.Max(0.05f, flapDuration - 0.1f));
+
+            // loop naturally continues; will break automatically when gliding becomes true
         }
+
+        flapInfiniteRoutine = null;
     }
+
     #endregion
     #region Helpers
     private float GetAdjustedClipLength(string clipName)
