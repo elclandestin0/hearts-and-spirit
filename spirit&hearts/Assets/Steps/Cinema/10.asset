@@ -9,14 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ffba571ab303489ca3e148d5061e589, type: 3}
-  m_Name: Teach_Hover
+  m_Script: {fileID: 11500000, guid: 1a43a77629bb4db4e823a2be883bb97c, type: 3}
+  m_Name: 10
   m_EditorClassIdentifier: 
-  allowedAbilities: 31
-  gravityEnabled: 1
-  completionType: 4
-  targetCount: 0
-  targetSeconds: 5
-  subtitleText: 
-  doveVO: {fileID: 0}
-  minSecondsBeforeAdvance: 0.25
+  displayName: Intro
+  allowedAbilities: 1
+  actions:
+  - {fileID: 11400000, guid: 1b71fcc4a56364cd890eb24f1c315928, type: 2}
+  - {fileID: 11400000, guid: ddaeda1a0f05648c1952fe2dfb2782cb, type: 2}
