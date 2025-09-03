@@ -11,7 +11,9 @@ public enum TutorialCompletionType
     FallDuration,       // How long the player needs to fall for before completing a step 
     LookDuration,       // How long the player needs to look
     GravityDuration,
-    Nodding
+    Nodding,
+    SeedPicked,
+    LightLit
 }
 
 [CreateAssetMenu(menuName="Tutorial/Step")]

@@ -7,7 +7,6 @@ public class SeedBehavior : MonoBehaviour
 
     private Transform player;
     private Transform currentLightTarget;
-
     [Header("Attraction Settings")]
     [SerializeField] private float attractionRadius;
     [SerializeField] private float attachDistance;
@@ -20,12 +19,15 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private AmbientLightManager lightManager;
     private LightController light;
     private DovinaAudioManager dovinaAudioManager;
+    private MovementEventHub _hub;
     void Start()
     {
         player = GameObject.FindWithTag("Player")?.transform;
         seedHolster = player.transform.Find("SeedHolster");
         lightManager = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
         dovinaAudioManager = GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
+
+        _hub = player ? player.GetComponent<MovementEventHub>() : null;
     }
 
     void Update()
@@ -67,20 +69,12 @@ public class SeedBehavior : MonoBehaviour
                             dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
                             dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
                             lightManager.UpdateAmbientLight();
+                            _hub.OnLightLit.Invoke();
                             Destroy(this.gameObject);
                         }
                     }
                 }
                 break;
-        }
-    }
-
-    private void CheckForPlayerProximity()
-    {
-        float distance = Vector3.Distance(transform.position, player.position);
-        if (distance < attractionRadius)
-        {
-            currentState = State.AttractToPlayer;
         }
     }
 
@@ -91,10 +85,23 @@ public class SeedBehavior : MonoBehaviour
         {
             currentState = State.AttachedToPlayer;
             transform.SetParent(seedHolster);
-            transform.localPosition = new Vector3(0f, 0f, 0f);
-            player.gameObject.GetComponent<ItemManager>().AddSeed();
-            player.gameObject.GetComponent<ItemManager>().PlayPickUpSound();
+            transform.localPosition = Vector3.zero;
+
+            var items = player.gameObject.GetComponent<ItemManager>();
+            items.AddSeed();
+            items.PlayPickUpSound();
             dovinaAudioManager.PlayPriority("gp_changes/seed", 2, 2, 14);
+
+            _hub?.OnSeedPicked.Invoke();
+        }
+    }
+
+    private void CheckForPlayerProximity()
+    {
+        float distance = Vector3.Distance(transform.position, player.position);
+        if (distance < attractionRadius)
+        {
+            currentState = State.AttractToPlayer;
         }
     }
 

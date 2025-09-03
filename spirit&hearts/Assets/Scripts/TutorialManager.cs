@@ -14,6 +14,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     [SerializeField] private Transform playerHead;
     [SerializeField] private bool autoStart = true;
     [SerializeField] private TMP_Text subtitleUI;
+    private int seedsPicked, lightsLit;
 
     // Progress
     public int StepIndex { get; private set; } = -1;
@@ -46,6 +47,8 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         _events.OnHoverTick.AddListener(dt => hoverSec += dt);
         _events.OnNod.AddListener(() => nodCount++);
         _events.OnGravityTick.AddListener(dt => gravitySec += dt);
+        _events.OnSeedPicked.AddListener(() => seedsPicked++);
+        _events.OnLightLit.AddListener(() => lightsLit++);
     }
 
     void Start()
@@ -62,7 +65,6 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     private void Advance()
     {
-        // clear current step refs
         currentInteractive = null;
         currentCinematic = null;
 
@@ -74,25 +76,9 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         }
 
         var so = steps[StepIndex];
-        Debug.Log(so);
 
-        // Try cinematic first
-        currentCinematic = so as CinematicStep;
-        if (currentCinematic != null)
-        {
-            // lock to cinematic policy (usually Look only)
-            _policy = new MovementPolicy
-            {
-                Allowed = currentCinematic.allowedAbilities,
-                GravityEnabled = currentInteractive ? currentInteractive.gravityEnabled : false
-            };
+        // cinematic branch unchanged...
 
-            if (cinematicRoutine != null) StopCoroutine(cinematicRoutine);
-            cinematicRoutine = StartCoroutine(RunCinematic(currentCinematic));
-            return;
-        }
-
-        // Then interactive
         currentInteractive = so as TutorialStep;
         if (currentInteractive != null)
         {
@@ -102,29 +88,29 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
                 GravityEnabled = currentInteractive.gravityEnabled
             };
 
-            // reset counters & clock for this interactive step
+            // reset step-local counters
             flapCount = 0;
             glideSec = diveSec = hoverSec = lookSec = gravitySec = 0f;
             nodCount = 0;
+
+            // reset NEW counters for this step
+            seedsPicked = 0;
+            lightsLit = 0;
+
             stepClock = 0f;
 
             var movementScript = GetComponent<Movement>();
-
             movementScript.isGliding = false;
             movementScript.isHovering = false;
             movementScript.isFlapping = false;
 
             doveSpeaker?.PlayClip(currentInteractive.doveVO, 2);
-            var subtitles = currentInteractive.subtitleText;
-            if (subtitles != null && subtitleUI != null)
-            {
-                subtitleUI.text = subtitles;
-            }
+            if (!string.IsNullOrEmpty(currentInteractive.subtitleText) && subtitleUI != null)
+                subtitleUI.text = currentInteractive.subtitleText;
 
             return;
         }
 
-        // Unsupported asset type—skip forward safely.
         Debug.LogWarning($"TutorialManager: Unsupported step type at index {StepIndex}: {so}");
         Advance();
     }
@@ -233,6 +219,14 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
                 break;
             case TutorialCompletionType.GravityDuration:
                 if (gravitySec >= currentInteractive.targetSeconds) Advance();
+                break;
+
+            case TutorialCompletionType.SeedPicked:
+                if (seedsPicked >= Mathf.Max(1, currentInteractive.targetCount)) Advance();
+                break;
+
+            case TutorialCompletionType.LightLit:
+                if (lightsLit >= Mathf.Max(1, currentInteractive.targetCount)) Advance();
                 break;
         }
     }

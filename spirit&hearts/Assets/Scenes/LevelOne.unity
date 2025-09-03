@@ -4038,6 +4038,9 @@ PrefabInstance:
     - {fileID: 2776290719038889594, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 8526492151438153135, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1508020842}
     - targetCorrespondingSourceObject: {fileID: 9087650321930764197, guid: d142b82bff16b42a1a755121f2df3ce4, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1259329992}
@@ -17004,6 +17007,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9038761488099297489, guid: 03ddd8d3614504c529814658c211239d, type: 3}
   m_PrefabInstance: {fileID: 1638529109}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1508020841
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1508020842}
+  m_Layer: 0
+  m_Name: SeedSpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1508020842
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1508020841}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 11.7, y: -9.5, z: 20}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 475700256}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1508484580
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24698,6 +24732,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6f931e149af724227ad15983b0c87a98, type: 2}
   - {fileID: 11400000, guid: 18a7d9f8738b55b40b2a9131ecbce30d, type: 2}
   - {fileID: 11400000, guid: 18a3503fe2cad4c45876f14fbd0dd5f8, type: 2}
+  - {fileID: 11400000, guid: a9a5b9eb1f6e84bb3a42fcf46ec77322, type: 2}
+  - {fileID: 11400000, guid: 0ec9bcda536454f20a0aeecbe4aa9c2f, type: 2}
   - {fileID: 11400000, guid: fbca5527b4ce1784e918f7946a8b24dd, type: 2}
   doveSpeaker: {fileID: 278844209}
   doveController: {fileID: 278844212}
@@ -24706,8 +24742,8 @@ MonoBehaviour:
   autoStart: 1
   subtitleUI: {fileID: 1910341593}
   scenePoints:
-  - id: PlayerHead
-    transform: {fileID: 513363057}
+  - id: SeedSpawn
+    transform: {fileID: 1508020842}
 --- !u!114 &2015689900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24739,6 +24775,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnNod:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSeedPicked:
+    m_PersistentCalls:
+      m_Calls: []
+  OnLightLit:
     m_PersistentCalls:
       m_Calls: []
   OnGlideStart:

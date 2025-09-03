@@ -13,6 +13,8 @@ public class MovementEventHub : MonoBehaviour
     public UnityEvent<float> OnLookTick = new();
     public UnityEvent<float> OnGravityTick = new();
     public UnityEvent OnNod = new();
+    public UnityEvent OnSeedPicked = new UnityEvent();
+    public UnityEvent OnLightLit = new UnityEvent();
 
     public void RaiseFlap()
     {
