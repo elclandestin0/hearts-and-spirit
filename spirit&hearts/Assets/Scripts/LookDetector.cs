@@ -4,7 +4,7 @@ public class LookDetector : MonoBehaviour
 {
     public Transform head;       // player camera
     public Transform target;     // dove (or whatever)
-    public float dotThreshold = 0.9f; // 1 = perfect forward, 0.9 = ~25° cone
+    public float dotThreshold = 0.8f; // 1 = perfect forward, 0.9 = ~25° cone
     private MovementEventHub hub;
     private bool wasLooking;
 

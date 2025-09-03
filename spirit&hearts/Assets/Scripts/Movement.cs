@@ -213,7 +213,15 @@ public class Movement : MonoBehaviour
         bool leftHeld = leftGripValue > 0.5f;
         bool rightHeld = rightGripValue > 0.5f;
 
-        isHovering = Allowed(MovementAbility.Hover) && leftHeld && rightHeld;
+        bool wantHover = Allowed(MovementAbility.Hover) && leftHeld && rightHeld;
+
+#if UNITY_EDITOR
+        // debug helper: hold N to force hover on
+        if (Allowed(MovementAbility.Hover) && Input.GetKey(KeyCode.N))
+            wantHover = true;
+#endif
+
+        isHovering = wantHover;
         DetectSnapTurn();
     }
 
@@ -472,21 +480,32 @@ public class Movement : MonoBehaviour
         {
             if (isHovering) { eventHub.RaiseHoverEnd(); }
             isHovering = false;
+            wasHovering = false;   // keep internal flag consistent
             return;
         }
 
-        if (isHovering && isGliding)
+        // transitions
+        if (isHovering && !wasHovering)
         {
-            eventHub.RaiseHoverTick(Time.deltaTime);
-            float currentSpeed = velocity.magnitude;
-            float targetSpeed = Mathf.Min(currentSpeed, maxHoverSpeed);
-            float smoothedSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 4f);
-            velocity = velocity.normalized * smoothedSpeed;
+            eventHub.OnHoverStart?.Invoke(); // optional if you expose it
         }
         else if (!isHovering && wasHovering)
         {
             eventHub.RaiseHoverEnd();
         }
+
+        if (isHovering)
+        {
+            eventHub.RaiseHoverTick(Time.deltaTime);
+
+            // cap speed while hovering
+            float currentSpeed = velocity.magnitude;
+            float targetSpeed = Mathf.Min(currentSpeed, maxHoverSpeed);
+            float smoothedSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * 4f);
+            velocity = currentSpeed > 0.0001f ? velocity.normalized * smoothedSpeed : Vector3.zero;
+        }
+
+        wasHovering = isHovering; // <- update once per frame
     }
 
     private void ApplyGravityIfNeeded()
