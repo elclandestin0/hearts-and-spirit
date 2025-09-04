@@ -76,9 +76,23 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         }
 
         var so = steps[StepIndex];
+        Debug.Log(so);
+        currentCinematic = so as CinematicStep;
+        if (currentCinematic != null)
+        {
+            // lock to cinematic policy (usually Look only)
+            _policy = new MovementPolicy
+            {
+                Allowed = currentCinematic.allowedAbilities,
+                GravityEnabled = currentInteractive ? currentInteractive.gravityEnabled : false
+            };
 
-        // cinematic branch unchanged...
+            if (cinematicRoutine != null) StopCoroutine(cinematicRoutine);
+            cinematicRoutine = StartCoroutine(RunCinematic(currentCinematic));
+            return;
+        }
 
+        // Then interactive
         currentInteractive = so as TutorialStep;
         if (currentInteractive != null)
         {
