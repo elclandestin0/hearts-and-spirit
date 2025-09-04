@@ -133,14 +133,20 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     public struct NamedPoint { public string id; public Transform transform; }
 
     [SerializeField] private NamedPoint[] scenePoints; // fill in inspector
-
     private Transform ResolvePoint(string id)
     {
-        for (int i = 0; i < scenePoints.Length; i++)
-            if (scenePoints[i].id == id) return scenePoints[i].transform;
+        foreach (var p in scenePoints)
+        {
+            Debug.Log($"[ResolvePoint] Comparing '{p.id}' with '{id}'");
+            if (p.id == id)
+            {
+                Debug.Log($"[ResolvePoint] MATCH found for {id}, transform={p.transform.name}");
+                return p.transform;
+            }
+        }
+        Debug.LogWarning($"[ResolvePoint] No match for '{id}'");
         return null;
     }
-
     private IEnumerator RunCinematic(CinematicStep cine)
     {
         var ctx = new CineContext

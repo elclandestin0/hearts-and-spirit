@@ -16,6 +16,19 @@ public class MovementEventHub : MonoBehaviour
     public UnityEvent OnSeedPicked = new UnityEvent();
     public UnityEvent OnLightLit = new UnityEvent();
 
+    public void RaiseSeedPicked()
+    {
+        Debug.Log("Invoking seed pick up");
+        _seedCount++;
+        OnSeedPicked?.Invoke();
+        OnSeedCountChanged?.Invoke(_seedCount);
+    }
+    public void RaiseLightLit()
+    {
+        _lightsLit++;
+        OnLightLit?.Invoke();
+        OnLightsLitChanged?.Invoke(_lightsLit);
+    }
     public void RaiseFlap()
     {
         _flapCount++;
@@ -100,6 +113,8 @@ public class MovementEventHub : MonoBehaviour
 
     // -------- Optional aggregates (listeners can subscribe directly) --------
     public UnityEvent<int> OnFlapCountChanged = new();
+    public UnityEvent<int> OnSeedCountChanged = new();
+    public UnityEvent<int> OnLightsLitChanged = new();
     public UnityEvent<int> OnNodCountChanged = new();
     public UnityEvent<float> OnGlideSecondsChanged = new();
     public UnityEvent<float> OnDiveSecondsChanged = new();
@@ -131,7 +146,7 @@ public class MovementEventHub : MonoBehaviour
     }
 
     // -------- Internals --------
-    int _flapCount, _nodCount;
+    int _flapCount, _nodCount, _seedCount, _lightsLit;
     float _glideSec, _diveSec, _hoverSec, _lookSec;
     bool _isGliding, _isDiving, _isHovering, _isLooking;
 }

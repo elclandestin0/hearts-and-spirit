@@ -22,6 +22,7 @@ public class CineSeedSpawner : CineAction
             yield return new WaitForSeconds(preDelay);
 
         var anchor = (ctx.ResolveTarget != null) ? ctx.ResolveTarget(pointId) : null;
+        Debug.Log("Resolved anchor: " + anchor.transform.position);
         if (anchor == null)
         {
             Debug.LogWarning($"CineSpawnPrefabAtPoint: point '{pointId}' not found. Using playerRoot.");

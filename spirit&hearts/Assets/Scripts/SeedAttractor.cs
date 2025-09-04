@@ -27,7 +27,7 @@ public class SeedBehavior : MonoBehaviour
         lightManager = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
         dovinaAudioManager = GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
 
-        _hub = player ? player.GetComponent<MovementEventHub>() : null;
+        _hub = player ? player.gameObject.GetComponentInChildren<MovementEventHub>() : null;
     }
 
     void Update()
@@ -66,10 +66,10 @@ public class SeedBehavior : MonoBehaviour
                             light.isLit = true;
                             player.gameObject.GetComponent<ItemManager>().RemoveSeed();
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
-                            dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
-                            dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
+                            // dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
+                            // dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
                             lightManager.UpdateAmbientLight();
-                            _hub.OnLightLit.Invoke();
+                            _hub.RaiseLightLit();
                             Destroy(this.gameObject);
                         }
                     }
@@ -90,9 +90,9 @@ public class SeedBehavior : MonoBehaviour
             var items = player.gameObject.GetComponent<ItemManager>();
             items.AddSeed();
             items.PlayPickUpSound();
-            dovinaAudioManager.PlayPriority("gp_changes/seed", 2, 2, 14);
+            // dovinaAudioManager.PlayPriority("gp_changes/seed", 2, 2, 14);
 
-            _hub?.OnSeedPicked.Invoke();
+            _hub.RaiseSeedPicked();
         }
     }
 

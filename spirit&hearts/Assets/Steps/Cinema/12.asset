@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a43a77629bb4db4e823a2be883bb97c, type: 3}
+  m_Name: 12
+  m_EditorClassIdentifier: 
+  displayName: Parable
+  allowedAbilities: 1
+  actions:
+  - {fileID: 11400000, guid: 174f1c318e7bc58459a8b01f7e8bfb94, type: 2}
+  - {fileID: 11400000, guid: 7b8f1012f755646569218dcff3488f0c, type: 2}
+  - {fileID: 11400000, guid: d4bf3faa0b31c49119b9a0f4e980d84c, type: 2}
+  - {fileID: 11400000, guid: 1f0e490d9276047049318db7bd7e4d4b, type: 2}
+  - {fileID: 11400000, guid: 875e5d7950c7447939ad552b79bf7dba, type: 2}
+  - {fileID: 11400000, guid: f6d43c0d8421d429e9f61ef79e32f2fa, type: 2}
+  - {fileID: 11400000, guid: e7342a01a56314ebda2661c0e38eb6f4, type: 2}
