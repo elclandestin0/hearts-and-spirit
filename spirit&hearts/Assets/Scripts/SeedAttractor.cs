@@ -60,13 +60,14 @@ public class SeedBehavior : MonoBehaviour
                         LightController light = currentLightTarget.GetComponent<LightController>()
                                                 ?? currentLightTarget.GetComponentInParent<LightController>()
                                                 ?? currentLightTarget.GetComponentInChildren<LightController>();
+
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
                             player.gameObject.GetComponent<ItemManager>().RemoveSeed();
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
-                            dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
-                            dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
+                            // dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
+                            // dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
                             lightManager.UpdateAmbientLight();
                             _hub.RaiseLightLit();
                             Destroy(this.gameObject);
