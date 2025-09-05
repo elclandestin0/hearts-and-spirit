@@ -17,17 +17,16 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private float lightSeekRadius;
     [SerializeField] private string lightTag = "Light";
     [SerializeField] private AmbientLightManager lightManager;
+    [SerializeField] private MovementEventHub _hub;
     private LightController light;
     private DovinaAudioManager dovinaAudioManager;
-    private MovementEventHub _hub;
     void Start()
     {
         player = GameObject.FindWithTag("Player")?.transform;
         seedHolster = player.transform.Find("SeedHolster");
         lightManager = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
         dovinaAudioManager = GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
-
-        _hub = player ? player.gameObject.GetComponentInChildren<MovementEventHub>() : null;
+        _hub = GameObject.FindWithTag("MainPlayer")?.GetComponent<MovementEventHub>();
     }
 
     void Update()
@@ -66,8 +65,8 @@ public class SeedBehavior : MonoBehaviour
                             light.isLit = true;
                             player.gameObject.GetComponent<ItemManager>().RemoveSeed();
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
-                            // dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
-                            // dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
+                            dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
+                            dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
                             lightManager.UpdateAmbientLight();
                             _hub.RaiseLightLit();
                             Destroy(this.gameObject);
@@ -90,7 +89,7 @@ public class SeedBehavior : MonoBehaviour
             var items = player.gameObject.GetComponent<ItemManager>();
             items.AddSeed();
             items.PlayPickUpSound();
-            // dovinaAudioManager.PlayPriority("gp_changes/seed", 2, 2, 14);
+            dovinaAudioManager.PlayPriority("gp_changes/seed", 2, 2, 14);
 
             _hub.RaiseSeedPicked();
         }
