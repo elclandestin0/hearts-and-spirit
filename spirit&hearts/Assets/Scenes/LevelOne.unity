@@ -24842,6 +24842,12 @@ MonoBehaviour:
   OnFlapCountChanged:
     m_PersistentCalls:
       m_Calls: []
+  OnSeedCountChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnLightsLitChanged:
+    m_PersistentCalls:
+      m_Calls: []
   OnNodCountChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -24867,7 +24873,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   head: {fileID: 1527897013}
-  speedThreshold: 50
+  speedThreshold: 75
   angleThreshold: 15
   maxNodInterval: 0.6
 --- !u!114 &2015689912
