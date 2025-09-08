@@ -61,7 +61,7 @@ public class DoveCompanion : MonoBehaviour
 
     // Internal variables
     private enum DoveState { Orbiting, Hovering, Following, Escaping, Navigating }
-    private DoveState currentState = DoveState.Orbiting;
+    private DoveState currentState = DoveState.Hovering;
     private Vector3 escapeTarget;
     private bool isEscaping = false;
     private int flapQueue = 0;
@@ -74,7 +74,7 @@ public class DoveCompanion : MonoBehaviour
     // Chatter
     private bool hasPlayedFastChatter = false;
     private bool hasPlayedSlowChatter = false;
-
+    bool isIdle;
     #region Loop
     void Start()
     {
@@ -88,7 +88,8 @@ public class DoveCompanion : MonoBehaviour
 
     void Update()
     {
-        Hover();
+        isIdle = !movementScript.isGliding;
+        if (!tutorialManager.IsRunning) Hover();
         TryPlaySpeedChatter();
         switch (currentState)
         {
@@ -240,8 +241,6 @@ public class DoveCompanion : MonoBehaviour
     private void Hover()
     {
         BaseChatter();
-        bool isIdle = !movementScript.isGliding;
-
         if (isIdle && currentState != DoveState.Hovering)
         {
             currentState = DoveState.Hovering;

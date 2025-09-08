@@ -788,7 +788,7 @@ public class Movement : MonoBehaviour
     // Movement Audio
     private void HandleStateTransition(bool currentState, ref bool previousState, ref bool hasPlayedFlag, string category, int clipIndex)
     {
-        if (!tutorialManager.IsRunning) return;
+        if (tutorialManager.IsRunning) return;
         if (category == "gp_changes/movement/toHovering")
         {
             if (currentState && !hasPlayedFlag)
