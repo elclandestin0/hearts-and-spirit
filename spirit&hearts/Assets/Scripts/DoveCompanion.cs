@@ -70,6 +70,7 @@ public class DoveCompanion : MonoBehaviour
     private Vector3 doveVelocity = Vector3.zero;
     private float lastKnownSpeed;
     private DovinaAudioManager dovinaAudioManager;
+    private TutorialManager tutorialManager;
     // Chatter
     private bool hasPlayedFastChatter = false;
     private bool hasPlayedSlowChatter = false;
@@ -79,6 +80,7 @@ public class DoveCompanion : MonoBehaviour
     {
         animator = GetComponentInChildren<Animator>();
         dovinaAudioManager = GetComponent<DovinaAudioManager>();
+        tutorialManager = player.gameObject.GetComponent<TutorialManager>();
         currentOrbitRadius = orbitRadius;
         targetOrbitRadius = orbitRadius;
         movementScript.OnFlap += HandleFlap;
@@ -237,14 +239,15 @@ public class DoveCompanion : MonoBehaviour
 
     private void Hover()
     {
-        // BaseChatter();
+        BaseChatter();
         bool isIdle = !movementScript.isGliding;
 
         if (isIdle && currentState != DoveState.Hovering)
         {
             currentState = DoveState.Hovering;
             if (hoverRoutine != null) StopCoroutine(hoverRoutine);
-            // hoverRoutine = StartCoroutine(IdleHoverLoop());
+            if (!tutorialManager.IsRunning) return;
+            hoverRoutine = StartCoroutine(IdleHoverLoop());
         }
         else if (!isIdle && currentState == DoveState.Hovering)
         {

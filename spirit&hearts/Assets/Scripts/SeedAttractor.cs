@@ -20,6 +20,7 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private MovementEventHub _hub;
     private LightController light;
     private DovinaAudioManager dovinaAudioManager;
+    private TutorialManager tutorialManager;
     void Start()
     {
         player = GameObject.FindWithTag("Player")?.transform;
@@ -27,6 +28,7 @@ public class SeedBehavior : MonoBehaviour
         lightManager = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
         dovinaAudioManager = GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
         _hub = GameObject.FindWithTag("MainPlayer")?.GetComponent<MovementEventHub>();
+        tutorialManager = GameObject.FindWithTag("MainPlayer")?.GetComponent<TutorialManager>();
     }
 
     void Update()
@@ -66,9 +68,12 @@ public class SeedBehavior : MonoBehaviour
                             light.isLit = true;
                             player.gameObject.GetComponent<ItemManager>().RemoveSeed();
                             player.gameObject.GetComponent<ItemManager>().PlayLightSound();
-                            // dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
-                            // dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
-                            lightManager.UpdateAmbientLight();
+                            if (!tutorialManager.IsRunning)
+                            {
+                                dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
+                                dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
+                                lightManager.UpdateAmbientLight();
+                            }
                             _hub.RaiseLightLit();
                             Destroy(this.gameObject);
                         }

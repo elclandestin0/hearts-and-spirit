@@ -145,6 +145,7 @@ public class Movement : MonoBehaviour
     // --- ADDED (top of class fields) ---
     private IMovementPolicyProvider policyProvider;
     private MovementEventHub eventHub;
+    private TutorialManager tutorialManager;
     private MovementPolicy Policy => policyProvider != null
         ? policyProvider.CurrentPolicy
         : new MovementPolicy { Allowed = (MovementAbility)(-1), GravityEnabled = true };
@@ -159,6 +160,7 @@ public class Movement : MonoBehaviour
     void Start()
     {
         head = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Transform>();
+        tutorialManager = GetComponent<TutorialManager>();
         prevLeftPos = leftHand.position;
         prevRightPos = rightHand.position;
         zones = FindObjectsOfType<SplineWindZone>();
@@ -678,7 +680,7 @@ public class Movement : MonoBehaviour
 
         if (Physics.SphereCast(origin, sphereRadius, direction, out RaycastHit hit, dynamicDistance, impactLayer, QueryTriggerInteraction.Ignore))
         {
-            PlayBounce();
+            if (!tutorialManager.IsRunning) PlayBounce();
             float speed = velocity.magnitude;
             float approachDot = Vector3.Dot(direction, -hit.normal);
 
@@ -786,6 +788,7 @@ public class Movement : MonoBehaviour
     // Movement Audio
     private void HandleStateTransition(bool currentState, ref bool previousState, ref bool hasPlayedFlag, string category, int clipIndex)
     {
+        if (!tutorialManager.IsRunning) return;
         if (category == "gp_changes/movement/toHovering")
         {
             if (currentState && !hasPlayedFlag)

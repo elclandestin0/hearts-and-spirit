@@ -76,7 +76,6 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         }
 
         var so = steps[StepIndex];
-        Debug.Log(so);
         currentCinematic = so as CinematicStep;
         if (currentCinematic != null)
         {

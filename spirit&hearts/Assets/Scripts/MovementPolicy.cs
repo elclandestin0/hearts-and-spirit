@@ -5,18 +5,18 @@ using System;
 public enum MovementAbility
 {
     None  = 0,
-    Look  = 1 << 0,  // head/camera look
+    Look  = 1 << 0,
     Flap  = 1 << 1,
     Glide = 1 << 2,
     Dive  = 1 << 3,
-    Hover = 1 << 4,  // maintain/feather
-    Translate = 1 << 5 // any positional movement at all
+    Hover = 1 << 4,
+    Translate = 1 << 5
 }
 
 public struct MovementPolicy
 {
-    public MovementAbility Allowed; // bitmask
-    public bool GravityEnabled;  // NEW
+    public MovementAbility Allowed;
+    public bool GravityEnabled;
 
     public static MovementPolicy Everything =>
         new MovementPolicy {
