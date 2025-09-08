@@ -89,7 +89,11 @@ public class DoveCompanion : MonoBehaviour
     void Update()
     {
         isIdle = !movementScript.isGliding;
-        if (!tutorialManager.IsRunning) Hover();
+        if (!tutorialManager.IsRunning)
+        {
+            Hover();
+        } 
+
         TryPlaySpeedChatter();
         switch (currentState)
         {
@@ -106,6 +110,7 @@ public class DoveCompanion : MonoBehaviour
                 break;
         }
 
+        Debug.Log("is gliding " + movementScript.isGliding);
         animator.SetBool("Gliding", movementScript.isGliding);
 
         if (!movementScript.isGliding && prevIsGliding)

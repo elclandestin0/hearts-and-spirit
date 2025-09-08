@@ -173,6 +173,7 @@ public class Movement : MonoBehaviour
 
         if (!allowTranslate)
         {
+            Debug.Log("Switching everything to false..?");
             velocity = Vector3.zero; // freeze translation
             // Emit "end" events if we were in active states
             if (wasGliding) { eventHub.RaiseGlideEnd(); wasGliding = false; isGliding = false; }
@@ -360,10 +361,8 @@ public class Movement : MonoBehaviour
 
     private void HandleGlideLogic()
     {
-        Debug.Log("isGliding. " + isGliding);
         if (!Allowed(MovementAbility.Glide))
         {
-            Debug.Log("Switching to isGliding = false");
             if (isGliding || wasGlidingLastFrame) { eventHub.RaiseGlideEnd(); }
             isGliding = false;
             wasGlidingLastFrame = false;
@@ -788,15 +787,18 @@ public class Movement : MonoBehaviour
     // Movement Audio
     private void HandleStateTransition(bool currentState, ref bool previousState, ref bool hasPlayedFlag, string category, int clipIndex)
     {
-        if (tutorialManager.IsRunning) return;
         if (category == "gp_changes/movement/toHovering")
         {
             if (currentState && !hasPlayedFlag)
             {
                 if (velocity.magnitude <= 30f)
                 {
-                    dovinaAudioManager.PlayPriority(category, 1, 0, 999);
-                    hasPlayedFlag = true;
+
+                    if (!tutorialManager.IsRunning)
+                    {
+                        dovinaAudioManager.PlayPriority(category, 1, 0, 999);
+                        hasPlayedFlag = true;
+                    }
                 }
             }
             else if (!currentState)
@@ -811,8 +813,11 @@ public class Movement : MonoBehaviour
                 float randomThreshold = Mathf.Lerp(0.15f, 0.25f, Random.value);
                 if (Random.value <= randomThreshold)
                 {
-                    dovinaAudioManager.PlayPriority(category, 1, 0, 999);
-                    hasPlayedFlag = true;
+                    if (!tutorialManager.IsRunning)
+                    {
+                        dovinaAudioManager.PlayPriority(category, 1, 0, 999);
+                        hasPlayedFlag = true;
+                    }
                 }
             }
             else if (!currentState && previousState)
