@@ -31,7 +31,7 @@ public class Movement : MonoBehaviour
     [SerializeField] private GhostFlightRecorder recorder;
 
     // Flight values
-    private readonly float flapStrength = 1f;
+    private readonly float flapStrength = 5f;
     private readonly float forwardPropulsionStrength = 1f;
     private readonly float maxSpeed = 30f;
     private readonly float maxDiveSpeed = 200f;
@@ -513,10 +513,10 @@ public class Movement : MonoBehaviour
     {
         if (!Policy.GravityEnabled)
         {
-            // If you fire a gravity tick event elsewhere, make sure not to raise it here.
-            // Also keep your wind exit bookkeeping if you need it.
             return;
         }
+
+        Debug.Log("In ApplyGravityIfNeeded()");
         bool appliedGravityThisFrame = false;
         bool isInWindZone = false;
 
@@ -552,8 +552,8 @@ public class Movement : MonoBehaviour
             Vector3 gravityDirection = Vector3.down * 0.75f + head.forward.normalized * 0.25f;
             gravityDirection.Normalize();
             velocity += gravityDirection * gravity * Time.deltaTime;
-
             appliedGravityThisFrame = true;
+            Debug.Log("Applying gravity " + gravity);
         }
 
         if (appliedGravityThisFrame)
@@ -679,7 +679,7 @@ public class Movement : MonoBehaviour
 
         if (Physics.SphereCast(origin, sphereRadius, direction, out RaycastHit hit, dynamicDistance, impactLayer, QueryTriggerInteraction.Ignore))
         {
-            if (!tutorialManager.IsRunning) PlayBounce();
+            PlayBounce();
             float speed = velocity.magnitude;
             float approachDot = Vector3.Dot(direction, -hit.normal);
 
@@ -694,7 +694,7 @@ public class Movement : MonoBehaviour
 
                 Debug.DrawLine(origin, hit.point, Color.green, 1f);
 
-                dovinaAudioManager.PlayPriority("gp_changes/bouncing", 0, 0, 999);
+                if (!tutorialManager.IsRunning) dovinaAudioManager.PlayPriority("gp_changes/bouncing", 0, 0, 999);
             }
         }
 

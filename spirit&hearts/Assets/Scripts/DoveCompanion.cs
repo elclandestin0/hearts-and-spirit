@@ -92,7 +92,7 @@ public class DoveCompanion : MonoBehaviour
         if (!tutorialManager.IsRunning)
         {
             Hover();
-        } 
+        }
 
         TryPlaySpeedChatter();
         switch (currentState)
@@ -110,8 +110,7 @@ public class DoveCompanion : MonoBehaviour
                 break;
         }
 
-        Debug.Log("is gliding " + movementScript.isGliding);
-        animator.SetBool("Gliding", movementScript.isGliding);
+        if (!tutorialManager.IsRunning) animator.SetBool("Gliding", movementScript.isGliding);
 
         if (!movementScript.isGliding && prevIsGliding)
             StartInfiniteFlap();
@@ -250,7 +249,7 @@ public class DoveCompanion : MonoBehaviour
         {
             currentState = DoveState.Hovering;
             if (hoverRoutine != null) StopCoroutine(hoverRoutine);
-            if (!tutorialManager.IsRunning) return;
+            if (tutorialManager.IsRunning) return;
             hoverRoutine = StartCoroutine(IdleHoverLoop());
         }
         else if (!isIdle && currentState == DoveState.Hovering)

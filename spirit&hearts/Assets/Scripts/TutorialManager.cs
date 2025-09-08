@@ -71,6 +71,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         StepIndex++;
         if (steps == null || StepIndex >= steps.Length)
         {
+            Debug.Log("Invoking EndTutorialToFreeFlight()");
             EndTutorialToFreeFlight();
             return;
         }
@@ -184,15 +185,8 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     private void EndTutorialToFreeFlight()
     {
-        _policy = new MovementPolicy
-        {
-            Allowed = MovementAbility.Look | MovementAbility.Translate |
-                      MovementAbility.Flap | MovementAbility.Glide |
-                      MovementAbility.Dive | MovementAbility.Hover
-        };
-
         IsRunning = false;
-        enabled = false; // manager no longer needs to tick
+        enabled = false;
     }
 
     void Update()
