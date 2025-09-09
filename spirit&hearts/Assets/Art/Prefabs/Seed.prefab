@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 7986125000264205921}
   - component: {fileID: 8546025100054043572}
   - component: {fileID: 2097975818630986166}
+  - component: {fileID: 6593313786030574643}
   m_Layer: 0
   m_Name: Seed
   m_TagString: Seed
@@ -175,3 +176,23 @@ MonoBehaviour:
   lightSeekRadius: 300
   lightTag: Light
   lightManager: {fileID: 0}
+  _hub: {fileID: 0}
+--- !u!114 &6593313786030574643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4170091215176379153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f3beb822924a413db7877b7162e7983, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lightMaterial: {fileID: 0}
+  unlitColor: {r: 1, g: 1, b: 1, a: 0}
+  unlitIntensity: 1
+  litColor: {r: 1, g: 0, b: 0, a: 0}
+  litIntensity: 1000
+  transitionDuration: 1.5
+  isLit: 1

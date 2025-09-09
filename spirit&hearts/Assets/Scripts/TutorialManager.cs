@@ -54,6 +54,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     void Start()
     {
         if (autoStart) StartTutorial();
+        IsRunning = true;
     }
 
     public void StartTutorial()
