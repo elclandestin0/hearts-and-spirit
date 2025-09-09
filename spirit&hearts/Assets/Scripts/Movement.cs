@@ -218,12 +218,9 @@ public class Movement : MonoBehaviour
 
         bool wantHover = Allowed(MovementAbility.Hover) && leftHeld && rightHeld;
 
-#if UNITY_EDITOR
-        // debug helper: hold N to force hover on
         if (Allowed(MovementAbility.Hover) && Input.GetKey(KeyCode.N))
             wantHover = true;
-#endif
-
+            
         isHovering = wantHover;
         DetectSnapTurn();
     }

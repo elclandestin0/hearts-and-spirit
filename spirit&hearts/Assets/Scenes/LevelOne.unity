@@ -841,7 +841,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1681434919983735074, guid: 68cf884cde7104362af3a7bf4e91b90f, type: 3}
       propertyPath: isLit
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1925717306044340617, guid: 68cf884cde7104362af3a7bf4e91b90f, type: 3}
       propertyPath: m_Layer
@@ -7221,15 +7221,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalScale.x
-      value: 50
+      value: 30.000002
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalScale.y
-      value: 50
+      value: 30.000002
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalScale.z
-      value: 50
+      value: 30.000002
       objectReference: {fileID: 0}
     - target: {fileID: 5836710660068512611, guid: 134e6bd3f07e748b2a7663087b10dbb0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -14175,6 +14175,7 @@ GameObject:
   - component: {fileID: 993404187}
   - component: {fileID: 993404186}
   - component: {fileID: 993404188}
+  - component: {fileID: 993404189}
   m_Layer: 5
   m_Name: Hearts & Spirit
   m_TagString: Untagged
@@ -14313,12 +14314,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightMaterial: {fileID: 0}
-  unlitColor: {r: 0, g: 0, b: 0, a: 0}
-  unlitIntensity: 0
-  litColor: {r: 0, g: 0, b: 0, a: 0}
-  litIntensity: 0
+  unlitColor: {r: 1, g: 1, b: 1, a: 0}
+  unlitIntensity: 1
+  litColor: {r: 1, g: 1, b: 1, a: 0}
+  litIntensity: 1000
   transitionDuration: 1.5
-  isLit: 0
+  isLit: 1
+--- !u!114 &993404189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 993404184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2bea06551a284c508a7b497e9ac5b02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unlitColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  unlitIntensity: 1
+  litColor: {r: 1, g: 0, b: 0, a: 1}
+  litIntensity: 1000
+  bloomBoost: 12
+  transitionDuration: 1.5
+  isLit: 1
 --- !u!1 &1010554777
 GameObject:
   m_ObjectHideFlags: 0
@@ -26775,12 +26795,12 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 5b910f3eb578647a9845d3ee81165b5d, type: 3}
-  m_Resource: {fileID: 8300000, guid: 5b910f3eb578647a9845d3ee81165b5d, type: 3}
+  m_audioClip: {fileID: 8300000, guid: e7449841646be4fd59aec81097fb7106, type: 3}
+  m_Resource: {fileID: 8300000, guid: e7449841646be4fd59aec81097fb7106, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
