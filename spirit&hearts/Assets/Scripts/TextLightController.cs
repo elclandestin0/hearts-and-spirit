@@ -112,13 +112,19 @@ public class TextLightController : MonoBehaviour
             }
         }
     }
-
     public void StartTransition(bool toLit)
     {
-        if (!Application.isPlaying || _matInstance == null) { ApplyImmediate(toLit); return; }
+        // If we can't run coroutines (disabled/not playing), just snap
+        if (!Application.isPlaying || !isActiveAndEnabled || _matInstance == null)
+        {
+            ApplyImmediate(toLit);
+            return;
+        }
+
         StopAllCoroutines();
         StartCoroutine(DoTransition(toLit));
     }
+
 
     IEnumerator DoTransition(bool toLit)
     {

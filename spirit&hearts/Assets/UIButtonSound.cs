@@ -2,11 +2,15 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
-public class UIButtonAudio : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IHoverState
+public class UIButtonSound : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IHoverState
 {
     [Header("Clips")]
     public AudioClip hoverClip;
     public AudioClip clickClip;
+
+    [Header("Hover Cooldown")]
+    public float hoverCooldown = 0.25f;   // seconds between hover plays
+    private float _nextHoverAt = -1f;
 
     private bool _isHovered;
     public bool IsHovered => _isHovered;
@@ -25,9 +29,15 @@ public class UIButtonAudio : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (_isHovered) return;
         _isHovered = true;
-        UIAudioBus.Instance.RequestHover(hoverClip, this);
+
+        if (Time.unscaledTime < _nextHoverAt) return;
+
+        if (hoverClip != null)
+        {
+            UIAudioBus.Instance.RequestHover(hoverClip, this);
+            _nextHoverAt = Time.unscaledTime + hoverCooldown; // arm cooldown
+        }
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -38,6 +48,10 @@ public class UIButtonAudio : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        UIAudioBus.Instance.PlayClick(clickClip);
+        if (clickClip != null)
+        {
+            UIAudioBus.Instance.PlayClick(clickClip);
+            _nextHoverAt = Mathf.Max(_nextHoverAt, Time.unscaledTime + 0.1f);
+        }
     }
 }

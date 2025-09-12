@@ -8,11 +8,7 @@ public class UIAudioBus : MonoBehaviour
 
     [Header("Shared UI Audio Source (2D)")]
     public AudioSource audioSource;
-
-    // click-lock
-    private float lockUntil = -1f; // Time.unscaledTime when we may play hover again
-
-    // pending hover request
+    private float lockUntil = -1f;
     private AudioClip pendingHoverClip;
     private IHoverState pendingHoverState;
 
