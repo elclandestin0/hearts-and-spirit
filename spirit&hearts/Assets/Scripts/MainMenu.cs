@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
-public class VRMainMenu : MonoBehaviour
+public class MainMenu : MonoBehaviour
 {
     [Header("Panels")]
     public GameObject panelRoot;
@@ -66,7 +66,7 @@ public class VRMainMenu : MonoBehaviour
         panelPlay.SetActive(false);
         panelSettings.SetActive(true);
     }
-    
+
     public void BeginGame()
     {
         panelRoot.SetActive(false);
@@ -105,5 +105,16 @@ public class VRMainMenu : MonoBehaviour
     {
         BeginGame();
         tutorialManager.StartTutorial();
+    }
+
+    public void ExitGame()
+    {
+#if UNITY_EDITOR
+        // Stop play mode in the editor
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        // Quit the application in a build
+        Application.Quit();
+#endif
     }
 }
