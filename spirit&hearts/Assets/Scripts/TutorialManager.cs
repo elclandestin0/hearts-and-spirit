@@ -188,6 +188,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     {
         IsRunning = false;
         enabled = false;
+        subtitleUI.text = "";
     }
 
     void Update()

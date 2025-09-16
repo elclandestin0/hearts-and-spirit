@@ -71,7 +71,7 @@ public class SeedBehavior : MonoBehaviour
                             if (!tutorialManager.IsRunning)
                             {
                                 dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
-                                dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
+                                dovinaAudioManager.PlayPriority("parables", 4, 0, 999);
                                 lightManager.UpdateAmbientLight();
                             }
                             
