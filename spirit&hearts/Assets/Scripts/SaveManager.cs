@@ -40,13 +40,13 @@ public static class SaveManager
 
     public static void Save(string slot)
     {
+        Debug.Log("Saving into " + slot);
         var env = new SaveEnvelope
         {
             scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
             timestamp = DateTime.UtcNow.ToString("o"),
             records = new List<SaveRecord>()
         };
-
         foreach (var e in entities)
         {
             foreach (var (type, state) in e.CaptureAll())
@@ -60,13 +60,9 @@ public static class SaveManager
                 env.records.Add(record);
             }
         }
-
         var json = JsonUtility.ToJson(env, true);
         File.WriteAllText(GetSavePath(slot), json);
-
-#if UNITY_EDITOR
         Debug.Log($"[SaveManager] Saved {env.records.Count} records to: {GetSavePath(slot)}");
-#endif
     }
 
     public static bool Load(string slot)

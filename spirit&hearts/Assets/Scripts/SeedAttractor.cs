@@ -74,7 +74,13 @@ public class SeedBehavior : MonoBehaviour
                                 dovinaAudioManager.PlayPriority("parables", 2, 0, 999);
                                 lightManager.UpdateAmbientLight();
                             }
+                            
                             _hub.RaiseLightLit();
+                            var pid = light.GetComponent<PersistentId>();
+                            var playerRoot = GameObject.FindWithTag("MainPlayer").transform;
+                            ProgressManager.Instance?.MarkLastLit(pid, playerRoot);
+                            Debug.Log("About to save into slot1");
+                            SaveManager.Save("slot1");
                             Destroy(this.gameObject);
                         }
                     }

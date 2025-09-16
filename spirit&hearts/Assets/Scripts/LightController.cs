@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class LightController : MonoBehaviour
+public class LightController : MonoBehaviour, ISaveable
 {
     public Material lightMaterial;
 
@@ -17,6 +17,8 @@ public class LightController : MonoBehaviour
     [Header("State")]
     public bool isLit = false;
     private bool _previousLitState;
+    [System.Serializable] private struct LightState { public bool lit; }
+    public object CaptureState() => new LightState { lit = isLit };
     private Material _mat
     {
         get
@@ -46,6 +48,13 @@ public class LightController : MonoBehaviour
             StartTransition(isLit);
             _previousLitState = isLit;
         }
+    }
+
+    public void RestoreState(object sObj)
+    {
+        var s = (LightState)sObj;
+        isLit = s.lit;
+        SendMessage("ApplyInitialState", SendMessageOptions.DontRequireReceiver);
     }
 
     private void ApplyInitialState()

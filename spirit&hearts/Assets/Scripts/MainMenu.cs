@@ -99,7 +99,7 @@ public class MainMenu : MonoBehaviour
         var c = img.color;
         c.a = a;
         img.color = c;
-    }
+    }  
 
     public void NewGame()
     {
@@ -116,5 +116,16 @@ public class MainMenu : MonoBehaviour
         // Quit the application in a build
         Application.Quit();
 #endif
+    }
+
+    public void ContinueGame()
+    {
+        bool ok = SaveManager.Load("slot1");
+        if (ok)
+        {
+            ProgressManager.Instance?.ApplySpawnIfAny();
+        }
+
+        BeginGame();
     }
 }
