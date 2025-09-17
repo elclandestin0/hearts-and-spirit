@@ -173,7 +173,6 @@ public class Movement : MonoBehaviour
 
         if (!allowTranslate)
         {
-            Debug.Log("Switching everything to false..?");
             velocity = Vector3.zero; // freeze translation
             // Emit "end" events if we were in active states
             if (wasGliding) { eventHub.RaiseGlideEnd(); wasGliding = false; isGliding = false; }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -33,7 +34,10 @@ public class DovinaAudioManager : MonoBehaviour
         "gp_changes/bouncing"
     };
 
-
+    public event Action<AudioClip,int> OnClipStarted;
+    public event Action<int> OnClipEnded;                 
+    public event Action<int> OnClipInterrupted;              
+    int _playToken = 0;
     private void Awake() => LoadAllClips();
 
     private void LoadAllClips()
@@ -75,24 +79,22 @@ public class DovinaAudioManager : MonoBehaviour
         }
     }
 
-    // -------- Category access --------
     public AudioClip[] GetClips(string category) =>
         audioCategories.TryGetValue(category, out var clips) ? clips : null;
 
     public AudioClip GetClip(string category)
     {
         if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return null;
-        return clips[Random.Range(0, clips.Length)];
+        return clips[UnityEngine.Random.Range(0, clips.Length)];
     }
 
-    // -------- Non-repeating (shuffle bag) --------
     private void RefillBag(string category)
     {
         if (!audioCategories.TryGetValue(category, out var src) || src.Length == 0) return;
         var list = new List<AudioClip>(src);
         for (int i = list.Count - 1; i > 0; i--)
         {
-            int j = Random.Range(0, i + 1);
+            int j = UnityEngine.Random.Range(0, i + 1);
             (list[i], list[j]) = (list[j], list[i]);
         }
         nonRepeatingBags[category] = new Queue<AudioClip>(list);
@@ -115,28 +117,24 @@ public class DovinaAudioManager : MonoBehaviour
         if (clip != null) PlayClip(clip, priority, category);
     }
 
-    // -------- High-level helpers --------
-    // Random in category at given priority (uses queue rules)
     public void PlayFromCategory(string category, int priority)
     {
         var clip = GetClip(category);
         if (clip != null) PlayClip(clip, priority, category);
     }
 
-    // Index/range in category at given priority (uses queue rules)
     public void PlayPriority(string category, int priority, int startIndex = 0, int endIndexInclusive = -1)
     {
         if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
 
         int idx = (endIndexInclusive == -1)
             ? Mathf.Clamp(startIndex, 0, clips.Length - 1)
-            : Random.Range(Mathf.Clamp(startIndex, 0, clips.Length - 1), Mathf.Clamp(endIndexInclusive + 1, 0, clips.Length));
+            : UnityEngine.Random.Range(Mathf.Clamp(startIndex, 0, clips.Length - 1), Mathf.Clamp(endIndexInclusive + 1, 0, clips.Length));
 
         if (idx < 0 || idx >= clips.Length) return;
         PlayClip(clips[idx], priority, category);
     }
 
-    // Back-to-back ordered enqueue helper
     public void PlayBackToBack(params (string category, int start, int endInclusive, int priority)[] items)
     {
         foreach (var it in items)
@@ -144,14 +142,13 @@ public class DovinaAudioManager : MonoBehaviour
             if (!audioCategories.TryGetValue(it.category, out var clips) || clips.Length == 0) continue;
             int idx = (it.endInclusive == -1)
                 ? Mathf.Clamp(it.start, 0, clips.Length - 1)
-                : Random.Range(Mathf.Clamp(it.start, 0, clips.Length - 1), Mathf.Clamp(it.endInclusive + 1, 0, clips.Length));
+                : UnityEngine.Random.Range(Mathf.Clamp(it.start, 0, clips.Length - 1), Mathf.Clamp(it.endInclusive + 1, 0, clips.Length));
             if (idx < 0 || idx >= clips.Length) continue;
             clipQueue.Enqueue(new ClipRequest(clips[idx], it.priority));
         }
         if (!isPriorityPlaying) TryPlayNextQueued();
     }
 
-    // -------- Core play w/ priority & queue rules --------
     public void PlayClip(AudioClip clip, int priority, string context = null)
     {
         if (clip == null) return;
@@ -169,6 +166,7 @@ public class DovinaAudioManager : MonoBehaviour
             { 
                 Debug.Log("stopping audio"); 
                 audioSource.Stop();
+                OnClipInterrupted?.Invoke(_playToken);
             }
             else
             {
@@ -195,24 +193,27 @@ public class DovinaAudioManager : MonoBehaviour
 
         isPriorityPlaying = true;
         currentPriority = priority;
-
+        _playToken++; 
+        OnClipStarted?.Invoke(clip, _playToken);
         if (priority == 0)
         {
             isOnCooldown = true;
-            cooldownRemaining = Random.Range(20f, 30f);
-            StartCoroutine(ResumeCooldownAfterClip(clip.length, /*isChatter*/ true));
+            cooldownRemaining = UnityEngine.Random.Range(20f, 30f);
+            StartCoroutine(ResumeCooldownAfterClip(clip.length, true, _playToken));
         }
         else
         {
-            StartCoroutine(ResumeCooldownAfterClip(clip.length, /*isChatter*/ false));
+            StartCoroutine(ResumeCooldownAfterClip(clip.length, false, _playToken));
         }
     }
 
 
-    private IEnumerator ResumeCooldownAfterClip(float clipLength, bool isChatter)
+    private IEnumerator ResumeCooldownAfterClip(float clipLength, bool isChatter, int token)
     {
         yield return new WaitForSeconds(clipLength);
+        if (token != _playToken) yield break;
         isPriorityPlaying = false;
+        OnClipEnded?.Invoke(token);
 
         // After a clip ends, always try queue first
         if (!TryPlayNextQueued())

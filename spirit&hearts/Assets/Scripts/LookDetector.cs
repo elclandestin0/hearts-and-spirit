@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class LookDetector : MonoBehaviour
 {
-    public Transform head;       // player camera
-    public Transform target;     // dove (or whatever)
-    public float dotThreshold = 0.8f; // 1 = perfect forward, 0.9 = ~25° cone
+    public Transform head;
+    public Transform target;
+    public float dotThreshold = 0.85f;
     private MovementEventHub hub;
     private bool wasLooking;
 
