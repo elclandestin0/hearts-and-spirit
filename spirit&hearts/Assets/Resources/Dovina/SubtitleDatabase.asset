@@ -1,0 +1,423 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78223d930024b45db9191ebad19f0ab9, type: 3}
+  m_Name: SubtitleDatabase
+  m_EditorClassIdentifier: 
+  entries:
+  - clip: {fileID: 8300000, guid: 49fa0c76629a240469cddc5c7e80b49d, type: 3}
+    text: Oh, Lord!
+  - clip: {fileID: 8300000, guid: 7432ad6d22d6f4fed949b2e02ffa7726, type: 3}
+    text: Oops!
+  - clip: {fileID: 8300000, guid: ae7a91c7a65e0458baecd2b766eac774, type: 3}
+    text: Oopa! Hehehe.
+  - clip: {fileID: 8300000, guid: 22a9c081a814a4a83a38439b2650408b, type: 3}
+    text: It's lit!
+  - clip: {fileID: 8300000, guid: 50939395cb0a34f1085d07443811d0c0, type: 3}
+    text: It's lit!
+  - clip: {fileID: 8300000, guid: ba3d24db2b1e147019e5ec968b273a9a, type: 3}
+    text: Light it up.
+  - clip: {fileID: 8300000, guid: 75193e7f3200c4fd2b8360e73e18b4ce, type: 3}
+    text: It's lit!
+  - clip: {fileID: 8300000, guid: c573823b49d7b47ad81fe3dceb108763, type: 3}
+    text: Light it up!
+  - clip: {fileID: 8300000, guid: 5a676a53a994b47b393997d48c85be5b, type: 3}
+    text: Light it uuuup!
+  - clip: {fileID: 8300000, guid: 4c2b9d6005eeb498c996c26cc8f03acc, type: 3}
+    text: It's lit!
+  - clip: {fileID: 8300000, guid: 4d9d0b05c561146f5bed134d758c61a7, type: 3}
+    text: Light it up!
+  - clip: {fileID: 8300000, guid: e229bcb4983834554940317e9817ea3b, type: 3}
+    text: 'It''s lit! '
+  - clip: {fileID: 8300000, guid: 306a427bcc26941998596630f2de0415, type: 3}
+    text: Beautiful!
+  - clip: {fileID: 8300000, guid: fde8162ff8f3c47f5835e1fc0afe50cb, type: 3}
+    text: Beautiful!
+  - clip: {fileID: 8300000, guid: bdf1a0431d871467e968a45a4ca06aba, type: 3}
+    text: Beaaautiful.
+  - clip: {fileID: 8300000, guid: 0e8a1ae6355684b4c8217cb8a6bdcde5, type: 3}
+    text: Beaaautiful.
+  - clip: {fileID: 8300000, guid: 32828da96682e4ab1be7e5a09d7f9250, type: 3}
+    text: Beautiful!
+  - clip: {fileID: 8300000, guid: 314aaf3b96b644064b9e9cd1c70d7a86, type: 3}
+    text: It's lit!
+  - clip: {fileID: 8300000, guid: 3c27f39a160b04311ba16838dce535b6, type: 3}
+    text: Vibe.
+  - clip: {fileID: 8300000, guid: b02b3deddfca141b18bab5adbf94af8e, type: 3}
+    text: Viibe!
+  - clip: {fileID: 8300000, guid: 812ae90ae60a547618d7c14f414408a1, type: 3}
+    text: Vibey.
+  - clip: {fileID: 8300000, guid: eeee74257d5f74aefb2d16df4877b4b2, type: 3}
+    text: Viiibes.
+  - clip: {fileID: 8300000, guid: f1965ef7804334c4296085e9308ac7d6, type: 3}
+    text: That's the Altar of Peace. Isn't it wonderful when things are lit?
+  - clip: {fileID: 8300000, guid: b8f67c3d6320644848eacc39d0867af6, type: 3}
+    text: 'That''s the Altar of Peace. Maybe it would be awesome to give it a little
+      light. '
+  - clip: {fileID: 8300000, guid: 63e56191acad44a2b88e959991d97fb0, type: 3}
+    text: 'Want to just hang around here? '
+  - clip: {fileID: 8300000, guid: d5e81e1c4a6a445eaa17e85203574118, type: 3}
+    text: Let's hang out here.
+  - clip: {fileID: 8300000, guid: da37f13c121cf4b529e8759ffc8f7f69, type: 3}
+    text: This is pretty nice here.
+  - clip: {fileID: 8300000, guid: ea31e891c1fd548c7ba7ffeba3331ce9, type: 3}
+    text: Beautiful place to just chill.
+  - clip: {fileID: 8300000, guid: a45ece0caee5448afae6e302f77a086e, type: 3}
+    text: Beautiful place to just chill.
+  - clip: {fileID: 8300000, guid: f7c4f8a4d81c34027ab46559d1eb7920, type: 3}
+    text: Wow, so gorgeous here!
+  - clip: {fileID: 8300000, guid: d0a7ff397167c4cb9b5cb2146e4610fb, type: 3}
+    text: Do you want to just hang around here?
+  - clip: {fileID: 8300000, guid: 33701a1d76db14d838759c921f0ce2b3, type: 3}
+    text: That's the Forest of Love. How lovely is it to see it alive?
+  - clip: {fileID: 8300000, guid: 47d33a17ccbe842dd899b1f207b2f05f, type: 3}
+    text: That's the Forest of Love. I think it needs a little light!
+  - clip: {fileID: 8300000, guid: 4ffd82a011cfc254f81b96afb93c48ae, type: 3}
+    text: I see a lanter we can light up over there.
+  - clip: {fileID: 8300000, guid: 61c804cf5bc8d4e1e9fbd43cb558f8ef, type: 3}
+    text: I see a lantern we can light up over there.
+  - clip: {fileID: 8300000, guid: 2654c929483e4d443b528d578d381776, type: 3}
+    text: I see a lantern we can light up over there.
+  - clip: {fileID: 8300000, guid: b497efebdbbc8423fb3ca86758ae7f80, type: 3}
+    text: I see a lantern we can light up over there.
+  - clip: {fileID: 8300000, guid: 6c2cdee677d034e4fb8e509076f1449d, type: 3}
+    text: I see a lantern we can light up over there.
+  - clip: {fileID: 8300000, guid: 86e0793090cb742489e8bb5e133f0bc3, type: 3}
+    text: I see a lantern we can light up over there.
+  - clip: {fileID: 8300000, guid: 927d3443a65432a4f81bec7b8847b138, type: 3}
+    text: I see a lantern we can light up over there.
+  - clip: {fileID: 8300000, guid: 62ddff1be06cd4fa88d9614ec0acaaa5, type: 3}
+    text: I see a lantern we can light up over there.
+  - clip: {fileID: 8300000, guid: bfb5e7c99979142b59d084291aed0be5, type: 3}
+    text: That's the Lighthouse of Truth. It's so beautiful when it's lit.
+  - clip: {fileID: 8300000, guid: cbf351f5c06ac42859a835ed29407112, type: 3}
+    text: That's the Lighthouse of Truth. Would be cool to light it up.
+  - clip: {fileID: 8300000, guid: 49e8240646a71454ea2ca15c6e4e36c5, type: 3}
+    text: Over here, I am near a lantern.
+  - clip: {fileID: 8300000, guid: 0d4eb82db32294609bfe61ff0c71354b, type: 3}
+    text: Over here! I am near a lantern.
+  - clip: {fileID: 8300000, guid: 12b70765549c1435190d4761d2100196, type: 3}
+    text: Over here! I am near a lantern.
+  - clip: {fileID: 8300000, guid: c3a38c2784b5b442780dd01d1def8319, type: 3}
+    text: Over here! I am near a lantern.
+  - clip: {fileID: 8300000, guid: 3478596ead7ad4100a2dcb11b2fd7e10, type: 3}
+    text: 'I see an orb that can be lit up! '
+  - clip: {fileID: 8300000, guid: f53cbb122967e4f35bba448748cb17b4, type: 3}
+    text: 'I see an orb that can be lit up! '
+  - clip: {fileID: 8300000, guid: 096fc281048ab44a5afa92b58c1fd6a1, type: 3}
+    text: 'I see an orb that can be lit up! '
+  - clip: {fileID: 8300000, guid: 82633e4a28fda435e8361cab212e955c, type: 3}
+    text: Over here, I am near an orb.
+  - clip: {fileID: 8300000, guid: 722fa6ce451324a2ea256aac51cf25b8, type: 3}
+    text: Over here, I am near an orb.
+  - clip: {fileID: 8300000, guid: 326e890bdc7934f9c996f91da506c624, type: 3}
+    text: Over here, I am near an orb.
+  - clip: {fileID: 8300000, guid: 525f786f24a9a4171a75e3777fc435de, type: 3}
+    text: Over here, I am near an orb.
+  - clip: {fileID: 8300000, guid: bd3ce7f352f1641c790318344986e46b, type: 3}
+    text: That's a seed over there!
+  - clip: {fileID: 8300000, guid: afaa0546f32f1469c9543a984e24fc5c, type: 3}
+    text: That's a seed over there.
+  - clip: {fileID: 8300000, guid: a98d59818a9ef46b283aba1c83642cce, type: 3}
+    text: Gliding Seed Found 03
+  - clip: {fileID: 8300000, guid: ffd1c19010aaf4a8fb7dba1b5c95986c, type: 3}
+    text: Gliding Seed Island 01
+  - clip: {fileID: 8300000, guid: 28c6bf85eb2ff418a8b37d0c55782df5, type: 3}
+    text: Gliding Seed Island 02
+  - clip: {fileID: 8300000, guid: dc59d61562abe4d8289cd0e558a88a94, type: 3}
+    text: Gliding Seed Island 03
+  - clip: {fileID: 8300000, guid: f62da726fce2b49cbacc613ad1ec0d8b, type: 3}
+    text: I see a seed on that island.
+  - clip: {fileID: 8300000, guid: 59506d343039c44c099379ea89b7cc33, type: 3}
+    text: I see a seed on that island.
+  - clip: {fileID: 8300000, guid: f23c6ee5b537a41508f916e5cd61bfcd, type: 3}
+    text: Over here! I am near a seed.
+  - clip: {fileID: 8300000, guid: fe013783578934f7391b8b2c0a78585b, type: 3}
+    text: Over here! I am near a seed.
+  - clip: {fileID: 8300000, guid: 7efa9e9d9db214721a4de2729201ed01, type: 3}
+    text: Over here! I am near a seed.
+  - clip: {fileID: 8300000, guid: 63b11bbcea4284d42a0ae9764d23c905, type: 3}
+    text: Over here! I am near a seed.
+  - clip: {fileID: 8300000, guid: b4d679d3589514871ab6719291e69321, type: 3}
+    text: None of us can ever fathom or grasp, how much we are loved.
+  - clip: {fileID: 8300000, guid: cf828820973474c52a95f3dbb91b1b69, type: 3}
+    text: What a blessing it is to be alive.
+  - clip: {fileID: 8300000, guid: 4702483efe7ec41cf90412b3317bf2a2, type: 3}
+    text: It's wonderful that you're around.
+  - clip: {fileID: 8300000, guid: 1fb77b8662b404e56bc806a4aa11b667, type: 3}
+    text: It's such a privilege that I can help you. I delight in it.
+  - clip: {fileID: 8300000, guid: 85bd76e57a028482cbf85e110cf98f16, type: 3}
+    text: Whenever we delight in helping others, love delights in us.
+  - clip: {fileID: 8300000, guid: 3080d36804aef4ef8bed50c2348500b3, type: 3}
+    text: When we delight in love, love delights in us.
+  - clip: {fileID: 8300000, guid: 9214b7ae2deaa45c0988cc9337759a88, type: 3}
+    text: 'Grateful to be breathing, let us give back that breath to love. '
+  - clip: {fileID: 8300000, guid: ee0c99e0e3e664270b78e795c6290d98, type: 3}
+    text: Isn't this world so beautiful?
+  - clip: {fileID: 8300000, guid: 0a9c821a6c0184828be2b02808e2bac3, type: 3}
+    text: Huh.
+  - clip: {fileID: 8300000, guid: 77e28f45ca1324835a7d9ac6a662e03d, type: 3}
+    text: Huh.
+  - clip: {fileID: 8300000, guid: b496f5874bef648a1aecc049a5c2a39c, type: 3}
+    text: Huh!
+  - clip: {fileID: 8300000, guid: 28f1c3e5773654089b09d344ae4200b1, type: 3}
+    text: Hovering Gliding 01 Low
+  - clip: {fileID: 8300000, guid: ee1c018f7b4d34e55a999e06a86f0b4a, type: 3}
+    text: 
+  - clip: {fileID: 8300000, guid: 9adf9768766eb475f9e305f5c9362d13, type: 3}
+    text: Back in action!
+  - clip: {fileID: 8300000, guid: a7de8263f6026460da134b074c648fb4, type: 3}
+    text: On we go!
+  - clip: {fileID: 8300000, guid: 4c6ba1bfc32af4220afeb592a5c68191, type: 3}
+    text: Cool, we can hang out here for a bit.
+  - clip: {fileID: 8300000, guid: e7f6924c42521406b98f6efb484db4ad, type: 3}
+    text: Yeah, let's stay here.
+  - clip: {fileID: 8300000, guid: 64a576f952aff474e8cef29f3ba770c5, type: 3}
+    text: Let's take a breather.
+  - clip: {fileID: 8300000, guid: 0d065f8ba30a34ec3846cefeeed46f74, type: 3}
+    text: Good job finding a seed!
+  - clip: {fileID: 8300000, guid: e1f020e5d55f940bf91d796ccb968ea6, type: 3}
+    text: Nice, another seed. There exists no limit to how many seeds you can carry.
+  - clip: {fileID: 8300000, guid: babdd1a1a701847b08afe1b6674233d2, type: 3}
+    text: Another one!
+  - clip: {fileID: 8300000, guid: 457297a42c95249a6bfde4f235d0b7f6, type: 3}
+    text: Another one!
+  - clip: {fileID: 8300000, guid: f2f75510e6c714527946d685d84b533b, type: 3}
+    text: Another one!
+  - clip: {fileID: 8300000, guid: c6f6282aa13364dde89292ee09445ce9, type: 3}
+    text: Another one!
+  - clip: {fileID: 8300000, guid: 1b6314fd49f07482f9a32d37ac1f9f95, type: 3}
+    text: Let's gooo!
+  - clip: {fileID: 8300000, guid: e7575596d104f4d09bb81e8276c99f72, type: 3}
+    text: Let's gooo!
+  - clip: {fileID: 8300000, guid: 6cfaa26410b604abcbae2593a59b8e2c, type: 3}
+    text: Let's gooo!
+  - clip: {fileID: 8300000, guid: a993f04d56db145ec8ee82399aa803ee, type: 3}
+    text: Let's gooo!
+  - clip: {fileID: 8300000, guid: 4ec1fcc510c9c42b3bc8cc67441b58bb, type: 3}
+    text: Amazing!
+  - clip: {fileID: 8300000, guid: 9c19d65b87fc44448b9067cd63ad5767, type: 3}
+    text: Aaaamazing.
+  - clip: {fileID: 8300000, guid: e1eaac66c1a4043ce806c06d0422734b, type: 3}
+    text: Amaaaazing.
+  - clip: {fileID: 8300000, guid: cb2ef28df43ee4de68b7b59a9a2f9f20, type: 3}
+    text: Amazing!
+  - clip: {fileID: 8300000, guid: fedaec9ca978049308cef9b64d61c64e, type: 3}
+    text: Amazing!
+  - clip: {fileID: 8300000, guid: 8b7664cdca6564273869d00c6b0609f8, type: 3}
+    text: Woohoo!
+  - clip: {fileID: 8300000, guid: 7b5aec583c1ff4908bb26fa526de81f3, type: 3}
+    text: Woohoo!
+  - clip: {fileID: 8300000, guid: 5bde67fe213c240bd97438cdad1f3e10, type: 3}
+    text: Woohoo!
+  - clip: {fileID: 8300000, guid: b9bb31672bb2d493d9fb961b137f640a, type: 3}
+    text: Weee!
+  - clip: {fileID: 8300000, guid: 804c836e5060648f2bfbc02beaf239a4, type: 3}
+    text: Gp Changes Speed 05
+  - clip: {fileID: 8300000, guid: 2294b27ad313142a98745778566d2961, type: 3}
+    text: Wee!
+  - clip: {fileID: 8300000, guid: 3234d4a08292a47cda84da20b98ab44f, type: 3}
+    text: Aweee!
+  - clip: {fileID: 8300000, guid: a8a0bae79028649d7bb048ebb99f7995, type: 3}
+    text: Weee!
+  - clip: {fileID: 8300000, guid: 5c8f5aed52be3454189adab3400a20f6, type: 3}
+    text: Wee!
+  - clip: {fileID: 8300000, guid: fa074fdb7664d4d11832dd9c34a58fbf, type: 3}
+    text: Careful now, we are going a little too quick.
+  - clip: {fileID: 8300000, guid: b4590fdcef9b746499290da6fab94adc, type: 3}
+    text: Careful now, we are going a little too quick.
+  - clip: {fileID: 8300000, guid: 0fd91664ec92d4bb4a8334d66456f39d, type: 3}
+    text: Geronimooo!
+  - clip: {fileID: 8300000, guid: 34c712f5e03574959acb08523e404844, type: 3}
+    text: Gp Changes Speed 14
+  - clip: {fileID: 8300000, guid: 03e691202eae642bf940ab7f7c71b44f, type: 3}
+    text: Geronimooo!
+  - clip: {fileID: 8300000, guid: 44c0492b5e7634b3e8e532dfe4ff301d, type: 3}
+    text: Geronimooo!
+  - clip: {fileID: 8300000, guid: e4a37fb990297434bb8de555f089e300, type: 3}
+    text: Geronimooo!
+  - clip: {fileID: 8300000, guid: a7659f15e74d940f7a17c53aad186b39, type: 3}
+    text: Geronimooo!
+  - clip: {fileID: 8300000, guid: 3a152d9ee122449d3b4603611f055e9e, type: 3}
+    text: 'You are really enjoying this, huh? '
+  - clip: {fileID: 8300000, guid: c74b95306f2da4910ab767e222eea13a, type: 3}
+    text: 'You are really enjoying this, huh? '
+  - clip: {fileID: 8300000, guid: 0056dd0b3b3aa4a9cbfc708f0413245b, type: 3}
+    text: 'You are really enjoying this, huh? '
+  - clip: {fileID: 8300000, guid: 24ba072452f73405a94705f5287b50e0, type: 3}
+    text: Off we go!
+  - clip: {fileID: 8300000, guid: ad62f2b2759554ae9bbbd516904081a5, type: 3}
+    text: Off we go!
+  - clip: {fileID: 8300000, guid: 7ff3a452b24e7496b8611ea852d21bfd, type: 3}
+    text: Off we goo!
+  - clip: {fileID: 8300000, guid: d8cd875f4ded34d678b377d892501ff9, type: 3}
+    text: Mm, this is an interesting pace. I am cool with whatever!
+  - clip: {fileID: 8300000, guid: aa34bf6b12732453491951c67583bea6, type: 3}
+    text: Mm, this is an interesting pace. I am cool with whatever!
+  - clip: {fileID: 8300000, guid: acbabd65dd976431e938e5c87754ad4d, type: 3}
+    text: Mm, this is an interesting pace. I am cool with whatever!
+  - clip: {fileID: 8300000, guid: 896f4d5bb8d8a4883abf5d3d88122922, type: 3}
+    text: Duhduhruduhduhdoo.
+  - clip: {fileID: 8300000, guid: 8434b2744b1544ea1ad79df780ffe985, type: 3}
+    text: Duhduhduhdoodehduhdoo.
+  - clip: {fileID: 8300000, guid: 8bb548849c8cb4983bc9aa8e82fdedf4, type: 3}
+    text: Duhduhdehdehdededoo.
+  - clip: {fileID: 8300000, guid: e6546bbbbc03c4ca98f4da2d1dcd4b17, type: 3}
+    text: Duhduhroduhrooo.
+  - clip: {fileID: 8300000, guid: e83d39cceb0bb4c079b8527092cee94d, type: 3}
+    text: Dahpadadapdadoo.
+  - clip: {fileID: 8300000, guid: 6496349ee1e6a4e298e99c3ee016fb96, type: 3}
+    text: Dahdahdahdahdahdahdadah!
+  - clip: {fileID: 8300000, guid: 8444975cf7f6b4403bce5c759586511e, type: 3}
+    text: Lalalala.
+  - clip: {fileID: 8300000, guid: 6ca429b4f0e744d7ca6d348ef2f3be25, type: 3}
+    text: I don't mind this pace at all!
+  - clip: {fileID: 8300000, guid: a1eba42a75ab84d529e71f3e38a46c50, type: 3}
+    text: You are really enjoying this, huh?
+  - clip: {fileID: 8300000, guid: 5c68b1723762a4d19b9b07d5754b3d84, type: 3}
+    text: Mmm we can't go up the mountain like this. Maybe we can find another way
+      around?
+  - clip: {fileID: 8300000, guid: c1bd4c2955bc240579ddedc6e0d12c02, type: 3}
+    text: Mmm, we can't go up the mountain like this. Maybe we can find another way
+      around?
+  - clip: {fileID: 8300000, guid: 93f10b23abcb84862b70af1bd06b8df7, type: 3}
+    text: Hmm, we can't go up the mountain like this. Maybe we can find another way
+      around.
+  - clip: {fileID: 8300000, guid: 0cda1c9d1c4ad4bc8a50354bcc307a7a, type: 3}
+    text: There's too much wind in our face. Let's find another way around.
+  - clip: {fileID: 8300000, guid: ce6556f6c6c9b4fa9b6bd556a60c3ebe, type: 3}
+    text: There's too much wind in our face. Let's find another way around.
+  - clip: {fileID: 8300000, guid: a481e9018105344b68d9e805c9641336, type: 3}
+    text: There's too much wind in our face. Let's find another way around.
+  - clip: {fileID: 8300000, guid: 74585592dfa17404da44ecb1fd935f97, type: 3}
+    text: Don't you just love the wind?
+  - clip: {fileID: 8300000, guid: 9eb3bdb01af1d4e53859bb930ce2cf1c, type: 3}
+    text: Don't you just love the wind?
+  - clip: {fileID: 8300000, guid: 00e9b375042a44d03a95598cc4abf77b, type: 3}
+    text: Don't you just love the wind?
+  - clip: {fileID: 8300000, guid: d16c896e8090847cd9ec9e2340b1bf54, type: 3}
+    text: Nice, this world has some light in it now.
+  - clip: {fileID: 8300000, guid: e2d715b35237046009c6f7465a22def5, type: 3}
+    text: Cool! We've got a lot of light in this world.
+  - clip: {fileID: 8300000, guid: 1a10ef1d1ded143e994f40aa704fb061, type: 3}
+    text: Yay, the whole world is alive with the light of love. Good job!
+  - clip: {fileID: 8300000, guid: cf56cdeb45b744a68a910b87b1ca2469, type: 3}
+    text: Intro 001
+  - clip: {fileID: 8300000, guid: c112118cf48274ea29de059f8401ab5b, type: 3}
+    text: Intro 001 Final
+  - clip: {fileID: 8300000, guid: 9181e0ebb62974d81ac0b01f14e2006c, type: 3}
+    text: Intro 002
+  - clip: {fileID: 8300000, guid: 4a3b1c9ccf5b047a3959026af320cf53, type: 3}
+    text: Intro 003
+  - clip: {fileID: 8300000, guid: a774e2530658041e498a4952c1939e26, type: 3}
+    text: Intro 004
+  - clip: {fileID: 8300000, guid: 527109673d7f841a28d46a1515e134b3, type: 3}
+    text: Intro 005
+  - clip: {fileID: 8300000, guid: a7bee34b799264ca3b64e18652385898, type: 3}
+    text: Intro 006
+  - clip: {fileID: 8300000, guid: 787d9bfc458284a7db42529139403f9f, type: 3}
+    text: Intro 007 Good
+  - clip: {fileID: 8300000, guid: bfef63b07d856436eb2d44b828ec934f, type: 3}
+    text: Intro 007 Need Edit
+  - clip: {fileID: 8300000, guid: eee4397543b914493905ea72dbafb2a4, type: 3}
+    text: Intro 008
+  - clip: {fileID: 8300000, guid: 9dc72fc951692405cbf391f683522a32, type: 3}
+    text: Intro 009
+  - clip: {fileID: 8300000, guid: e09125a9a66f842c68954033bf49e1b4, type: 3}
+    text: Intro 010
+  - clip: {fileID: 8300000, guid: 01e3be5c4950940c8b3ec212b020aee6, type: 3}
+    text: Intro 011
+  - clip: {fileID: 8300000, guid: c24221cfc49bf40c0b70b3632fa25f8c, type: 3}
+    text: Intro 012
+  - clip: {fileID: 8300000, guid: a4de3177ef77d4c53b5a43ca45b6bd02, type: 3}
+    text: Intro 013
+  - clip: {fileID: 8300000, guid: 42e8bc857c58c4e70a36a5e79aa3f54a, type: 3}
+    text: Intro 014
+  - clip: {fileID: 8300000, guid: b96674b8e5f2e45c8b836ec34e2a1ad2, type: 3}
+    text: Intro 015
+  - clip: {fileID: 8300000, guid: 017f159485e714f719205134db038aad, type: 3}
+    text: Intro 016
+  - clip: {fileID: 8300000, guid: 62664bfc76f8e43a7bfad2cee6769a16, type: 3}
+    text: Intro 016 Good
+  - clip: {fileID: 8300000, guid: ed61a23955a8f42448e828356290297b, type: 3}
+    text: Intro Conclusion
+  - clip: {fileID: 8300000, guid: 78b043db3e7514a4fb0a4ed61d68da0d, type: 3}
+    text: Intro First Objective 01
+  - clip: {fileID: 8300000, guid: 5cf7f8b3441da4eeebcf8cc43bb6a7eb, type: 3}
+    text: Intro First Objective 02
+  - clip: {fileID: 8300000, guid: 5ef42a53f424849d0a20fd7f419e71a8, type: 3}
+    text: Intro Gliding 01
+  - clip: {fileID: 8300000, guid: ea9ad05862f7e413d908120f7fbb447e, type: 3}
+    text: Intro Gliding 02
+  - clip: {fileID: 8300000, guid: 97ad173a6eb574b71973698d5847d81b, type: 3}
+    text: Intro Gliding 02 0
+  - clip: {fileID: 8300000, guid: d23e173ba027d487c95c5c3754c3d72d, type: 3}
+    text: Intro Gliding 03
+  - clip: {fileID: 8300000, guid: 89955dfe6ac4b42b68c224ffada3f1e2, type: 3}
+    text: Intro Gliding 04
+  - clip: {fileID: 8300000, guid: b2b2c858adc61470c8f83afea05ccd90, type: 3}
+    text: Intro Gliding 05
+  - clip: {fileID: 8300000, guid: c5ba03a8656b842959a759461a501bed, type: 3}
+    text: Intro Hovering 01
+  - clip: {fileID: 8300000, guid: 4999b1e62ce514a52bedd50240a69204, type: 3}
+    text: Intro Hovering 02
+  - clip: {fileID: 8300000, guid: a0efc882a78ca4d0cacb2e1594629479, type: 3}
+    text: Intro Hovering 03
+  - clip: {fileID: 8300000, guid: 076bcf47538b04cafb6bf3e6979ebfaa, type: 3}
+    text: Intro Hovering 04
+  - clip: {fileID: 8300000, guid: 38abd53d675734faba01121c625a8b53, type: 3}
+    text: Intro Parable 01
+  - clip: {fileID: 8300000, guid: debe23ae1e9ee4802a031fa06f0fc570, type: 3}
+    text: Intro Parable 02
+  - clip: {fileID: 8300000, guid: fd35603a0e4aa42a9a1d612cd86953ab, type: 3}
+    text: Intro Parable 03
+  - clip: {fileID: 8300000, guid: 286a0e608315a433793c67be71e54c49, type: 3}
+    text: Intro Parable 03 01
+  - clip: {fileID: 8300000, guid: e55956003b8ff4568ae8a7077ed0cf7f, type: 3}
+    text: Intro Parable 04
+  - clip: {fileID: 8300000, guid: 26540183694e64715b69ae5b5d0baec7, type: 3}
+    text: Intro Wind Director 01
+  - clip: {fileID: 8300000, guid: 51fe130a92391d141855c979addc0526, type: 3}
+    text: You are not forgotten. Even the smallest sparrow is seen, and you are worth
+      far more.
+  - clip: {fileID: 8300000, guid: 72756e5d9f0ee42fea8adb4544a3b481, type: 3}
+    text: "You are always loved, and Love is always with you \u2014 not for what
+      you do, but for who you are."
+  - clip: {fileID: 8300000, guid: c3cfc1c1f218a4c4d898029d6409c31b, type: 3}
+    text: "The greatest love is sacrifice \u2014  in kindness and in dedication of
+      your life \u2014 for a friend or for a stranger."
+  - clip: {fileID: 8300000, guid: b1ed0ad15812d479e8fda2f5c4833a42, type: 3}
+    text: You are light. Not because you shine on your own, but because Love burns
+      in you like a flame.
+  - clip: {fileID: 8300000, guid: e5b11b0673aab4e6ab376880d9c14a2a, type: 3}
+    text: Forgiveness is not a weakness. It is the key that unlocks your own heart.
+  - clip: {fileID: 8300000, guid: a116a161f52374a929802ac6122d32da, type: 3}
+    text: Blessed are the gentle ones, for they will inherit this world.
+  - clip: {fileID: 8300000, guid: 7001e9a4118f5cc47a43cb528758e140, type: 3}
+    text: This parable is a poem to love.
+  - clip: {fileID: 8300000, guid: 7047db5681ecebb4ea4ba3dcf44620aa, type: 3}
+    text: Even the darkness will not be dark to you; the night will shine like the
+      day, for darkness is as light to you.
+  - clip: {fileID: 8300000, guid: 2735a556c92d144178bbe657d851ab6d, type: 3}
+    text: Don't be overcome by darkness. Rather, overcome darkness with Love!
+  - clip: {fileID: 8300000, guid: e56ffe2e4ead449b99334de11e64a589, type: 3}
+    text: All things can be done with Love. Love always strengthens.
+  - clip: {fileID: 8300000, guid: c589ee328bac19248bef979599160930, type: 3}
+    text: Love is patient. Love is kind. It does not boast, it does not envy. It
+      is not proud.
+  - clip: {fileID: 8300000, guid: 4082eae61f624478f9d052fc5283acaf, type: 3}
+    text: We have not been given a spirit of darkness. But of power, of love and
+      a sound mind.
+  - clip: {fileID: 8300000, guid: ed1bba0d82f104cdda90b1647d648cba, type: 3}
+    text: Love your neighbor, as you love yourself.
+  - clip: {fileID: 8300000, guid: 7043253f0dd9d4d64859c04dd0fe0144, type: 3}
+    text: Guard your heart, for everything you do flows from it.
+  categoryEntries: []

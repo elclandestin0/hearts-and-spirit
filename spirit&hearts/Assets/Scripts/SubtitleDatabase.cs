@@ -24,8 +24,9 @@ public class SubtitleDatabase : ScriptableObject
         [TextArea] public string text;  // generic line if you don't want per-clip
     }
 
-    Dictionary<AudioClip,string> _byClip;
-    Dictionary<string,string> _byCat;
+    Dictionary<AudioClip, string> _byClip;
+    Dictionary<string, string> _byCat;
+    public bool ContainsClip(AudioClip clip) => entries.Exists(e => e != null && e.clip == clip);
 
     void OnEnable()
     {
@@ -43,5 +44,15 @@ public class SubtitleDatabase : ScriptableObject
     {
         if (clip && _byClip != null && _byClip.TryGetValue(clip, out text)) return true;
         text = null; return false;
+    }
+
+    public void RebuildIndex()
+    {
+        _byClip = new Dictionary<AudioClip, string>();
+        foreach (var e in entries)
+        {
+            if (e != null && e.clip && !string.IsNullOrEmpty(e.text))
+                _byClip[e.clip] = e.text;
+        }
     }
 }
