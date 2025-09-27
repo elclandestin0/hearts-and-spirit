@@ -56,11 +56,12 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     void Start()
     {
         // Skip automatically in Editor/Development builds
-        if (skipInEditorOrDevBuild && (Application.isEditor || Debug.isDebugBuild))
-        {
-            EndTutorialToFreeFlight();
-            return;
-        }
+        // if (skipInEditorOrDevBuild && (Application.isEditor || Debug.isDebugBuild))
+        // {
+        //     EndTutorialToFreeFlight();
+        //     return;
+        // }
+        IsRunning = true;
 
         if (autoStart) StartTutorial();
     }
@@ -201,11 +202,11 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     void Update()
     {
-        if (allowSkipHotkey && (Application.isEditor || Debug.isDebugBuild) && Input.GetKeyDown(skipKey))
-        {
-            EndTutorialToFreeFlight();
-            return;
-        }
+        // if (allowSkipHotkey && (Application.isEditor || Debug.isDebugBuild) && Input.GetKeyDown(skipKey))
+        // {
+        //     EndTutorialToFreeFlight();
+        //     return;
+        // }
 
         if (!IsRunning || currentInteractive == null) return;
 

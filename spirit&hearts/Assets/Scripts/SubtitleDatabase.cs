@@ -7,8 +7,8 @@ public class SubtitleDatabase : ScriptableObject
     [System.Serializable]
     public class Entry
     {
-        public AudioClip clip;          // exact VO file
-        [TextArea] public string text;  // subtitle to show
+        public AudioClip clip;          
+        [TextArea] public string text;
     }
 
     [Header("Per-clip subtitles (preferred)")]
