@@ -14,9 +14,6 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     [SerializeField] private Transform playerHead;
     [SerializeField] private bool autoStart = true;
     [SerializeField] private TMP_Text subtitleUI;
-    [SerializeField] private bool skipInEditorOrDevBuild = true;
-    [SerializeField] private bool allowSkipHotkey = true;
-    [SerializeField] private KeyCode skipKey = KeyCode.BackQuote;
     private int seedsPicked, lightsLit;
     // Progress
     public int StepIndex { get; private set; } = -1;
@@ -55,15 +52,8 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     void Start()
     {
-        // Skip automatically in Editor/Development builds
-        // if (skipInEditorOrDevBuild && (Application.isEditor || Debug.isDebugBuild))
-        // {
-        //     EndTutorialToFreeFlight();
-        //     return;
-        // }
-        IsRunning = true;
-
         if (autoStart) StartTutorial();
+        IsRunning = true;
     }
 
     public void StartTutorial()
