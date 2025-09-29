@@ -29,11 +29,12 @@ public class DovinaAudioManager : MonoBehaviour
     public float cd_world = 60f;
     [Tooltip("Per-PLACE cooldown inside locations (forest_, altar_, lighthouse_, etc).")]
     public float cd_locations_place = 60f;
-    public float cd_move_hovering = 60f;
-    public float cd_move_toGliding = 60f;
+    public float cd_locations = 30f;
+    public float cd_move_hovering = 15f;
+    public float cd_move_toGliding = 15f;
     public float cd_move_gliding = 60f;
-    public float cd_move_toHovering = 60f;
-    public float cd_bouncing = 60f;
+    public float cd_move_toHovering = 15f;
+    public float cd_bouncing = 15f;
     [Tooltip("Parables has NO cooldown (ignored).")]
     public float cd_parables_ignored = 0f;
 
@@ -187,6 +188,7 @@ public class DovinaAudioManager : MonoBehaviour
         if (category.Equals("gp_changes/speed/fast", StringComparison.OrdinalIgnoreCase)) return cd_speed_fast;
         if (category.Equals("gp_changes/wind", StringComparison.OrdinalIgnoreCase)) return cd_wind;
         if (category.Equals("gp_changes/world", StringComparison.OrdinalIgnoreCase)) return cd_world;
+        if (category.Equals("gp_changes/locations/chill_suggestions", StringComparison.OrdinalIgnoreCase)) return cd_locations;
         if (category.Equals("gp_changes/movement/hovering", StringComparison.OrdinalIgnoreCase)) return cd_move_hovering;
         if (category.Equals("gp_changes/movement/toGliding", StringComparison.OrdinalIgnoreCase)) return cd_move_toGliding;
         if (category.Equals("gp_changes/movement/gliding", StringComparison.OrdinalIgnoreCase)) return cd_move_gliding;
@@ -201,6 +203,7 @@ public class DovinaAudioManager : MonoBehaviour
     {
         if (!CategoryHasCooldown(category)) return false;
         if (!categoryCooldownUntil.TryGetValue(category, out var until)) return false;
+        Debug.Log("Category " + category + " on cooldown. Until: " + until);
         return Time.time < until;
     }
 
@@ -348,6 +351,7 @@ public class DovinaAudioManager : MonoBehaviour
                 clip = alt;
             }
         }
+
         else if (IsCategoryOnCooldown(context))
         {
             return;

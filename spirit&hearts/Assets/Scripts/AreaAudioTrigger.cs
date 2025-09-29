@@ -25,7 +25,7 @@ public class AreaAudioTrigger : MonoBehaviour
 
         if (TryGetMatchingClip(clips, out var selectedClip))
         {
-            dovinaAudioManager.PlayClip(selectedClip, 1);
+            dovinaAudioManager.PlayClip(selectedClip, 1, audioCategory);
         }
     }
 
