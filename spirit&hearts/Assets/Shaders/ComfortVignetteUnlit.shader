@@ -1,4 +1,4 @@
-Shader "VR/ComfortVignetteUnlit"
+Shader "ComfortVignetteUnlit"
 {
     Properties
     {

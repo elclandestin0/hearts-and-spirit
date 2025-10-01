@@ -9,8 +9,8 @@ public class VRComfortVignetteUI : MonoBehaviour
     public Transform head;
                    
     [Header("Speed Mapping")]
-    public float minSpeed = 2f;
-    public float maxSpeed = 50f;
+    public float minSpeed;
+    public float maxSpeed;
     [Range(0f,1f)] public float maxIntensity = 0.8f;
     public float minRadius = 0.85f;          // 0.85 = wide open; 0.4 = tight tunnel
     public float maxRadius = 0.45f;
@@ -27,14 +27,22 @@ public class VRComfortVignetteUI : MonoBehaviour
     public Vector2 center = new Vector2(0.5f, 0.5f);
     public float ellipticity = 1.0f;
 
-    private RawImage img;
-    private Material mat;
-    private Vector3 prevFwd;
+    public RawImage img;
+    public Material mat;
+    public Vector3 prevFwd;
 
     void Awake()
     {
         img = GetComponent<RawImage>();
-        if (img.material) mat = img.material;
+
+        // 1) Ensure we have a material that has _Intensity/_Radius props
+        if (img.material != null)
+            mat = new Material(img.material);             // instance, not shared
+        else
+            mat = new Material(Shader.Find("ComfortVignetteUnlit"));
+
+        img.material = mat;                               // assign the instance
+
         if (!head && Camera.main) head = Camera.main.transform;
         if (head) prevFwd = head.forward;
     }
@@ -57,7 +65,7 @@ public class VRComfortVignetteUI : MonoBehaviour
             prevFwd = head.forward;
         }
 
-        float t = Mathf.Clamp01(Mathf.Lerp(tSpeed, Mathf.Max(tSpeed, tAng), angWeight));
+        float t = 1;
 
         // Map t → radius (smaller radius = stronger tunnel) and intensity
         float targetRadius = Mathf.Lerp(minRadius, maxRadius, t);
