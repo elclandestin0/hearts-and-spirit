@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(RawImage))]
 public class VRComfortVignetteUI : MonoBehaviour
@@ -15,10 +17,9 @@ public class VRComfortVignetteUI : MonoBehaviour
     public float minRadius = 0.85f;          // 0.85 = wide open; 0.4 = tight tunnel
     public float maxRadius = 0.45f;
     public float smooth = 8f;
-
     [Header("Angular Comfort")]
-    public float angMin = 45f;               // deg/sec to start effect
-    public float angMax = 140f;              // deg/sec max
+    public float angMin = 45f;
+    public float angMax = 140f;
     [Range(0f,1f)] public float angWeight = 0.35f;
 
     [Header("Shape")]
@@ -30,21 +31,27 @@ public class VRComfortVignetteUI : MonoBehaviour
     public RawImage img;
     public Material mat;
     public Vector3 prevFwd;
-
+    public Volume volume;             
+    public Vignette vig;
     void Awake()
     {
         img = GetComponent<RawImage>();
 
-        // 1) Ensure we have a material that has _Intensity/_Radius props
         if (img.material != null)
-            mat = new Material(img.material);             // instance, not shared
+            mat = new Material(img.material);
         else
             mat = new Material(Shader.Find("ComfortVignetteUnlit"));
 
-        img.material = mat;                               // assign the instance
+        img.material = mat;
 
         if (!head && Camera.main) head = Camera.main.transform;
         if (head) prevFwd = head.forward;
+    }
+
+
+    void Start() 
+    { 
+        if (volume && volume.profile) volume.profile.TryGet(out vig); 
     }
 
     void Update()
@@ -65,7 +72,7 @@ public class VRComfortVignetteUI : MonoBehaviour
             prevFwd = head.forward;
         }
 
-        float t = 1;
+        float t = Mathf.Clamp01(Mathf.Lerp(tSpeed, Mathf.Max(tSpeed, tAng), angWeight));
 
         // Map t → radius (smaller radius = stronger tunnel) and intensity
         float targetRadius = Mathf.Lerp(minRadius, maxRadius, t);
@@ -87,5 +94,8 @@ public class VRComfortVignetteUI : MonoBehaviour
         mat.SetFloat("_Aspect", aspect);
         mat.SetFloat("_Ellipticity", Mathf.Max(0.01f, ellipticity));
         mat.SetVector("_Center", new Vector4(center.x, center.y, 0, 0));
+
+        if (vig == null || playerMovement == null) return;
+        vig.intensity.value = Mathf.Lerp(vig.intensity.value, Mathf.Lerp(0f, maxIntensity, t), Time.deltaTime * smooth);
     }
 }
