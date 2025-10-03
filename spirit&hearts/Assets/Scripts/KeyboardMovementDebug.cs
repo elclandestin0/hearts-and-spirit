@@ -12,7 +12,7 @@ public class KeyboardMovementDebug : MonoBehaviour
 
     [Header("Mouse / Touchpad")]
     public bool enableMouseLook = true;
-    public float mouseSensitivity = 1.5f;
+    public float mouseSensitivity = 4.5f;
 
     void Update()
     {

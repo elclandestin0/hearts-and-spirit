@@ -13,7 +13,6 @@ public class CineSay : CineAction
     public override IEnumerator Execute(CineContext ctx)
     {
         if (ctx.subtitleUI) ctx.subtitleUI.text = subtitle;
-        // in some bootstrap, once:
         PauseState.OnPauseChanged += paused =>
         {
             var s = ctx.speaker?.audioSource; // or find all DovinaAudioManager instances and pause them

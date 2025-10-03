@@ -10,13 +10,14 @@ public class VRComfortVignetteUI : MonoBehaviour
     [Header("References")]
     public Movement playerMovement;
     public Transform head;
-                   
+
     [Header("Speed Mapping")]
     public float minSpeed;
     public float maxSpeed;
-    [Range(0f,1f)] public float maxIntensity = 0.8f;
-    public float minRadius = 0.85f;          // 0.85 = wide open; 0.4 = tight tunnel
-    public float maxRadius = 0.45f;
+
+    [Range(0f,1f)] public float maxIntensity;
+    public float minRadius = 0.85f;
+    public float maxRadius = 0.35f;
     public float smooth = 8f;
 
     [Header("Angular Comfort")]
@@ -50,27 +51,22 @@ public class VRComfortVignetteUI : MonoBehaviour
         if (!head && Camera.main) head = Camera.main.transform;
         if (head) prevFwd = head.forward;
     }
-
-
     void Start() 
     { 
         if (volume && volume.profile) volume.profile.TryGet(out vig); 
     }
-
     void Update()
     {
         if (playerMovement == null || mat == null) return;
 
-        // --- speed term
+        // speed term
         float speed = playerMovement.CurrentVelocity.magnitude;
         float tSpeed = Mathf.InverseLerp(minSpeed, maxSpeed, speed);
 
-        // --- angular term
+        // angular term
         float tAng = 0f;
         float t = Mathf.Clamp01(Mathf.Lerp(tSpeed, Mathf.Max(tSpeed, tAng), angWeight));
 
-        // Map t → radius (smaller radius = stronger tunnel) and intensity
-        float targetRadius = Mathf.Lerp(minRadius, maxRadius, t);
         float targetIntensity = Mathf.Lerp(0f, maxIntensity, t);
 
         if (comfortableMode)
@@ -79,7 +75,6 @@ public class VRComfortVignetteUI : MonoBehaviour
             vig.intensity.value = Mathf.Lerp(vig.intensity.value, Mathf.Lerp(0f, maxIntensity, t), Time.deltaTime * smooth);
         }
     }
-
     public void ToggleComfortableMode()
     {
         comfortableMode = !comfortableMode;

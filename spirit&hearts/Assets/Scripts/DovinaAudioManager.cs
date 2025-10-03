@@ -167,15 +167,12 @@ public class DovinaAudioManager : MonoBehaviour
         }
         return null;
     }
-
-    // -------------------- Category cooldown helpers --------------------
     private bool CategoryHasCooldown(string category)
     {
         if (string.IsNullOrEmpty(category)) return false;
         if (IsIntro(category) || IsParables(category)) return false; // no cooldowns
         return true;
     }
-
     private float GetCategoryCooldownDuration(string category)
     {
         if (string.IsNullOrEmpty(category)) return 0f;
@@ -198,7 +195,6 @@ public class DovinaAudioManager : MonoBehaviour
         // default safety
         return 60f;
     }
-
     private bool IsCategoryOnCooldown(string category)
     {
         if (!CategoryHasCooldown(category)) return false;
@@ -206,15 +202,12 @@ public class DovinaAudioManager : MonoBehaviour
         Debug.Log("Category " + category + " on cooldown. Until: " + until);
         return Time.time < until;
     }
-
     private void StartCategoryCooldown(string category)
     {
         if (!CategoryHasCooldown(category)) return;
         float dur = Mathf.Max(0.01f, GetCategoryCooldownDuration(category));
         categoryCooldownUntil[category] = Time.time + dur;
     }
-
-    // -------------------- Non-repeating bag --------------------
     private void RefillBag(string category)
     {
         if (!audioCategories.TryGetValue(category, out var src) || src.Length == 0) return;
@@ -226,7 +219,6 @@ public class DovinaAudioManager : MonoBehaviour
         }
         nonRepeatingBags[category] = new Queue<AudioClip>(list);
     }
-
     public AudioClip GetNonRepeatingClip(string category)
     {
         if (!nonRepeatingBags.TryGetValue(category, out var bag) || bag == null || bag.Count == 0)
@@ -237,8 +229,6 @@ public class DovinaAudioManager : MonoBehaviour
         if (bag == null || bag.Count == 0) return null;
         return bag.Dequeue();
     }
-
-    // -------------------- High-level selection (respects cooldowns) --------------------
     public void PlayNonRepeating(string category, int priority)
     {
         var clip = GetNonRepeatingClip(category);
@@ -257,7 +247,6 @@ public class DovinaAudioManager : MonoBehaviour
 
         if (clip != null) PlayClip(clip, priority, category);
     }
-
     public void PlayFromCategory(string category, int priority)
     {
         if (IsLocationsCategory(category))
@@ -280,7 +269,6 @@ public class DovinaAudioManager : MonoBehaviour
         var clip2 = GetClip(category);
         if (clip2 != null) PlayClip(clip2, priority, category);
     }
-
     public void PlayPriority(string category, int priority, int startIndex = 0, int endIndexInclusive = -1)
     {
         if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
@@ -304,7 +292,6 @@ public class DovinaAudioManager : MonoBehaviour
         if (IsCategoryOnCooldown(category)) return;
         if (clip != null) PlayClip(clip, priority, category);
     }
-
     public void PlayBackToBack(params (string category, int start, int endInclusive, int priority)[] items)
     {
         foreach (var it in items)
@@ -385,7 +372,6 @@ public class DovinaAudioManager : MonoBehaviour
 
         PlayNow(clip, priority, context);
     }
-
     private void PlayNow(AudioClip clip, int priority, string context)
     {
         audioSource.Stop();
@@ -420,7 +406,6 @@ public class DovinaAudioManager : MonoBehaviour
             StartCoroutine(ResumeCooldownAfterClip(clip.length, false, _playToken));
         }
     }
-
     private IEnumerator ResumeCooldownAfterClip(float clipLength, bool isChatter, int token)
     {
         yield return new WaitForSeconds(clipLength);
@@ -436,7 +421,6 @@ public class DovinaAudioManager : MonoBehaviour
                 cooldownCoroutine = StartCoroutine(CooldownTimer());
         }
     }
-
     private bool TryPlayNextQueued()
     {
         while (clipQueue.Count > 0)
@@ -467,7 +451,6 @@ public class DovinaAudioManager : MonoBehaviour
         }
         return false;
     }
-
     private IEnumerator CooldownTimer()
     {
         while (cooldownRemaining > 0f)
@@ -479,8 +462,6 @@ public class DovinaAudioManager : MonoBehaviour
         isOnCooldown = false;
         cooldownCoroutine = null;
     }
-
-    // -------- Status --------
     public bool IsPlaying => audioSource.isPlaying;
     public bool IsOnCooldown => isOnCooldown;                 // chatter cooldown (prio 0)
     public bool IsPriorityPlaying => isPriorityPlaying;
