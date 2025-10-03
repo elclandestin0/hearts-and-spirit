@@ -14,10 +14,17 @@ public class MainMenu : MonoBehaviour
     [Range(0.1f, 3f)] public float fadeDuration = 1.0f;
 
     [Header("Placement")]
-    public Transform xrOrigin;     // Assign your XROrigin
+    public Transform xrOrigin;             // XROrigin / rig root
     public float distanceFromHead = 2f;
-    public Vector3 menuOffset = new Vector3(0, -0.1f, 0); // slight vertical offset
+    public Vector3 menuOffset = new Vector3(0, -0.1f, 0);
+
+    [Header("Controls")]
+    public KeyCode pauseKey = KeyCode.Escape;
+
     private TutorialManager tutorialManager;
+    private Movement movement;             // player movement script
+    private Camera cam;
+    private bool isPaused = false;
 
     void Awake()
     {
@@ -27,17 +34,63 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
-        // Place in front of HMD once at boot
+        cam = Camera.main;
         TryPlaceInFrontOfHead();
         tutorialManager = GameObject.FindGameObjectWithTag("MainPlayer").GetComponent<TutorialManager>();
+        movement = GameObject.FindGameObjectWithTag("MainPlayer").GetComponent<Movement>();
+
+        // start hidden until explicitly shown
+        panelRoot.SetActive(false);
     }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(pauseKey))
+        {
+            if (isPaused) ResumeFromPause();
+            else PauseAndShowMenu();
+        }
+    }
+
+
+    private void PauseAndShowMenu()
+    {
+        isPaused = true;
+
+        // Freeze player movement by disabling the Movement script.
+        // (This guarantees no forces/glide/gravity are applied while paused.)
+        if (movement != null) movement.enabled = false;
+
+        // Re-position the menu in front of wherever the player is looking *right now*.
+        TryPlaceInFrontOfHead();
+
+        // Show root panel
+        ShowRoot();
+        panelRoot.SetActive(true);
+    }
+
+    private void ResumeFromPause()
+    {
+        isPaused = false;
+
+        // Hide menu panels
+        panelRoot.SetActive(false);
+        panelPlay.SetActive(false);
+        panelSettings.SetActive(false);
+
+        // Re-enable movement
+        if (movement != null) movement.enabled = true;
+    }
+
+    // ————— Placement —————
 
     void TryPlaceInFrontOfHead()
     {
         if (xrOrigin == null) return;
-        var cam = Camera.main;
+        if (cam == null) cam = Camera.main;
         if (cam == null) return;
 
+        // keep it on the horizontal plane, so it doesn’t tilt up/down with the head
         Vector3 forward = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
         if (forward.sqrMagnitude < 0.001f) forward = cam.transform.forward;
 
@@ -45,7 +98,7 @@ public class MainMenu : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
     }
 
-    #region Panel API
+    // ————— Panel API (unchanged) —————
     public void ShowRoot()
     {
         panelRoot.SetActive(true);
@@ -73,7 +126,6 @@ public class MainMenu : MonoBehaviour
         panelPlay.SetActive(false);
         panelSettings.SetActive(false);
     }
-    #endregion
 
     public IEnumerator FadeOutThenHide()
     {
@@ -88,7 +140,6 @@ public class MainMenu : MonoBehaviour
             yield return null;
         }
 
-        // Hide all panels after fade to black
         panelRoot.SetActive(false);
         panelPlay.SetActive(false);
         panelSettings.SetActive(false);
@@ -101,21 +152,15 @@ public class MainMenu : MonoBehaviour
         img.color = c;
     }  
 
+    // ————— Buttons —————
+
     public void NewGame()
     {
         BeginGame();
-        tutorialManager.StartTutorial();
-    }
+        // closing pause if it was open
+        if (isPaused) ResumeFromPause();
 
-    public void ExitGame()
-    {
-#if UNITY_EDITOR
-        // Stop play mode in the editor
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        // Quit the application in a build
-        Application.Quit();
-#endif
+        tutorialManager.StartTutorial();
     }
 
     public void ContinueGame()
@@ -127,5 +172,15 @@ public class MainMenu : MonoBehaviour
         }
 
         BeginGame();
+        if (isPaused) ResumeFromPause();
+    }
+
+    public void ExitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }
