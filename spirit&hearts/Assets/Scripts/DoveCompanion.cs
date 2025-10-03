@@ -404,6 +404,9 @@ public class DoveCompanion : MonoBehaviour
     /// </summary>
     public IEnumerator Face(Transform target, float duration, Vector3 localLookAtOffset, float turnSpeed = 6f)
     {
+        if (PauseState.IsPaused)
+            yield return new WaitUntil(() => !PauseState.IsPaused);
+
         float t = 0f;
         while (t < duration && target != null)
         {

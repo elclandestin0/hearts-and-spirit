@@ -151,6 +151,9 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     }
     private IEnumerator RunCinematic(CinematicStep cine)
     {
+        if (PauseState.IsPaused)
+            yield return new WaitUntil(() => !PauseState.IsPaused);
+
         var ctx = new CineContext
         {
             playerHead = playerHead,
@@ -167,16 +170,14 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         {
             foreach (var act in cine.actions)
             {
-                if (PauseState.IsPaused) yield return null;
                 if (act == null) continue;
 
-                // Clone the asset so we mutate nothing on disk (safe for builds)
+                // NEW: if paused, wait here (prevents advancing to the next action while paused)
+                if (PauseState.IsPaused)
+                    yield return PauseYields.UntilUnpaused();
+
                 var runtimeAct = ScriptableObject.Instantiate(act);
-
-                // No target assignment here — CineMoveDoveTo resolves via ctx
                 yield return StartCoroutine(runtimeAct.Execute(ctx));
-
-                // Optional cleanup
                 Destroy(runtimeAct);
             }
         }

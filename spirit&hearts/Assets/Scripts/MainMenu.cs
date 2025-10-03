@@ -64,9 +64,9 @@ public class MainMenu : MonoBehaviour
             else
             {
                 if (IsOnPause())
-                    ResumeFromPause();  // pause -> pause again -> unpause
+                    ResumeFromPause();
                 else
-                    ShowPause();        // paused but on Settings -> go back to Pause
+                    ShowPause();
             }
         }
     }
@@ -220,7 +220,6 @@ public class MainMenu : MonoBehaviour
     {
         return panelPause.activeSelf && !panelSettings.activeSelf;
     }
-
 
     private bool IsOnSettings()
     {

@@ -317,7 +317,6 @@ public class DovinaAudioManager : MonoBehaviour
             AudioClip choice = (idx >= 0 && idx < clips.Length) ? clips[idx] : null;
             if (choice == null) continue;
 
-            // Check cooldowns before queuing; swap for alternate if needed
             if (IsLocationsCategory(it.category))
             {
                 var place = GetPlaceKey(choice);
@@ -335,7 +334,6 @@ public class DovinaAudioManager : MonoBehaviour
         if (!isPriorityPlaying) TryPlayNextQueued();
     }
 
-    // -------------------- Core play w/ priority & queue rules --------------------
     public void PlayClip(AudioClip clip, int priority, string context = null)
     {
         if (PauseState.IsPaused) return;
