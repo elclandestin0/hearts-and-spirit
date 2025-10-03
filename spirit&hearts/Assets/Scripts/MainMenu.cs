@@ -5,9 +5,9 @@ using System.Collections;
 public class MainMenu : MonoBehaviour
 {
     [Header("Panels")]
-    public GameObject panelRoot;
-    public GameObject panelPlay;
-    public GameObject panelSettings;
+    public GameObject panelRoot;       // container canvas for menu UIs
+    public GameObject panelSettings;   // settings panel (child of root)
+    public GameObject panelPause;      // pause panel (child of root)
 
     [Header("Fade")]
     public Image fader;
@@ -25,6 +25,7 @@ public class MainMenu : MonoBehaviour
     private Movement movement;             // player movement script
     private Camera cam;
     private bool isPaused = false;
+    private bool settingsFromPause = false;
 
     void Awake()
     {
@@ -36,96 +37,148 @@ public class MainMenu : MonoBehaviour
     {
         cam = Camera.main;
         TryPlaceInFrontOfHead();
-        tutorialManager = GameObject.FindGameObjectWithTag("MainPlayer").GetComponent<TutorialManager>();
-        movement = GameObject.FindGameObjectWithTag("MainPlayer").GetComponent<Movement>();
 
-        // start hidden until explicitly shown
-        panelRoot.SetActive(false);
+        var player = GameObject.FindGameObjectWithTag("MainPlayer");
+        tutorialManager = player.GetComponent<TutorialManager>();
+        movement = player.GetComponent<Movement>();
+
+        // Boot behavior: show main menu (not paused)
+        panelRoot.SetActive(true);
+        panelPause.SetActive(false);
+        panelSettings.SetActive(false);
+        isPaused = false;
+        if (movement != null) movement.enabled = true;
     }
 
     void Update()
     {
         if (Input.GetKeyDown(pauseKey))
         {
-            if (isPaused) ResumeFromPause();
-            else PauseAndShowMenu();
+            if (!isPaused)
+            {
+                PauseAndShowPause();
+            }
+            else
+            {
+                if (IsOnPause())
+                    ResumeFromPause();  // pause -> pause again -> unpause
+                else
+                    ShowPause();        // paused but on Settings -> go back to Pause
+            }
         }
     }
 
 
-    private void PauseAndShowMenu()
+    private void HandleEscape()
+    {
+        if (isPaused)
+        {
+            if (IsOnPause())
+            {
+                ResumeFromPause();
+            }
+            else
+            {
+                ShowPause();
+            }
+        }
+        else
+        {
+            if (IsAnyMenuVisibleExceptPause())
+            {
+                if (IsOnSettings()) ShowRoot();
+            }
+            else
+            {
+                PauseAndShowPause();
+            }
+        }
+    }
+
+
+    private void PauseAndShowPause()
     {
         isPaused = true;
 
-        // Freeze player movement by disabling the Movement script.
-        // (This guarantees no forces/glide/gravity are applied while paused.)
         if (movement != null) movement.enabled = false;
 
-        // Re-position the menu in front of wherever the player is looking *right now*.
         TryPlaceInFrontOfHead();
-
-        // Show root panel
-        ShowRoot();
-        panelRoot.SetActive(true);
+        ShowPause();
     }
 
     private void ResumeFromPause()
     {
         isPaused = false;
 
-        // Hide menu panels
-        panelRoot.SetActive(false);
-        panelPlay.SetActive(false);
-        panelSettings.SetActive(false);
-
-        // Re-enable movement
+        HideAllPanels();
         if (movement != null) movement.enabled = true;
     }
 
-    // ————— Placement —————
-
-    void TryPlaceInFrontOfHead()
-    {
-        if (xrOrigin == null) return;
-        if (cam == null) cam = Camera.main;
-        if (cam == null) return;
-
-        // keep it on the horizontal plane, so it doesn’t tilt up/down with the head
-        Vector3 forward = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
-        if (forward.sqrMagnitude < 0.001f) forward = cam.transform.forward;
-
-        transform.position = cam.transform.position + forward * distanceFromHead + menuOffset;
-        transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
-    }
-
-    // ————— Panel API (unchanged) —————
     public void ShowRoot()
     {
         panelRoot.SetActive(true);
-        panelPlay.SetActive(false);
-        panelSettings.SetActive(false);
-    }
-
-    public void ShowPlay()
-    {
-        panelRoot.SetActive(false);
-        panelPlay.SetActive(true);
+        panelPause.SetActive(false);
         panelSettings.SetActive(false);
     }
 
     public void ShowSettings()
     {
         panelRoot.SetActive(false);
-        panelPlay.SetActive(false);
+        panelPause.SetActive(false);
         panelSettings.SetActive(true);
     }
 
-    public void BeginGame()
+    public void ShowPause()
     {
         panelRoot.SetActive(false);
-        panelPlay.SetActive(false);
         panelSettings.SetActive(false);
+        panelPause.SetActive(true);
     }
+
+    public void OpenSettings()
+    {
+        settingsFromPause = isPaused || panelPause.activeSelf;
+
+        ShowSettings();
+    }
+
+
+    public void BeginGame()
+    {
+        // Enter gameplay from main menu
+        HideAllPanels();
+        isPaused = false;
+        if (movement != null) movement.enabled = true;
+    }
+
+    public void HideAllPanels()
+    {
+        panelRoot.SetActive(false);
+        panelSettings.SetActive(false);
+        panelPause.SetActive(false);
+    }
+
+    public void Back()
+    {
+        if (panelSettings.activeSelf)
+        {
+            if (settingsFromPause)
+            {
+                ShowPause();
+            }
+            else
+            {
+                ShowRoot();
+            }
+            return;
+        }
+
+        if (panelPause.activeSelf)
+        {
+            ResumeFromPause();
+        }
+    }
+
 
     public IEnumerator FadeOutThenHide()
     {
@@ -140,39 +193,59 @@ public class MainMenu : MonoBehaviour
             yield return null;
         }
 
-        panelRoot.SetActive(false);
-        panelPlay.SetActive(false);
-        panelSettings.SetActive(false);
+        HideAllPanels();
     }
 
     void SetAlpha(Image img, float a)
     {
-        var c = img.color;
-        c.a = a;
-        img.color = c;
-    }  
+        var c = img.color; c.a = a; img.color = c;
+    }
 
-    // ————— Buttons —————
+    void TryPlaceInFrontOfHead()
+    {
+        if (xrOrigin == null) return;
+        if (cam == null) cam = Camera.main;
+        if (cam == null) return;
+
+        Vector3 forward = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
+        if (forward.sqrMagnitude < 0.001f) forward = cam.transform.forward;
+
+        transform.position = cam.transform.position + forward * distanceFromHead + menuOffset;
+        transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+    }
+
+    private bool IsOnPause()
+    {
+        return panelPause.activeSelf && !panelSettings.activeSelf;
+    }
+
+
+    private bool IsOnSettings()
+    {
+        return panelRoot.activeSelf && panelSettings.activeSelf;
+    }
+
+    private bool IsAnyMenuVisible()
+    {
+        return panelRoot.activeSelf || panelSettings.activeSelf || panelPause.activeSelf;
+    }
+
+    private bool IsAnyMenuVisibleExceptPause()
+    {
+        return panelRoot.activeSelf && !panelPause.activeSelf;
+    }
 
     public void NewGame()
     {
         BeginGame();
-        // closing pause if it was open
-        if (isPaused) ResumeFromPause();
-
         tutorialManager.StartTutorial();
     }
 
     public void ContinueGame()
     {
         bool ok = SaveManager.Load("slot1");
-        if (ok)
-        {
-            ProgressManager.Instance?.ApplySpawnIfAny();
-        }
-
+        if (ok) ProgressManager.Instance?.ApplySpawnIfAny();
         BeginGame();
-        if (isPaused) ResumeFromPause();
     }
 
     public void ExitGame()
