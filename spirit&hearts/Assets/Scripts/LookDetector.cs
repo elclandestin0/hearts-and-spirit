@@ -16,6 +16,7 @@ public class LookDetector : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
         if (!head || !target) return;
 
         Vector3 toTarget = (target.position - head.position).normalized;

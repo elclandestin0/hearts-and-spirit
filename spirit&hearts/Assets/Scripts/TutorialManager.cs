@@ -58,6 +58,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     public void StartTutorial()
     {
+        if (PauseState.IsPaused) return;
         IsRunning = true;
         StepIndex = -1;
         Advance();
@@ -65,6 +66,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     private void Advance()
     {
+        if (PauseState.IsPaused) return;
         currentInteractive = null;
         currentCinematic = null;
 
@@ -165,6 +167,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         {
             foreach (var act in cine.actions)
             {
+                if (PauseState.IsPaused) yield return null;
                 if (act == null) continue;
 
                 // Clone the asset so we mutate nothing on disk (safe for builds)
@@ -192,11 +195,11 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     void Update()
     {
-        // if (allowSkipHotkey && (Application.isEditor || Debug.isDebugBuild) && Input.GetKeyDown(skipKey))
-        // {
-        //     EndTutorialToFreeFlight();
-        //     return;
-        // }
+        if (PauseState.IsPaused)
+        {
+            Debug.Log("Game paused");
+            return;
+        }
 
         if (!IsRunning || currentInteractive == null) return;
 

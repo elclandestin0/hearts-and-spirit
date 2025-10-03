@@ -26,6 +26,7 @@ public class MainMenu : MonoBehaviour
     private Camera cam;
     private bool isPaused = false;
     private bool settingsFromPause = false;
+    private bool gameBegun = false;
 
     void Awake()
     {
@@ -54,6 +55,8 @@ public class MainMenu : MonoBehaviour
     {
         if (Input.GetKeyDown(pauseKey))
         {
+            if (!gameBegun) return;
+
             if (!isPaused)
             {
                 PauseAndShowPause();
@@ -96,12 +99,12 @@ public class MainMenu : MonoBehaviour
     }
 
 
+    // in MainMenu
     private void PauseAndShowPause()
     {
         isPaused = true;
-
         if (movement != null) movement.enabled = false;
-
+        PauseState.SetPaused(true);
         TryPlaceInFrontOfHead();
         ShowPause();
     }
@@ -109,9 +112,9 @@ public class MainMenu : MonoBehaviour
     private void ResumeFromPause()
     {
         isPaused = false;
-
         HideAllPanels();
         if (movement != null) movement.enabled = true;
+        PauseState.SetPaused(false);
     }
 
     public void ShowRoot()
@@ -138,17 +141,16 @@ public class MainMenu : MonoBehaviour
     public void OpenSettings()
     {
         settingsFromPause = isPaused || panelPause.activeSelf;
-
         ShowSettings();
     }
 
 
     public void BeginGame()
     {
-        // Enter gameplay from main menu
         HideAllPanels();
         isPaused = false;
         if (movement != null) movement.enabled = true;
+        gameBegun = true;
     }
 
     public void HideAllPanels()

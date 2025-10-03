@@ -33,6 +33,7 @@ public class SeedBehavior : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
         if (player == null) return;
 
         switch (currentState)

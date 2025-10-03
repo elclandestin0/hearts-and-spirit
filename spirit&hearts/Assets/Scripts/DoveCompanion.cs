@@ -88,6 +88,7 @@ public class DoveCompanion : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
         isIdle = !movementScript.isGliding;
         if (!tutorialManager.IsRunning)
         {
@@ -323,8 +324,12 @@ public class DoveCompanion : MonoBehaviour
         yield return SmoothHoverApproachInternal(() => worldPos, true);
     }
 
-    private IEnumerator SmoothHoverApproachInternal(Func<Vector3> getTargetPos, bool isCinema)
+    private IEnumerator SmoothHoverApproachInternal(System.Func<Vector3> getTargetPos, bool isCinema)
     {
+        // If paused at start, wait here until unpaused
+        if (PauseState.IsPaused)
+            yield return new WaitUntil(() => !PauseState.IsPaused);
+
         float maxCatchupDistance = 1000f;
         float blendDownDuration = 1.0f;
 
@@ -333,22 +338,27 @@ public class DoveCompanion : MonoBehaviour
 
         while (!movementScript.isGliding || isCinema)
         {
+            // If a pause happens mid-loop, wait here (freezes motion/rotation)
+            if (PauseState.IsPaused)
+            {
+                // Optional: preserve blendTimer continuity if you prefer: do nothing.
+                // If you want to "reblend" after pause, also reset blendTimer = 0f here.
+                yield return new WaitUntil(() => !PauseState.IsPaused);
+            }
+
             Vector3 targetPos = getTargetPos();
             liveTargetPosition = targetPos;
 
             float distance = Vector3.Distance(transform.position, targetPos);
-            float arrivalThreshold = 50f; // (tune this! 50 is very large)
-
+            float arrivalThreshold = 50f; // tune this!
             if (distance <= arrivalThreshold)
                 yield break;
 
             float playerSpeed = movementScript.CurrentVelocity.magnitude;
             float maxPlayerSpeed = movementScript.MaxSpeed;
 
-            // “Near” speed (when close) — you had it set to max; adjust if you want gentler arrival
             float nearHoverSpeed = maxPlayerSpeed;
 
-            // Distance-based catch-up
             float distanceRatio = Mathf.Clamp01(distance / maxCatchupDistance);
             float catchupSpeed = Mathf.Lerp(nearHoverSpeed, maxPlayerSpeed, distanceRatio);
 

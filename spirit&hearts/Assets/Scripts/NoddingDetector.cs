@@ -28,6 +28,8 @@ public class NoddingDetector : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (!head) return;
 
         float pitch = GetPitch();

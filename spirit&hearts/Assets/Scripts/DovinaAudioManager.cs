@@ -338,6 +338,7 @@ public class DovinaAudioManager : MonoBehaviour
     // -------------------- Core play w/ priority & queue rules --------------------
     public void PlayClip(AudioClip clip, int priority, string context = null)
     {
+        if (PauseState.IsPaused) return;
         if (clip == null) return;
 
         // Respect per-category/place cooldowns before playing
