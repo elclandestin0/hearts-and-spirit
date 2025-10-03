@@ -10,7 +10,6 @@ public class CineSay : CineAction
     [TextArea] public string subtitle;
     public AudioClip voice;
     public float minHold = 0.5f;
-
     public override IEnumerator Execute(CineContext ctx)
     {
         if (ctx.subtitleUI) ctx.subtitleUI.text = subtitle;
