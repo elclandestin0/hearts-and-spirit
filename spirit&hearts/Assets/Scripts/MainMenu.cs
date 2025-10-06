@@ -5,16 +5,16 @@ using System.Collections;
 public class MainMenu : MonoBehaviour
 {
     [Header("Panels")]
-    public GameObject panelRoot;       // container canvas for menu UIs
-    public GameObject panelSettings;   // settings panel (child of root)
-    public GameObject panelPause;      // pause panel (child of root)
+    public GameObject panelRoot;
+    public GameObject panelSettings;
+    public GameObject panelPause;
 
     [Header("Fade")]
     public Image fader;
     [Range(0.1f, 3f)] public float fadeDuration = 1.0f;
 
     [Header("Placement")]
-    public Transform xrOrigin;             // XROrigin / rig root
+    public Transform xrOrigin;
     public float distanceFromHead = 2f;
     public Vector3 menuOffset = new Vector3(0, -0.1f, 0);
 
@@ -22,11 +22,17 @@ public class MainMenu : MonoBehaviour
     public KeyCode pauseKey = KeyCode.Escape;
 
     private TutorialManager tutorialManager;
-    private Movement movement;             // player movement script
+    private Movement movement;
     private Camera cam;
     private bool isPaused = false;
     private bool settingsFromPause = false;
     private bool gameBegun = false;
+
+    [Header("Placement Lock")]
+    public bool lockDistanceFromBoot = true;
+    private float lockedDistance;
+    private Quaternion rotationOffsetFromFacing;
+
 
     void Awake()
     {
@@ -37,19 +43,31 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
         cam = Camera.main;
-        TryPlaceInFrontOfHead();
 
         var player = GameObject.FindGameObjectWithTag("MainPlayer");
         tutorialManager = player.GetComponent<TutorialManager>();
         movement = player.GetComponent<Movement>();
 
-        // Boot behavior: show main menu (not paused)
+        // capture fixed distance at boot (or use distanceFromHead)
+        if (lockDistanceFromBoot && cam)
+            lockedDistance = Vector3.Distance(transform.position, cam.transform.position);
+        else
+            lockedDistance = distanceFromHead;
+
+        // capture your current angle as an offset from a "face player (yaw only)" basis
+        rotationOffsetFromFacing = ComputeRotationOffset();
+
+        // place once for boot menu
+        TryPlaceInFrontOfHead();
+
+        // boot menu state...
         panelRoot.SetActive(true);
         panelPause.SetActive(false);
         panelSettings.SetActive(false);
         isPaused = false;
-        if (movement != null) movement.enabled = true;
+        if (movement) movement.enabled = true;
     }
+
 
     void Update()
     {
@@ -205,16 +223,32 @@ public class MainMenu : MonoBehaviour
 
     void TryPlaceInFrontOfHead()
     {
-        if (xrOrigin == null) return;
-        if (cam == null) cam = Camera.main;
-        if (cam == null) return;
+        if (!cam) cam = Camera.main;
+        if (!cam) return;
 
-        Vector3 forward = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
-        if (forward.sqrMagnitude < 0.001f) forward = cam.transform.forward;
+        Vector3 gazeYaw = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
+        if (gazeYaw.sqrMagnitude < 0.0001f) gazeYaw = cam.transform.forward;
 
-        transform.position = cam.transform.position + forward * distanceFromHead + menuOffset;
-        transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+        transform.position = cam.transform.position + gazeYaw * lockedDistance + menuOffset;
+
+        Quaternion facePlayer = Quaternion.LookRotation(-Vector3.ProjectOnPlane(transform.position - cam.transform.position, Vector3.up).normalized, Vector3.up);
+        transform.rotation = facePlayer * rotationOffsetFromFacing;
     }
+
+    private Quaternion ComputeRotationOffset()
+    {
+        if (!cam) cam = Camera.main;
+        if (!cam) return Quaternion.identity;
+
+        Vector3 toHead = cam.transform.position - transform.position;
+        Vector3 fwdYaw = Vector3.ProjectOnPlane(toHead, Vector3.up).normalized;
+        if (fwdYaw.sqrMagnitude < 0.0001f) fwdYaw = transform.forward;
+
+        Quaternion facePlayerAtBoot = Quaternion.LookRotation(fwdYaw, Vector3.up);
+
+        return Quaternion.Inverse(facePlayerAtBoot) * transform.rotation;
+    }
+
 
     private bool IsOnPause()
     {
