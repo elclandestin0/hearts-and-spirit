@@ -555,7 +555,7 @@ public class DoveCompanion : MonoBehaviour
         isFlappingLoop = false;
     }
 
-    private void StartInfiniteFlap()
+    public void StartInfiniteFlap()
     {
         if (flapInfiniteRoutine == null)
             flapInfiniteRoutine = StartCoroutine(FlapInfiniteLoop());
