@@ -162,7 +162,6 @@ public class MainMenu : MonoBehaviour
         ShowSettings();
     }
 
-
     public void BeginGame()
     {
         HideAllPanels();
