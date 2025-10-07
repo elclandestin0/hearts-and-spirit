@@ -159,7 +159,7 @@ public class Movement : MonoBehaviour
 
     void Start()
     {
-        head = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Transform>();
+        // head = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Transform>();
         tutorialManager = GetComponent<TutorialManager>();
         prevLeftPos = leftHand.position;
         prevRightPos = rightHand.position;
