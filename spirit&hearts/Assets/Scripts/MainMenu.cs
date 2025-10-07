@@ -8,6 +8,7 @@ public class MainMenu : MonoBehaviour
     public GameObject panelRoot;
     public GameObject panelSettings;
     public GameObject panelPause;
+    public GameObject panelPauseSettings;
 
     [Header("Fade")]
     public Image fader;
@@ -143,6 +144,13 @@ public class MainMenu : MonoBehaviour
     }
 
     public void ShowSettings()
+    {
+        panelRoot.SetActive(false);
+        panelPause.SetActive(false);
+        panelSettings.SetActive(true);
+    }
+
+    public void ShowPauseSettings()
     {
         panelRoot.SetActive(false);
         panelPause.SetActive(false);
