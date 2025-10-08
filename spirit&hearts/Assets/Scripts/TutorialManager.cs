@@ -59,8 +59,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     public void StartTutorial()
     {
         if (PauseState.IsPaused) return;
-        Debug.Log("PauseState not paused.. running game.");
-        doveController.StartInfiniteFlap();
+        // doveController.StartInfiniteFlap();
         IsRunning = true;
         StepIndex = -1;
         Advance();
