@@ -12,13 +12,12 @@ public class NoddingDetector : MonoBehaviour
     private float downTime;
     private float minPitch, maxPitch;
 
-    // NEW: hook to the hub
     private MovementEventHub hub;
 
     void Awake()
     {
-        hub = GetComponentInParent<MovementEventHub>(); // find the hub on your rig
-        if (!head) head = Camera.main ? Camera.main.transform : head; // safety
+        hub = GetComponentInParent<MovementEventHub>();
+        if (!head) head = head;
     }
 
     void Start()
@@ -50,7 +49,6 @@ public class NoddingDetector : MonoBehaviour
             if (Mathf.Abs(maxPitch - minPitch) > angleThreshold &&
                 Time.time - downTime < maxNodInterval)
             {
-                // tell the system a nod happened
                 hub?.RaiseNod();
             }
 
