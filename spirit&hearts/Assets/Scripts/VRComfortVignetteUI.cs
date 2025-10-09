@@ -37,6 +37,7 @@ public class VRComfortVignetteUI : MonoBehaviour
     public Vignette vig;
     private bool comfortableMode = false;
     [SerializeField] private TextMeshProUGUI comfortableModeToggle;
+    [SerializeField] private TextMeshProUGUI comfortableModeTogglePause;
     void Awake()
     {
         img = GetComponent<RawImage>();
@@ -79,5 +80,6 @@ public class VRComfortVignetteUI : MonoBehaviour
     {
         comfortableMode = !comfortableMode;
         comfortableModeToggle.text = comfortableMode ? "X" : "";
+        comfortableModeTogglePause.text = comfortableMode ? "X" : "";
     }
 }

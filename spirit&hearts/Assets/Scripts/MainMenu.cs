@@ -8,6 +8,7 @@ public class MainMenu : MonoBehaviour
     public GameObject panelRoot;
     public GameObject panelSettings;
     public GameObject panelPause;
+    public GameObject panelPauseSettings;
 
     [Header("Fade")]
     public Image fader;
@@ -23,7 +24,7 @@ public class MainMenu : MonoBehaviour
 
     private TutorialManager tutorialManager;
     private Movement movement;
-    private Camera cam;
+    [SerializeField] private Camera cam;
     private bool isPaused = false;
     private bool settingsFromPause = false;
     private bool gameBegun = false;
@@ -33,7 +34,11 @@ public class MainMenu : MonoBehaviour
     private float lockedDistance;
     private Quaternion rotationOffsetFromFacing;
 
+    [Header("Dove")]
+    public DoveCompanion doveController;
 
+    [Header("Pause Canvas (separate)")]
+    public Transform pauseCanvas; 
     void Awake()
     {
         ShowRoot();
@@ -42,8 +47,6 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
-        cam = Camera.main;
-
         var player = GameObject.FindGameObjectWithTag("MainPlayer");
         tutorialManager = player.GetComponent<TutorialManager>();
         movement = player.GetComponent<Movement>();
@@ -123,13 +126,38 @@ public class MainMenu : MonoBehaviour
         isPaused = true;
         if (movement != null) movement.enabled = false;
         PauseState.SetPaused(true);
-        TryPlaceInFrontOfHead();
+
+        PlacePauseCanvasAtGaze();
         ShowPause();
+    }
+
+    private void PlacePauseCanvasAtGaze()
+    {
+        if (!cam) cam = Camera.main;
+        if (!cam || !pauseCanvas) return;
+
+        Vector3 gazeYaw = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
+        if (gazeYaw.sqrMagnitude < 0.0001f) gazeYaw = cam.transform.forward;
+
+        float r = lockDistanceFromBoot ? lockedDistance : distanceFromHead;
+
+        Vector3 pos = cam.transform.position + gazeYaw * r + menuOffset;
+        pos.y = cam.transform.position.y + (pauseCanvas.position.y - cam.transform.position.y);
+
+        pauseCanvas.position = pos;
+
+        Vector3 toHead = cam.transform.position - pauseCanvas.position;
+        Vector3 fwdYaw = Vector3.ProjectOnPlane(toHead, Vector3.up).normalized;
+        if (fwdYaw.sqrMagnitude < 0.0001f) fwdYaw = pauseCanvas.forward;
+
+        Quaternion facePlayer = Quaternion.LookRotation(fwdYaw, Vector3.up);
+        pauseCanvas.rotation = facePlayer * rotationOffsetFromFacing;
     }
 
     private void ResumeFromPause()
     {
         isPaused = false;
+        settingsFromPause = false;
         HideAllPanels();
         if (movement != null) movement.enabled = true;
         PauseState.SetPaused(false);
@@ -137,9 +165,11 @@ public class MainMenu : MonoBehaviour
 
     public void ShowRoot()
     {
+        settingsFromPause = false;                
         panelRoot.SetActive(true);
         panelPause.SetActive(false);
         panelSettings.SetActive(false);
+        panelPauseSettings.SetActive(false);
     }
 
     public void ShowSettings()
@@ -147,6 +177,16 @@ public class MainMenu : MonoBehaviour
         panelRoot.SetActive(false);
         panelPause.SetActive(false);
         panelSettings.SetActive(true);
+        panelPauseSettings.SetActive(false);
+    }
+
+    public void ShowPauseSettings()
+    {
+        settingsFromPause = true;
+        panelRoot.SetActive(false);
+        panelPause.SetActive(false);
+        panelSettings.SetActive(false);
+        panelPauseSettings.SetActive(true);
     }
 
     public void ShowPause()
@@ -154,17 +194,18 @@ public class MainMenu : MonoBehaviour
         panelRoot.SetActive(false);
         panelSettings.SetActive(false);
         panelPause.SetActive(true);
+        panelPauseSettings.SetActive(false);
     }
 
     public void OpenSettings()
     {
-        settingsFromPause = isPaused || panelPause.activeSelf;
+        settingsFromPause = isPaused || panelPause.activeSelf || panelPauseSettings.activeSelf;
         ShowSettings();
     }
 
-
     public void BeginGame()
     {
+        doveController.allowAutoFlap = true;
         HideAllPanels();
         isPaused = false;
         if (movement != null) movement.enabled = true;
@@ -176,19 +217,23 @@ public class MainMenu : MonoBehaviour
         panelRoot.SetActive(false);
         panelSettings.SetActive(false);
         panelPause.SetActive(false);
+        panelPauseSettings.SetActive(false);
     }
 
     public void Back()
     {
-        if (panelSettings.activeSelf)
+        if (panelSettings.activeSelf || panelPauseSettings.activeSelf)
         {
             if (settingsFromPause)
             {
                 ShowPause();
+                Debug.Log("Showing panel pause");
             }
+
             else
             {
                 ShowRoot();
+                Debug.Log("Showing panel root");
             }
             return;
         }
@@ -223,9 +268,6 @@ public class MainMenu : MonoBehaviour
 
     void TryPlaceInFrontOfHead()
     {
-        if (!cam) cam = Camera.main;
-        if (!cam) return;
-
         Vector3 gazeYaw = Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized;
         if (gazeYaw.sqrMagnitude < 0.0001f) gazeYaw = cam.transform.forward;
 

@@ -75,6 +75,9 @@ public class DoveCompanion : MonoBehaviour
     private bool hasPlayedFastChatter = false;
     private bool hasPlayedSlowChatter = false;
     bool isIdle;
+    [Header("Boot / Control")]
+    public bool allowAutoFlap = false;
+    
     #region Loop
     void Start()
     {
@@ -113,13 +116,13 @@ public class DoveCompanion : MonoBehaviour
 
         if (!tutorialManager.IsRunning) animator.SetBool("Gliding", movementScript.isGliding);
 
-        if (!movementScript.isGliding && prevIsGliding)
+        if (allowAutoFlap && !movementScript.isGliding && prevIsGliding)
             StartInfiniteFlap();
 
         if (movementScript.isGliding && !prevIsGliding)
             StopInfiniteFlap();
 
-        if (!movementScript.isGliding && flapInfiniteRoutine == null) // safety: ensure running
+        if (allowAutoFlap && !movementScript.isGliding && flapInfiniteRoutine == null)
             StartInfiniteFlap();
 
         prevIsGliding = movementScript.isGliding;
@@ -534,9 +537,9 @@ public class DoveCompanion : MonoBehaviour
     #region Flap region
     private void HandleFlap()
     {
+        if (!allowAutoFlap) return;
         flapQueue++;
-        if (!isFlappingLoop)
-            StartCoroutine(PlayQueuedFlaps());
+        if (!isFlappingLoop) StartCoroutine(PlayQueuedFlaps());
     }
 
     private IEnumerator PlayQueuedFlaps()
@@ -555,7 +558,7 @@ public class DoveCompanion : MonoBehaviour
         isFlappingLoop = false;
     }
 
-    private void StartInfiniteFlap()
+    public void StartInfiniteFlap()
     {
         if (flapInfiniteRoutine == null)
             flapInfiniteRoutine = StartCoroutine(FlapInfiniteLoop());

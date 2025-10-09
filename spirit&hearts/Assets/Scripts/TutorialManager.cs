@@ -59,6 +59,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     public void StartTutorial()
     {
         if (PauseState.IsPaused) return;
+        // doveController.StartInfiniteFlap();
         IsRunning = true;
         StepIndex = -1;
         Advance();

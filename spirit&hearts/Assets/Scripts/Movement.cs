@@ -17,7 +17,7 @@ public class Movement : MonoBehaviour
     public Transform rightHand;
     public Transform head;
     public Transform rigRoot; // usually XROrigin or a parent of the camera
-
+    
     [Header("Physics Controls")]
     [SerializeField] private float gravity = 9.8f; // m/s²
     [SerializeField] private float glideStrength = 4.0f;
@@ -159,7 +159,7 @@ public class Movement : MonoBehaviour
 
     void Start()
     {
-        head = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Transform>();
+        // head = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Transform>();
         tutorialManager = GetComponent<TutorialManager>();
         prevLeftPos = leftHand.position;
         prevRightPos = rightHand.position;
