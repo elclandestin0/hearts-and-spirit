@@ -1,8 +1,6 @@
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
 using System.Collections;
-using System.Collections.Generic;
 
 // TO-DO: Split into: Input, Glide, Dive, Wind, Audio.
 public class Movement : MonoBehaviour
@@ -304,12 +302,12 @@ public class Movement : MonoBehaviour
         float speed = velocity.magnitude;
         float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(1f, maxDiveSpeed, speed));
 
-        // if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
-        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        // {
-        //     isFlapping = false;
-        //     return;
-        // }
+        if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
+        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        {
+            isFlapping = false;
+            return;
+        }
 
         // ↓ movement (downward stroke) detection
         float leftDown = -leftVelocity.SmoothedVelocity.y;
@@ -366,12 +364,12 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        // if (leftHand == null || rightHand == null) return;
-        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        // {
-        //     isGliding = false;
-        //     return;
-        // }
+        if (leftHand == null || rightHand == null) return;
+        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        {
+            isGliding = false;
+            return;
+        }
 
         // --- Hand spread calculation (projected to ignore vertical "squeeze") ---
         Vector3 lPos = currentLeftRel;

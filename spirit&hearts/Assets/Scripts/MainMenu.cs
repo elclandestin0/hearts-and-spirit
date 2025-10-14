@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 public class MainMenu : MonoBehaviour
 {
@@ -21,7 +22,8 @@ public class MainMenu : MonoBehaviour
 
     [Header("Controls")]
     public KeyCode pauseKey = KeyCode.Escape;
-
+    public InputActionReference pauseButtonXr;
+    public InputActionReference pauseButtonXrAlternate;
     private TutorialManager tutorialManager;
     private Movement movement;
     [SerializeField] private Camera cam;
@@ -38,7 +40,7 @@ public class MainMenu : MonoBehaviour
     public DoveCompanion doveController;
 
     [Header("Pause Canvas (separate)")]
-    public Transform pauseCanvas; 
+    public Transform pauseCanvas;
     void Awake()
     {
         ShowRoot();
@@ -74,7 +76,10 @@ public class MainMenu : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(pauseKey))
+        var a = pauseButtonXrAlternate.action.WasPressedThisFrame();
+        var b = pauseButtonXr.action.WasReleasedThisFrame();
+        if (pauseButtonXr) Debug.Log("Pressing pause button");
+        if (Input.GetKeyDown(pauseKey) || a || b)
         {
             if (!gameBegun) return;
 
