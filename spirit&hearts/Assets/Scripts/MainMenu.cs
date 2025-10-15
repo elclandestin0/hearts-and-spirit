@@ -10,7 +10,6 @@ public class MainMenu : MonoBehaviour
     public GameObject panelSettings;
     public GameObject panelPause;
     public GameObject panelPauseSettings;
-
     [Header("Fade")]
     public Image fader;
     [Range(0.1f, 3f)] public float fadeDuration = 1.0f;
@@ -30,6 +29,8 @@ public class MainMenu : MonoBehaviour
     private bool isPaused = false;
     private bool settingsFromPause = false;
     private bool gameBegun = false;
+    [SerializeField] private LineRenderer leftRayInteractor;
+    [SerializeField] private LineRenderer rightRayInteractor;
 
     [Header("Placement Lock")]
     public bool lockDistanceFromBoot = true;
@@ -41,6 +42,9 @@ public class MainMenu : MonoBehaviour
 
     [Header("Pause Canvas (separate)")]
     public Transform pauseCanvas;
+    [Header("Audio clips")]
+    public AudioClip clickClip;
+
     void Awake()
     {
         ShowRoot();
@@ -49,6 +53,8 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
+        leftRayInteractor.enabled = true;
+        rightRayInteractor.enabled = true;
         var player = GameObject.FindGameObjectWithTag("MainPlayer");
         tutorialManager = player.GetComponent<TutorialManager>();
         movement = player.GetComponent<Movement>();
@@ -83,12 +89,18 @@ public class MainMenu : MonoBehaviour
         {
             if (!gameBegun) return;
 
+            // Activate line renderers
+            leftRayInteractor.enabled = true;
+            rightRayInteractor.enabled = true;
+
             if (!isPaused)
             {
+                UIAudioBus.Instance.PlayClick(clickClip);
                 PauseAndShowPause();
             }
             else
             {
+                UIAudioBus.Instance.PlayClick(clickClip);
                 if (IsOnPause())
                     ResumeFromPause();
                 else
@@ -161,10 +173,13 @@ public class MainMenu : MonoBehaviour
 
     private void ResumeFromPause()
     {
+        Debug.Log("Resume from pause.");
         isPaused = false;
         settingsFromPause = false;
         HideAllPanels();
         if (movement != null) movement.enabled = true;
+        leftRayInteractor.enabled = false;
+        rightRayInteractor.enabled = false;
         PauseState.SetPaused(false);
     }
 
