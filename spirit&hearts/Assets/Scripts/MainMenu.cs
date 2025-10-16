@@ -53,8 +53,8 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
-        leftRayInteractor.enabled = true;
-        rightRayInteractor.enabled = true;
+        leftRayInteractor.gameObject.SetActive(true);
+        rightRayInteractor.gameObject.SetActive(true);
         var player = GameObject.FindGameObjectWithTag("MainPlayer");
         tutorialManager = player.GetComponent<TutorialManager>();
         movement = player.GetComponent<Movement>();
@@ -88,10 +88,6 @@ public class MainMenu : MonoBehaviour
         if (Input.GetKeyDown(pauseKey) || a || b)
         {
             if (!gameBegun) return;
-
-            // Activate line renderers
-            leftRayInteractor.enabled = true;
-            rightRayInteractor.enabled = true;
 
             if (!isPaused)
             {
@@ -178,13 +174,15 @@ public class MainMenu : MonoBehaviour
         settingsFromPause = false;
         HideAllPanels();
         if (movement != null) movement.enabled = true;
-        leftRayInteractor.enabled = false;
-        rightRayInteractor.enabled = false;
+        leftRayInteractor.gameObject.SetActive(false);
+        rightRayInteractor.gameObject.SetActive(false);
         PauseState.SetPaused(false);
     }
 
     public void ShowRoot()
     {
+        leftRayInteractor.gameObject.SetActive(true);
+        rightRayInteractor.gameObject.SetActive(true);
         settingsFromPause = false;                
         panelRoot.SetActive(true);
         panelPause.SetActive(false);
@@ -194,6 +192,8 @@ public class MainMenu : MonoBehaviour
 
     public void ShowSettings()
     {
+        leftRayInteractor.gameObject.SetActive(true);
+        rightRayInteractor.gameObject.SetActive(true);
         panelRoot.SetActive(false);
         panelPause.SetActive(false);
         panelSettings.SetActive(true);
@@ -203,6 +203,8 @@ public class MainMenu : MonoBehaviour
     public void ShowPauseSettings()
     {
         settingsFromPause = true;
+        leftRayInteractor.gameObject.SetActive(true);
+        rightRayInteractor.gameObject.SetActive(true);
         panelRoot.SetActive(false);
         panelPause.SetActive(false);
         panelSettings.SetActive(false);
@@ -211,6 +213,8 @@ public class MainMenu : MonoBehaviour
 
     public void ShowPause()
     {
+        leftRayInteractor.gameObject.SetActive(true);
+        rightRayInteractor.gameObject.SetActive(true);
         panelRoot.SetActive(false);
         panelSettings.SetActive(false);
         panelPause.SetActive(true);
@@ -234,6 +238,8 @@ public class MainMenu : MonoBehaviour
 
     public void HideAllPanels()
     {
+        leftRayInteractor.gameObject.SetActive(false);
+        rightRayInteractor.gameObject.SetActive(false);
         panelRoot.SetActive(false);
         panelSettings.SetActive(false);
         panelPause.SetActive(false);

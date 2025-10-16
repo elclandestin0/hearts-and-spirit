@@ -331,9 +331,6 @@ public class HoverTextLightTweenerSafe : MonoBehaviour,
                 sb.AppendLine("  3D Hit: none");
         }
 
-        if (!string.IsNullOrEmpty(reasonHint))
-            sb.AppendLine($"  HINT: {reasonHint}");
-
         Debug.Log(sb.ToString());
 
         if (_lastUIHitState != null && index < _lastUIHitState.Length)
