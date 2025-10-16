@@ -8,6 +8,8 @@ public class SubtitleController : MonoBehaviour
     public TutorialManager tutorialManager;   // optional
     public DovinaAudioManager audioMgr;
     public TMP_Text subtitleUI;
+    public TMP_Text subtitleToggle;
+    public TMP_Text subtitleTogglePause;
     public SubtitleDatabase database;
 
     [Header("Behavior")]
@@ -18,6 +20,12 @@ public class SubtitleController : MonoBehaviour
     Coroutine bindRoutine;
     int currentToken = -1;
     bool bound = false;
+
+    void Awake()
+    {
+        subtitleToggle.text = subtitleUI.enabled ? "X" : "";
+        subtitleTogglePause.text = subtitleUI.enabled ? "X" : "";
+    }
 
     void OnEnable()
     {
@@ -111,5 +119,12 @@ public class SubtitleController : MonoBehaviour
     {
         if (subtitleUI) subtitleUI.text = "";
         hideRoutine = null;
+    }
+
+    public void ToggleSubtitles()
+    {
+        subtitleUI.enabled = !subtitleUI.enabled;
+        subtitleToggle.text = subtitleUI.enabled ? "X" : "";
+        subtitleTogglePause.text = subtitleUI.enabled ? "X" : "";
     }
 }
