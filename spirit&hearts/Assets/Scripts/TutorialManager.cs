@@ -83,7 +83,6 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         currentCinematic = so as CinematicStep;
         if (currentCinematic != null)
         {
-            // lock to cinematic policy (usually Look only)
             _policy = new MovementPolicy
             {
                 Allowed = currentCinematic.allowedAbilities,
@@ -95,7 +94,6 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             return;
         }
 
-        // Then interactive
         currentInteractive = so as TutorialStep;
         if (currentInteractive != null)
         {
