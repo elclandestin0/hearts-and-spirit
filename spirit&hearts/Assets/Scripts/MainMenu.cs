@@ -102,6 +102,11 @@ public class MainMenu : MonoBehaviour
                     ShowPause();
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            NewGame();
+        }
     }
 
 
@@ -182,7 +187,7 @@ public class MainMenu : MonoBehaviour
     {
         leftRayInteractor.gameObject.SetActive(true);
         rightRayInteractor.gameObject.SetActive(true);
-        settingsFromPause = false;                
+        settingsFromPause = false;
         panelRoot.SetActive(true);
         panelPause.SetActive(false);
         panelSettings.SetActive(false);
