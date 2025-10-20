@@ -3,7 +3,6 @@ using UnityEngine;
 public class KeyboardMovementDebug : MonoBehaviour
 {
     public Movement movement;
-
     [Header("Settings")]
     public float pitchSpeed = 45f;
     public float yawSpeed = 60f;
@@ -13,9 +12,12 @@ public class KeyboardMovementDebug : MonoBehaviour
     [Header("Mouse / Touchpad")]
     public bool enableMouseLook = true;
     public float mouseSensitivity = 4.5f;
+    [SerializeField] private TutorialManager tutorialManager;
 
     void Update()
     {
+        if (tutorialManager.IsRunning) return;
+        if (PauseState.IsPaused) return;
         if (movement == null || movement.head == null) return;
 
         Transform head = movement.head;
