@@ -84,7 +84,6 @@ public class MainMenu : MonoBehaviour
     {
         var a = pauseButtonXrAlternate.action.WasPressedThisFrame();
         var b = pauseButtonXr.action.WasReleasedThisFrame();
-        if (pauseButtonXr) Debug.Log("Pressing pause button");
         if (Input.GetKeyDown(pauseKey) || a || b)
         {
             if (!gameBegun) return;

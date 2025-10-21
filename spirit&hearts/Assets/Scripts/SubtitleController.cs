@@ -13,7 +13,7 @@ public class SubtitleController : MonoBehaviour
     public SubtitleDatabase database;
 
     [Header("Behavior")]
-    public float extraHoldAfterEnd = 0.35f;
+    public float extraHoldAfterEnd = 1.5f;
     public bool clearWhenInterrupted = true;
 
     Coroutine hideRoutine;
