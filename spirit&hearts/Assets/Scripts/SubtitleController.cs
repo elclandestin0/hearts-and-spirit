@@ -5,7 +5,7 @@ using System.Collections;
 public class SubtitleController : MonoBehaviour
 {
     [Header("Refs")]
-    public TutorialManager tutorialManager;   // optional
+    public TutorialManager tutorialManager;
     public DovinaAudioManager audioMgr;
     public TMP_Text subtitleUI;
     public TMP_Text subtitleToggle;
@@ -29,7 +29,6 @@ public class SubtitleController : MonoBehaviour
 
     void OnEnable()
     {
-        // Don't clear here—tutorial may be showing a line right now.
         if (bindRoutine != null) StopCoroutine(bindRoutine);
         bindRoutine = StartCoroutine(BindAfterTutorial());
     }
@@ -42,13 +41,11 @@ public class SubtitleController : MonoBehaviour
 
     IEnumerator BindAfterTutorial()
     {
-        // If there's a tutorial, wait until it's done.
         while (tutorialManager != null && tutorialManager.IsRunning)
             yield return null;
 
         Bind();
 
-        // Now we own the subtitle UI; optionally clear once we’re in control.
         if (subtitleUI && string.IsNullOrEmpty(subtitleUI.text))
             subtitleUI.text = "";
     }
