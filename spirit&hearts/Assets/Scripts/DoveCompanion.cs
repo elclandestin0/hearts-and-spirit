@@ -210,7 +210,7 @@ public class DoveCompanion : MonoBehaviour
     #region Hovering
     private void BaseChatter()
     {
-        if (dovinaAudioManager.IsPriorityPlaying || dovinaAudioManager.IsOnCooldown) return;
+        if (dovinaAudioManager.IsPriorityPlaying || dovinaAudioManager.IsOnCooldown || !tutorialManager.IsRunning) return;
         var selected = dovinaAudioManager.GetClip("gp_changes/movement/hovering");
         dovinaAudioManager.PlayClip(selected, 0);
     }
