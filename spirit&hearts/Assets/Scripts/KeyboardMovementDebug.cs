@@ -16,7 +16,7 @@ public class KeyboardMovementDebug : MonoBehaviour
 
     void Update()
     {
-        if (tutorialManager.IsRunning) return;
+        if (!tutorialManager.IsRunning) return;
         if (PauseState.IsPaused) return;
         if (movement == null || movement.head == null) return;
 
