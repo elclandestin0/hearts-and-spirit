@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using Unity.VisualScripting;
 
 // TO-DO: Split into: Input, Glide, Dive, Wind, Audio.
 public class Movement : MonoBehaviour
@@ -32,7 +33,7 @@ public class Movement : MonoBehaviour
     private readonly float flapStrength = 5f;
     private readonly float forwardPropulsionStrength = 1f;
     private readonly float maxSpeed = 30f;
-    private readonly float maxDiveSpeed = 200f;
+    private readonly float maxDiveSpeed = 300f;
 
     private float snapAngle = 45f;
     private float turnThreshold = 0.8f;
@@ -150,10 +151,10 @@ public class Movement : MonoBehaviour
     private bool Allowed(MovementAbility a) => (Policy.Allowed & a) != 0;
 
     // Add these fields to your class (top-level)
-    [SerializeField] float maxOverallMul = 4f;   // hard cap
-    [SerializeField] float speedMaxMul = 2f;   // speed multiplier cap
-    [SerializeField] float strokeMaxMul = 2f;   // hand/F multiplier cap
-    [SerializeField] float maxHoldSeconds = 3f;   // full charge on release
+    [SerializeField] float maxOverallMul = 10f;   // hard cap
+    [SerializeField] float speedMaxMul = 5f;   // speed multiplier cap
+    [SerializeField] float strokeMaxMul = 5f;   // hand/F multiplier cap
+    [SerializeField] float maxHoldSeconds = 3f;   // full charge on release, debug only
     [SerializeField] float maxFlapVelocity = 10f;  // full hand-down at 10 m/s
     private float fHoldStartTime = -1f;
 
@@ -312,7 +313,6 @@ public class Movement : MonoBehaviour
         float speedT = Mathf.InverseLerp(1f, maxDiveSpeed, speed);     // 0..1
         float speedMul = Mathf.Lerp(1f, speedMaxMul, speedT);          // 1..speedMaxMul
 
-        // ---------- Hand downstroke sampling
         float leftDown  = -leftVelocity.SmoothedVelocity.y;
         float rightDown = -rightVelocity.SmoothedVelocity.y;
         float avgDownSpeed = Mathf.Max(0f, (leftDown + rightDown) * 0.5f);
@@ -321,34 +321,29 @@ public class Movement : MonoBehaviour
         bool isMovingDown = avgDownSpeed > minFlapThreshold && avgDownSpeed < maxFlapVelocity;
         bool justStartedMovingDown = isMovingDown && !wasMovingDownLastFrame;
 
-        // 0..1 based on avg downward speed (0 => none, 1 => max at 10f)
         float downstrokeT = Mathf.InverseLerp(0f, maxFlapVelocity, Mathf.Clamp(avgDownSpeed, 0f, maxFlapVelocity));
 
-        // ---------- F-key charge (0..1 over maxHoldSeconds)
         if (Input.GetKeyDown(KeyCode.F)) fHoldStartTime = Time.time;
         bool fReleased = Input.GetKeyUp(KeyCode.F);
-        float holdSeconds = (fHoldStartTime >= 0f) ? (Time.time - fHoldStartTime) : 0f;
+        float holdSeconds = fHoldStartTime > 0f ? Time.time - fHoldStartTime : 0f;
         float holdT = Mathf.InverseLerp(0f, maxHoldSeconds, Mathf.Clamp(holdSeconds, 0f, maxHoldSeconds));
-
-        // ---------- Strengthener B: stroke/charge (1..strokeMaxMul)
-        // Use whichever is stronger right now: hand down or F-charge-on-release
-        float strokeTriggerT_Current = downstrokeT;        // live for stroke start
-        float strokeTriggerT_OnRelease = holdT;            // latched when releasing F
+        
+        // h
+        float strokeTriggerTCurrent = downstrokeT;
+        float strokeTriggerTOnRelease = holdT;
         bool enoughTimePassed = (Time.time - lastFlapTime) >= 0.665f;
 
-        // Case 1: Hand-driven flap (on stroke start)
         if (justStartedMovingDown && enoughTimePassed)
         {
-            float strokeMul = Mathf.Lerp(1f, strokeMaxMul, strokeTriggerT_Current); // 1..strokeMaxMul
+            float strokeMul = Mathf.Lerp(1f, strokeMaxMul, strokeTriggerTCurrent);
             FireFlap(speedMul, strokeMul);
         }
 
-        // Case 2: Key-driven flap (on F release)
         if (fReleased && enoughTimePassed)
         {
-            float strokeMul = Mathf.Lerp(1f, strokeMaxMul, strokeTriggerT_OnRelease); // 1..strokeMaxMul
+            float strokeMul = Mathf.Lerp(1f, strokeMaxMul, strokeTriggerTOnRelease);
             FireFlap(speedMul, strokeMul);
-            fHoldStartTime = -1f; // reset charge
+            fHoldStartTime = -1f;
         }
 
         // Stroke latch (unchanged)
@@ -366,11 +361,14 @@ public class Movement : MonoBehaviour
     private void FireFlap(float speedMul, float strokeMul)
     {
         float overallMul = Mathf.Min(maxOverallMul, speedMul * strokeMul); // multiplicative combo, clamped
-        float flapMagnitude = 2.0f; // base magnitude (unchanged)
-
-        velocity += overallMul * FlightPhysics.CalculateFlapVelocity(
+        float flapMagnitude = 3.0f;
+        Debug.Log("SpeedMul: " + speedMul + " and strokeMul: " + strokeMul + " and overall mul: " + overallMul);
+        Vector3 flapVelocity = FlightPhysics.CalculateFlapVelocity(
             head.forward, flapMagnitude, flapStrength, forwardPropulsionStrength
         );
+
+        velocity += overallMul * flapVelocity;
+        Debug.Log("Flap velocity: " + flapVelocity + " and velocity: " + velocity);
 
         glideTime = 0f;
         lastFlapTime = Time.time;
@@ -378,7 +376,7 @@ public class Movement : MonoBehaviour
         PlayFlap();
         eventHub.RaiseFlap();
 
-        // Latch gliding through the flap
+        // Latch gliding through the flap.
         glideHoldUntil = Mathf.Max(glideHoldUntil, Time.time + glideHoldDuration);
     }
     private void HandleGlideLogic()
@@ -461,8 +459,6 @@ public class Movement : MonoBehaviour
             isGliding,
             ref glideTime,
             ref diveAngle,
-            recentlyBounced,
-            bounceTimer,
             timeSinceDive,
             diveStartTime,
             isSpeedBoosted
