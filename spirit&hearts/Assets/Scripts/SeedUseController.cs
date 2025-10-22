@@ -6,9 +6,13 @@ public class SeedUseController : MonoBehaviour
     public Transform seedHolster;                 // assign in Inspector (a small anchor near chest)
     public GameObject courierPrefab;              // visual seed that flies to lights
     public DovinaAudioManager doveAudio;          // optional
-
+    [SerializeField] private float launchDuration = 1.0f;
+    [SerializeField] private float launchSpeed = 30f;
+    [SerializeField] private float arriveDistance = 10f;   // “counts as hit” radius
+    [SerializeField] private Transform head;
+    [SerializeField] private TutorialManager _tutorial;
     [Header("Light Seeking")]
-    public float lightSeekRadius = 60f;
+    public float lightSeekRadius = 500f;
     public string lightTag = "Light";
 
     // internal kk 
@@ -16,92 +20,54 @@ public class SeedUseController : MonoBehaviour
     private MovementEventHub _hub;
     private SeedInventory _inv;
     private AmbientLightManager _ambient;
-    private TutorialManager _tutorial;
+    private bool _isLaunchingForward = false;
 
-    // kw
+
     void Awake()
     {
         _inv = GetComponent<SeedInventory>();
         _hub = GetComponent<MovementEventHub>();
         _ambient = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
-        _tutorial = GetComponent<TutorialManager>();
         if (!seedHolster) seedHolster = transform.Find("SeedHolster");
         if (!doveAudio) doveAudio = GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
     }
 
     void Update()
     {
-        Debug.Log("Courier active? " + _courierActive);
-        Debug.Log("Inventory? " + _inv == null + " Seed Count? + " + _inv.GetSeedCount());
-        Debug.Log("Seed Count? " + _inv.GetSeedCount());
-        if (_courierActive) return;
-        if (_inv == null || _inv.GetSeedCount() <= 0) return;
-        Debug.Log("Courier not active. Inventory not null. We got " + _inv.GetSeedCount() + " seed.");
-
-        // Find a nearby, unlit light
-        GameObject[] lights = GameObject.FindGameObjectsWithTag(lightTag);
-        Transform target = null;
-        float best = float.PositiveInfinity;
-
-        foreach (var light in lights)
-        {
-            var lc = light.GetComponent<LightController>() 
-                  ?? light.GetComponentInParent<LightController>() 
-                  ?? light.GetComponentInChildren<LightController>();
-            if (lc == null || lc.isLit) continue;
-
-            float d = Vector3.Distance(transform.position, light.transform.position);
-            if (d < lightSeekRadius && d < best)
-            {
-                best = d;
-                target = light.transform;
-            }
-        }
-
-        if (target != null)
-            LaunchCourierTo(target);
+        if (Input.GetKeyDown(KeyCode.X))
+            LaunchCourierForward();
     }
-
-    private void LaunchCourierTo(Transform targetLight)
+    
+    private void LaunchCourierForward()
     {
-        Debug.Log("Found target.");
         if (courierPrefab == null || seedHolster == null) return;
-        Debug.Log("Launching courier. Checking seeds.");
-        // consume first to make intent clear
-        if (_inv.GetSeedCount() <= 0) return;
-        Debug.Log("We got a seed babeh.");
+        if (_inv == null || _inv.GetSeedCount() <= 0) return;
+
         _inv.RemoveSeed();
 
         var courierGO = Instantiate(courierPrefab, seedHolster.position, seedHolster.rotation);
+
+        var seedBehavior = courierGO.GetComponent<SeedBehavior>();
+        if (seedBehavior != null)
+        {
+            seedBehavior.DisablePickupFor(5f);
+            seedBehavior.externallyControlled = true;
+        }
+
+        // choose forward as player head forward (usually nicer) or this.transform.forward
+            Vector3 launchDir = head.forward;
+
         var courier = courierGO.AddComponent<SeedCourier>();
-        courier.Init(
-            targetLight,
-            onArrived: () =>
-            {
-                // light it
-                var lc = targetLight.GetComponent<LightController>() 
-                      ?? targetLight.GetComponentInParent<LightController>()
-                      ?? targetLight.GetComponentInChildren<LightController>();
-
-                if (lc != null && !lc.isLit)
-                {
-                    lc.isLit = true;
-                    if (_tutorial == null || !_tutorial.IsRunning)
-                    {
-                        doveAudio?.PlayPriority("gp_changes/light", 2, 1, 12);
-                        doveAudio?.PlayPriority("parables", 4, 0, 999);
-                        _ambient?.UpdateAmbientLight();
-                    }
-
-                    _hub?.RaiseLightLit();
-                    var pid = lc.GetComponent<PersistentId>();
-                    var playerRoot = transform;
-                    ProgressManager.Instance?.MarkLastLit(pid, playerRoot);
-                    SaveManager.Save("slot1");
-                }
-
-                _courierActive = false;
-            },
+        courier.InitForward(
+            dir: launchDir,
+            duration: launchDuration,
+            speed: launchSpeed,
+            arriveDistance: arriveDistance,
+            dove: doveAudio,
+            ambient: _ambient,
+            hub: _hub,
+            tutorial: _tutorial,
+            playerRoot: transform,
             onBegin: () => { _courierActive = true; },
             onDestroyed: () => { _courierActive = false; }
         );
