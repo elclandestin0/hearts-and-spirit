@@ -534,7 +534,6 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        Debug.Log("In ApplyGravityIfNeeded()");
         bool appliedGravityThisFrame = false;
         bool isInWindZone = false;
 
@@ -571,7 +570,6 @@ public class Movement : MonoBehaviour
             gravityDirection.Normalize();
             velocity += gravityDirection * gravity * Time.deltaTime;
             appliedGravityThisFrame = true;
-            Debug.Log("Applying gravity " + gravity);
         }
 
         if (appliedGravityThisFrame)
@@ -584,7 +582,7 @@ public class Movement : MonoBehaviour
         float liftBonus = Mathf.Lerp(0f, 3f, speedFactor);
         velocity += Vector3.up * liftBonus * Time.deltaTime;
     }
-// kkk
+    
     private void ApplyMovement()
     {
         transform.position += (velocity * 1.25f) * Time.deltaTime;

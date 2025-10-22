@@ -23,7 +23,7 @@ public class SeedBehavior : MonoBehaviour
     private TutorialManager tutorialManager;
     void Start()
     {
-        player = GameObject.FindWithTag("Player")?.transform;
+        player = GameObject.FindWithTag("MainPlayer")?.transform;
         seedHolster = player.transform.Find("SeedHolster");
         lightManager = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
         dovinaAudioManager = GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
@@ -95,16 +95,21 @@ public class SeedBehavior : MonoBehaviour
         float distance = Vector3.Distance(transform.position, player.position);
         if (distance <= attachDistance)
         {
-            currentState = State.AttachedToPlayer;
-            transform.SetParent(seedHolster);
-            transform.localPosition = Vector3.zero;
+            // 1) Add to inventory and play SFX
+            var inv = player.gameObject.GetComponent<SeedInventory>();
+            if (!inv) inv = player.gameObject.AddComponent<SeedInventory>();
+            inv.AddSeed();
 
-            var items = player.gameObject.GetComponent<ItemManager>();
-            items.AddSeed();
-            items.PlayPickUpSound();
-            dovinaAudioManager.PlayPriority("gp_changes/seed", 2, 2, 14);
+            var items = player.gameObject.GetComponent<ItemManager>(); // if you still use it for SFX/UI
+            items?.PlayPickUpSound();
+            var dove = dovinaAudioManager ?? GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
+            dove?.PlayPriority("gp_changes/seed", 2, 2, 14);
 
+            // 2) Fire the tutorial/event hub
             _hub.RaiseSeedPicked();
+
+            // 3) REMOVE the world pickup object (don't keep it in holster)
+            Destroy(gameObject);
         }
     }
 
