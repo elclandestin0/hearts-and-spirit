@@ -584,10 +584,10 @@ public class Movement : MonoBehaviour
         float liftBonus = Mathf.Lerp(0f, 3f, speedFactor);
         velocity += Vector3.up * liftBonus * Time.deltaTime;
     }
-
+// kkk
     private void ApplyMovement()
     {
-        transform.position += velocity * Time.deltaTime;
+        transform.position += (velocity * 1.25f) * Time.deltaTime;
     }
 
     private void ApplyDrag()
