@@ -25,8 +25,6 @@ public static class FlightPhysics
         bool isManualDivePose,
         ref float glideTime,
         ref float diveAngle,
-        bool recentlyBounced,
-        float bounceTimer,
         float timeSinceDiveEnd,
         float diveStartTime,
         bool isSpeedBoosted
