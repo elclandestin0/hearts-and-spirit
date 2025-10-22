@@ -3,53 +3,105 @@ using System;
 
 public class SeedCourier : MonoBehaviour
 {
-    private Transform _target;
-    private Action _onArrived, _onBegin, _onDestroyed;
+    // config
+    private Vector3 forwardDir;
+    private float duration;
+    private float speed;
+    private float arriveDistance;
+    private string lightTag = "Light";
 
-    [Header("Motion")]
-    public float minSpeed = 10f;
-    public float maxSpeed = 60f;
-    public float stopDistance = 10f; // match your old "<= 10f" reach
+    // refs for lighting
+    private DovinaAudioManager dove;
+    private AmbientLightManager ambient;
+    private MovementEventHub hub;
+    private TutorialManager tutorial;
+    private Transform playerRoot;
 
-    public void Init(Transform target, Action onArrived, Action onBegin = null, Action onDestroyed = null)
+    private float t;
+    private Action onBegin, onDestroyed;
+
+    public void InitForward(
+        Vector3 dir, float duration, float speed, float arriveDistance,
+        DovinaAudioManager dove, AmbientLightManager ambient, MovementEventHub hub,
+        TutorialManager tutorial, Transform playerRoot,
+        Action onBegin = null, Action onDestroyed = null)
     {
-        _target = target;
-        _onArrived = onArrived;
-        _onBegin = onBegin;
-        _onDestroyed = onDestroyed;
-        _onBegin?.Invoke();
+        this.forwardDir = dir.normalized;
+        this.duration = Mathf.Max(0.01f, duration);
+        this.speed = speed;
+        this.arriveDistance = arriveDistance;
+
+        this.dove = dove;
+        this.ambient = ambient;
+        this.hub = hub;
+        this.tutorial = tutorial;
+        this.playerRoot = playerRoot;
+
+        this.onBegin = onBegin;
+        this.onDestroyed = onDestroyed;
+
+        onBegin?.Invoke();
     }
 
     void Update()
     {
-        if (_target == null)
+        // move forward for 'duration'
+        if (t < duration)
         {
-            _onDestroyed?.Invoke();
-            Destroy(gameObject);
+            transform.position += forwardDir * speed * Time.deltaTime;
+
+            // if we pass close to any unlit light during the launch window, light it
+            Transform target = FindUnlitLightWithin(arriveDistance);
+            if (target != null)
+            {
+                TryLight(target);
+                onDestroyed?.Invoke();
+                Destroy(gameObject);
+                return;
+            }
+
+            t += Time.deltaTime;
             return;
         }
 
-        float distance = Vector3.Distance(transform.position, _target.position);
-        if (distance <= stopDistance)
-        {
-            _onArrived?.Invoke();
-            Destroy(gameObject);
-            return;
-        }
-
-        float t = Mathf.InverseLerp(120f, 0f, distance); // faster when close
-        float speed = Mathf.Lerp(minSpeed, maxSpeed, t);
-        Vector3 dir = (_target.position - transform.position).normalized;
-
-        transform.position += dir * speed * Time.deltaTime;
-
-        // face movement
-        if (dir.sqrMagnitude > 0.0001f)
-        {
-            var rot = Quaternion.LookRotation(dir, Vector3.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 6f);
-        }
+        enabled = false;
+        var sb = GetComponent<SeedBehavior>();
+        if (sb != null)
+            sb.externallyControlled = false;
     }
 
-    void OnDestroy() => _onDestroyed?.Invoke();
+    private Transform FindUnlitLightWithin(float radius)
+    {
+        GameObject[] lights = GameObject.FindGameObjectsWithTag(lightTag);
+        foreach (var go in lights)
+        {
+            var lc = go.GetComponent<LightController>() ?? go.GetComponentInParent<LightController>() ?? go.GetComponentInChildren<LightController>();
+            if (lc == null || lc.isLit) continue;
+
+            if (Vector3.Distance(transform.position, go.transform.position) <= radius)
+                return go.transform;
+        }
+        return null;
+    }
+
+    private void TryLight(Transform targetLight)
+    {
+        var lc = targetLight.GetComponent<LightController>() ?? targetLight.GetComponentInParent<LightController>() ?? targetLight.GetComponentInChildren<LightController>();
+        if (lc == null || lc.isLit) return;
+
+        lc.isLit = true;
+
+        if (tutorial == null || !tutorial.IsRunning)
+        {
+            dove?.PlayPriority("gp_changes/light", 2, 1, 12);
+            dove?.PlayPriority("parables", 4, 0, 999);
+            ambient?.UpdateAmbientLight();
+        }
+
+        hub?.RaiseLightLit();
+
+        var pid = lc.GetComponent<PersistentId>();
+        ProgressManager.Instance?.MarkLastLit(pid, playerRoot);
+        SaveManager.Save("slot1");
+    }
 }

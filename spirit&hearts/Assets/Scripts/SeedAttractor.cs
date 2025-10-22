@@ -18,13 +18,15 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private string lightTag = "Light";
     [SerializeField] private AmbientLightManager lightManager;
     [SerializeField] private MovementEventHub _hub;
+    public bool externallyControlled = false;
     private LightController light;
     private DovinaAudioManager dovinaAudioManager;
     private TutorialManager tutorialManager;
+    private float pickupDisabledUntil = 0f;
     void Start()
     {
         player = GameObject.FindWithTag("MainPlayer")?.transform;
-        seedHolster = player.transform.Find("SeedHolster");
+        seedHolster = GameObject.FindWithTag("Player").transform.Find("SeedHolster");
         lightManager = GameObject.Find("AmbientLightManager")?.GetComponent<AmbientLightManager>();
         dovinaAudioManager = GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
         _hub = GameObject.FindWithTag("MainPlayer")?.GetComponent<MovementEventHub>();
@@ -33,10 +35,11 @@ public class SeedBehavior : MonoBehaviour
 
     void Update()
     {
+        if (externallyControlled) return;
         if (PauseState.IsPaused) return;
         if (player == null) return;
 
-        switch (currentState)
+        switch (currentState)// d
         {
             case State.Idle:
                 CheckForPlayerProximity();
@@ -80,7 +83,6 @@ public class SeedBehavior : MonoBehaviour
                             var pid = light.GetComponent<PersistentId>();
                             var playerRoot = GameObject.FindWithTag("MainPlayer").transform;
                             ProgressManager.Instance?.MarkLastLit(pid, playerRoot);
-                            Debug.Log("About to save into slot1");
                             SaveManager.Save("slot1");
                             Destroy(this.gameObject);
                         }
@@ -90,14 +92,20 @@ public class SeedBehavior : MonoBehaviour
         }
     }
 
+    public void DisablePickupFor(float seconds)
+    {
+        pickupDisabledUntil = Time.time + seconds;
+    }
+
     private void CheckForAttachment()
     {
+        if (Time.time < pickupDisabledUntil) return;
         float distance = Vector3.Distance(transform.position, player.position);
+        var inv = player.GetComponent<SeedInventory>();
+        
         if (distance <= attachDistance)
         {
-            // 1) Add to inventory and play SFX
-            var inv = player.gameObject.GetComponent<SeedInventory>();
-            if (!inv) inv = player.gameObject.AddComponent<SeedInventory>();
+            inv ??= player.gameObject.AddComponent<SeedInventory>();
             inv.AddSeed();
 
             var items = player.gameObject.GetComponent<ItemManager>(); // if you still use it for SFX/UI

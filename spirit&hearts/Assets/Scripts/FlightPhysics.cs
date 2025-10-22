@@ -16,7 +16,7 @@ public static class FlightPhysics
         return velocity;
     }
 
-    public static Vector3 CalculateGlideVelocity(
+public static Vector3 CalculateGlideVelocity(
         Vector3 currentVelocity,
         Vector3 headForward,
         float glideStrength,
