@@ -4,6 +4,7 @@ public class SeedBehavior : MonoBehaviour
 {
     public enum State { Idle, AttractToPlayer, AttachedToPlayer, MoveToLight }
     public State currentState = State.Idle;
+    [HideInInspector] public bool externallyControlled = false;
 
     private Transform player;
     private Transform currentLightTarget;
@@ -18,7 +19,6 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private string lightTag = "Light";
     [SerializeField] private AmbientLightManager lightManager;
     [SerializeField] private MovementEventHub _hub;
-    public bool externallyControlled = false;
     private LightController light;
     private DovinaAudioManager dovinaAudioManager;
     private TutorialManager tutorialManager;
@@ -39,7 +39,7 @@ public class SeedBehavior : MonoBehaviour
         if (PauseState.IsPaused) return;
         if (player == null) return;
 
-        switch (currentState)// d
+        switch (currentState)
         {
             case State.Idle:
                 CheckForPlayerProximity();
@@ -57,7 +57,7 @@ public class SeedBehavior : MonoBehaviour
                 MoveToward(seedHolster);
                 CheckForAttachment();
                 break;
-                
+
 
             case State.AttachedToPlayer:
                 SearchForNearbyLight();
@@ -71,11 +71,10 @@ public class SeedBehavior : MonoBehaviour
                     float d = Vector3.Distance(transform.position, currentLightTarget.position);
                     if (d <= 10f)
                     {
-                        // Reached light source
+                        // *** your existing lighting block (unchanged) ***
                         LightController light = currentLightTarget.GetComponent<LightController>()
                                                 ?? currentLightTarget.GetComponentInParent<LightController>()
                                                 ?? currentLightTarget.GetComponentInChildren<LightController>();
-
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
@@ -99,6 +98,45 @@ public class SeedBehavior : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    public void BeginMoveToLight(Transform target)
+    {
+        if (target == null) return;
+        transform.SetParent(null);
+        currentLightTarget = target;
+        currentState = State.MoveToLight;
+    }
+
+    public bool BeginSeekNearestUnlit(float searchRadius = 300f)
+    {
+        Transform nearest = FindNearestUnlitLight(searchRadius);
+        if (nearest == null) return false;
+        BeginMoveToLight(nearest);
+        return true;
+    }
+
+    private Transform FindNearestUnlitLight(float radius)
+    {
+        GameObject[] lights = GameObject.FindGameObjectsWithTag(lightTag);
+        Transform best = null;
+        float bestDist = float.MaxValue;
+
+        foreach (var go in lights)
+        {
+            var lc = go.GetComponent<LightController>()
+                  ?? go.GetComponentInParent<LightController>()
+                  ?? go.GetComponentInChildren<LightController>();
+            if (lc == null || lc.isLit) continue;
+
+            float d = Vector3.Distance(transform.position, go.transform.position);
+            if (d <= radius && d < bestDist)
+            {
+                best = go.transform;
+                bestDist = d;
+            }
+        }
+        return best;
     }
 
     public void DisablePickupFor(float seconds)

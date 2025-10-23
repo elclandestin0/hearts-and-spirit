@@ -43,32 +43,38 @@ public class SeedCourier : MonoBehaviour
         onBegin?.Invoke();
     }
 
-    void Update()
+void Update()
+{
+    if (t < duration)
     {
-        // move forward for 'duration'
-        if (t < duration)
+        transform.position += forwardDir * speed * Time.deltaTime;
+
+        Transform target = FindUnlitLightWithin(arriveDistance);
+        if (target != null)
         {
-            transform.position += forwardDir * speed * Time.deltaTime;
-
-            // if we pass close to any unlit light during the launch window, light it
-            Transform target = FindUnlitLightWithin(arriveDistance);
-            if (target != null)
-            {
-                TryLight(target);
-                onDestroyed?.Invoke();
-                Destroy(gameObject);
-                return;
-            }
-
-            t += Time.deltaTime;
+            TryLight(target);
+            onDestroyed?.Invoke();
+            Destroy(gameObject);
             return;
         }
 
-        enabled = false;
-        var sb = GetComponent<SeedBehavior>();
-        if (sb != null)
-            sb.externallyControlled = false;
+        t += Time.deltaTime;
+        return;
     }
+
+    var sb = GetComponent<SeedBehavior>();
+    if (sb != null)
+    {
+        sb.externallyControlled = false;     
+        bool started = sb.BeginSeekNearestUnlit();
+        if (!started)
+        {
+            sb.currentState = SeedBehavior.State.Idle;
+        }
+    }
+
+    Destroy(this); 
+}
 
     private Transform FindUnlitLightWithin(float radius)
     {
