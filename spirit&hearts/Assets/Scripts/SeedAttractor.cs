@@ -78,8 +78,9 @@ public class SeedBehavior : MonoBehaviour
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
-                            player.gameObject.GetComponent<ItemManager>().RemoveSeed();
-                            player.gameObject.GetComponent<ItemManager>().PlayLightSound();
+
+                            var _player = GameObject.FindWithTag("Player");
+                            _player.GetComponent<ItemManager>().PlayLightSound();
                             if (!tutorialManager.IsRunning)
                             {
                                 dovinaAudioManager.PlayPriority("gp_changes/light", 2, 1, 12);
@@ -155,8 +156,10 @@ public class SeedBehavior : MonoBehaviour
             inv ??= player.gameObject.AddComponent<SeedInventory>();
             inv.AddSeed();
 
-            var items = player.gameObject.GetComponent<ItemManager>(); // if you still use it for SFX/UI
-            items?.PlayPickUpSound();
+            var _player = GameObject.FindGameObjectWithTag("Player");
+            var items = _player.GetComponent<ItemManager>();
+            Debug.Log("About to play pick-up sound.");
+            items.PlayPickUpSound();
             var dove = dovinaAudioManager ?? GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
             dove?.PlayPriority("gp_changes/seed", 2, 2, 14);
 

@@ -41,40 +41,55 @@ public class SeedCourier : MonoBehaviour
         this.onDestroyed = onDestroyed;
 
         onBegin?.Invoke();
+        var sb = GetComponent<SeedBehavior>();
+        if (sb) sb.externallyControlled = true;
     }
 
-void Update()
-{
-    if (t < duration)
+    void Update()
     {
-        transform.position += forwardDir * speed * Time.deltaTime;
+        var sb = GetComponent<SeedBehavior>();
 
-        Transform target = FindUnlitLightWithin(arriveDistance);
-        if (target != null)
+        if (t < duration)
         {
-            TryLight(target);
-            onDestroyed?.Invoke();
-            Destroy(gameObject);
+            transform.position += forwardDir * speed * Time.deltaTime;
+
+            Transform instant = FindUnlitLightWithin(arriveDistance);
+            if (instant != null)
+            {
+                TryLight(instant);
+                onDestroyed?.Invoke();
+                Destroy(gameObject);
+                return;
+            }
+
+            if (sb != null)
+            {
+                sb.externallyControlled = false;
+                bool started = sb.BeginSeekNearestUnlit();
+                if (started)
+                {
+                    Destroy(this);
+                    return;
+                }
+                sb.externallyControlled = true;
+            }
+
+            t += Time.deltaTime;
             return;
         }
 
-        t += Time.deltaTime;
-        return;
-    }
-
-    var sb = GetComponent<SeedBehavior>();
-    if (sb != null)
-    {
-        sb.externallyControlled = false;     
-        bool started = sb.BeginSeekNearestUnlit();
-        if (!started)
+        if (sb != null)
         {
-            sb.currentState = SeedBehavior.State.Idle;
+            sb.externallyControlled = false;
+            bool started = sb.BeginSeekNearestUnlit();
+            if (!started)
+            {
+                sb.currentState = SeedBehavior.State.Idle;
+            }
         }
-    }
 
-    Destroy(this); 
-}
+        Destroy(this);
+    }
 
     private Transform FindUnlitLightWithin(float radius)
     {

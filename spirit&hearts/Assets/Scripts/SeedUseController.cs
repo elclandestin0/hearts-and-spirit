@@ -7,7 +7,7 @@ public class SeedUseController : MonoBehaviour
     public GameObject courierPrefab;              // visual seed that flies to lights
     public DovinaAudioManager doveAudio;          // optional
     [SerializeField] private float launchDuration = 5.0f;
-    [SerializeField] private float launchSpeed = 30f;
+    [SerializeField] private float launchSpeed = 300f;
     [SerializeField] private float arriveDistance = 10f;   // “counts as hit” radius
     [SerializeField] private Transform head;
     [SerializeField] private TutorialManager _tutorial;
@@ -45,7 +45,7 @@ public class SeedUseController : MonoBehaviour
 
         _inv.RemoveSeed();
 
-        var courierGO = Instantiate(courierPrefab, seedHolster.position, seedHolster.rotation);
+        var courierGO = Instantiate(courierPrefab, seedHolster.position, courierPrefab.transform.rotation);
 
         var seedBehavior = courierGO.GetComponent<SeedBehavior>();
         if (seedBehavior != null)
