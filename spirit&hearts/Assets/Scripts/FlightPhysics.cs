@@ -75,13 +75,9 @@ public static Vector3 CalculateGlideVelocity(
             float diveTime = Time.time - diveStartTime;
             float diveRamp = Mathf.SmoothStep(0f, 1f, diveTime / 2f);
 
-            // Boost is *extra glide force*, not overriding anything
-            // float divePush = diveSpeedBoost * diveRamp * deltaTime * 0.5f;
             float divePush = diveSpeedBoost * deltaTime * 0.5f;
-            // Add dive push in the glide direction
             velocity += headForward.normalized * divePush;
 
-            // Slightly counteract glideTime to extend strong glide
             glideTime = Mathf.Max(0f, glideTime - deltaTime * 3f);
         }
         else
@@ -90,11 +86,9 @@ public static Vector3 CalculateGlideVelocity(
         }
 
 
-        // Cap speed no cap
         float speed = velocity.magnitude;
         if (speed > maxDiveSpeed && !isSpeedBoosted)
         {
-            // Gradually reduce speed toward maxDiveSpeed
             float decaySpeed = 2.5f; // adjust for how quickly you want it to settle
             float newSpeed = Mathf.Lerp(speed, maxDiveSpeed, Time.deltaTime * decaySpeed);
             velocity = velocity.normalized * newSpeed;

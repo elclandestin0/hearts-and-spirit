@@ -168,16 +168,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
+  externallyControlled: 0
   attractionRadius: 500
   attachDistance: 40
   minSpeed: 100
   maxSpeed: 200
   seedHolster: {fileID: 0}
+  useSpiral: 1
+  spiralStartRadius: 12
+  spiralAngularSpeed: 400
+  spiralShrinkSpeed: 40
   lightSeekRadius: 500
   lightTag: Light
   lightManager: {fileID: 0}
   _hub: {fileID: 0}
-  externallyControlled: 0
 --- !u!114 &6593313786030574643
 MonoBehaviour:
   m_ObjectHideFlags: 0
