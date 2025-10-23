@@ -65,6 +65,20 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         Advance();
     }
 
+    public void SkipTutorial()
+    {
+        // If a cinematic is in progress, stop it safely.
+        if (cinematicRoutine != null)
+        {
+            StopCoroutine(cinematicRoutine);
+            cinematicRoutine = null;
+            Debug.Log("Stopping cinematic routine...");
+        }
+
+        Debug.Log("End of Skip Tutorial...");
+        EndTutorialToFreeFlight();
+    }
+
     private void Advance()
     {
         if (PauseState.IsPaused) return;
@@ -188,15 +202,31 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     }
 
 
+
     private void EndTutorialToFreeFlight()
     {
+        // Grant everything
+        _policy = MovementPolicy.Everything;
+
+        // Optional: clear any on-screen subtitle
+        if (subtitleUI != null) subtitleUI.text = "";
+
+        // Mark finished and stop ticking
         IsRunning = false;
         enabled = false;
-        subtitleUI.text = "";
+
+        Debug.Log("[Tutorial] Skipped → Free Flight (Everything enabled).");
     }
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Debug.Log("Skipping tutorial...");
+            SkipTutorial();
+            return;
+        }
+
         if (PauseState.IsPaused)
         {
             Debug.Log("Game paused");
@@ -209,8 +239,6 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
         // Guard: ensure we don't read before min delay
         if (stepClock < currentInteractive.minSecondsBeforeAdvance) return;
-
-        // If you later expose "VO finished" from doveSpeaker, you can add it in the None case.
 
         switch (currentInteractive.completionType)
         {

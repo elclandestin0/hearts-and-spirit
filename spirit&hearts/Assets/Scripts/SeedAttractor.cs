@@ -46,9 +46,18 @@ public class SeedBehavior : MonoBehaviour
                 break;
 
             case State.AttractToPlayer:
+                float distance = Vector3.Distance(transform.position, player.position);
+                // If C is no longer held OR we left the radius, stop attracting
+                if (!Input.GetKey(KeyCode.C) || distance >= attractionRadius)
+                {
+                    currentState = State.Idle;
+                    break;
+                }
+
                 MoveToward(seedHolster);
                 CheckForAttachment();
                 break;
+                
 
             case State.AttachedToPlayer:
                 SearchForNearbyLight();
@@ -78,7 +87,7 @@ public class SeedBehavior : MonoBehaviour
                                 dovinaAudioManager.PlayPriority("parables", 4, 0, 999);
                                 lightManager.UpdateAmbientLight();
                             }
-                            
+
                             _hub.RaiseLightLit();
                             var pid = light.GetComponent<PersistentId>();
                             var playerRoot = GameObject.FindWithTag("MainPlayer").transform;
@@ -102,7 +111,7 @@ public class SeedBehavior : MonoBehaviour
         if (Time.time < pickupDisabledUntil) return;
         float distance = Vector3.Distance(transform.position, player.position);
         var inv = player.GetComponent<SeedInventory>();
-        
+
         if (distance <= attachDistance)
         {
             inv ??= player.gameObject.AddComponent<SeedInventory>();
@@ -124,11 +133,17 @@ public class SeedBehavior : MonoBehaviour
     private void CheckForPlayerProximity()
     {
         float distance = Vector3.Distance(transform.position, player.position);
-        if (distance < attractionRadius)
+
+        if (distance < attractionRadius && Input.GetKey(KeyCode.C))
         {
             currentState = State.AttractToPlayer;
         }
+        else
+        {
+            currentState = State.Idle;
+        }
     }
+
 
     private void SearchForNearbyLight()
     {
