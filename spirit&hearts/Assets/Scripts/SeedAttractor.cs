@@ -24,8 +24,8 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private float homingMinKick = 6f;   // one-time speed if we enter with 0
     [SerializeField] private float homingMinCruise = 30f; // speed floor while homing
     [Header("MoveToLight Speed By Proximity")]
-    [SerializeField] private float homingMaxSpeed = 45f;          // max speed when very close
-    [SerializeField] private float homingAccel = 30f;          // how fast we approach target speed (m/s² feel)
+    [SerializeField] private float homingMaxSpeed = 500f;          // max speed when very close
+    [SerializeField] private float homingAccel = 500f;          // how fast we approach target speed (m/s² feel)
     [SerializeField] private float homingCaptureRadius = 120f;    // distance where scaling starts (far -> near)
     [SerializeField]
     private AnimationCurve homingSpeedByProximity =
@@ -128,15 +128,18 @@ public class SeedBehavior : MonoBehaviour
                         Vector3 currentDir = (motion.Velocity.sqrMagnitude > 1e-6f) ? motion.Velocity.normalized : targetDir;
                         Vector3 blendedDir = Vector3.Slerp(currentDir, targetDir, Time.deltaTime * moveBlendGain);
 
-                        float tNear = Mathf.InverseLerp(homingCaptureRadius, 0f, dist);
-                        tNear = homingSpeedByProximity.Evaluate(tNear);
+                        float tNear = 1f - Mathf.InverseLerp(0f, homingCaptureRadius, dist);
+                        float targetSpeed = Mathf.Lerp(homingMinCruise, homingMaxSpeed, Mathf.SmoothStep(0f, 1f, tNear));
 
-                        float targetSpeed = Mathf.Lerp(homingMinCruise, homingMaxSpeed, tNear);
-
-                        float currentSpeed = motion.Velocity.magnitude;
+                        Debug.Log("tnear: " + tNear + "targetSpeed: " + targetSpeed);
+                        float targetMult = 1.25f;
+                        float lerpRate = 2f;
+                        float currentSpeed = Mathf.Lerp(motion.Velocity.magnitude,
+                                                        motion.Velocity.magnitude * targetMult,
+                                                        Time.deltaTime * lerpRate);
+                        Debug.Log("current speed " + currentSpeed);
                         float nextSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, homingAccel * Time.deltaTime);
-
-                        // 5) Apply
+                        Debug.Log("Next speed: " + nextSpeed);
                         motion.Velocity = blendedDir * nextSpeed;
                     }
 
@@ -190,8 +193,6 @@ public class SeedBehavior : MonoBehaviour
     }
 
 
-
-
     public bool BeginSeekNearestUnlit(float searchRadius = 300f)
     {
         Transform nearest = FindNearestUnlitLight(searchRadius);
@@ -241,7 +242,6 @@ public class SeedBehavior : MonoBehaviour
 
             var _player = GameObject.FindGameObjectWithTag("Player");
             var items = _player.GetComponent<ItemManager>();
-            Debug.Log("About to play pick-up sound.");
             items.PlayPickUpSound();
             var dove = dovinaAudioManager ?? GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
             dove?.PlayPriority("gp_changes/seed", 2, 2, 14);
@@ -290,7 +290,6 @@ public class SeedBehavior : MonoBehaviour
             currentState = State.MoveToLight;
         }
     }
-
 
     private void MoveToward(Transform target)
     {

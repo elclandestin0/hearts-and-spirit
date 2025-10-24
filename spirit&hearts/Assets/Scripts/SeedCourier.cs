@@ -19,7 +19,7 @@ public class SeedCourier : MonoBehaviour
     private SeedMotion motion;
     private float t;
     private Action onBegin, onDestroyed;
-    [SerializeField] private float launchDecel = 5f;     // m/s² — speed bleed after throw
+    [SerializeField] private float launchDecel = 2f;     // m/s² — speed bleed after throw
     [SerializeField] private float minLaunchSpeed = 0.5f; // when below this, we consider the throw “over”
 
 
