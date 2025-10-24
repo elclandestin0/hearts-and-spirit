@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 8546025100054043572}
   - component: {fileID: 2097975818630986166}
   - component: {fileID: 6593313786030574643}
+  - component: {fileID: -4699203539289196182}
   m_Layer: 0
   m_Name: Seed
   m_TagString: Seed
@@ -174,10 +175,11 @@ MonoBehaviour:
   minSpeed: 100
   maxSpeed: 200
   seedHolster: {fileID: 0}
-  useSpiral: 1
-  spiralStartRadius: 12
-  spiralAngularSpeed: 400
-  spiralShrinkSpeed: 40
+  moveBlendGain: 6
+  attractAccel: 30
+  attractDecel: 20
+  homingMinKick: 6
+  homingMinCruise: 3
   lightSeekRadius: 500
   lightTag: Light
   lightManager: {fileID: 0}
@@ -201,3 +203,19 @@ MonoBehaviour:
   litIntensity: 1000
   transitionDuration: 1.5
   isLit: 1
+--- !u!114 &-4699203539289196182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4170091215176379153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7e3afe28b7d14557be8794cdf8a0627, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Velocity: {x: 0, y: 0, z: 0}
+  drag: 0
+  debugLogs: 0
+  integrationEnabled: 1
