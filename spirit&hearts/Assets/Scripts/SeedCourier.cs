@@ -16,7 +16,7 @@ public class SeedCourier : MonoBehaviour
     private MovementEventHub hub;
     private TutorialManager tutorial;
     private Transform playerRoot;
-
+    private SeedMotion motion;
     private float t;
     private Action onBegin, onDestroyed;
 
@@ -41,17 +41,25 @@ public class SeedCourier : MonoBehaviour
         this.onDestroyed = onDestroyed;
 
         onBegin?.Invoke();
+
+        motion = GetComponent<SeedMotion>();
         var sb = GetComponent<SeedBehavior>();
+
+        Vector3 v0 = dir.normalized * speed;
+        if (motion) motion.SetVelocity(v0);
         if (sb) sb.externallyControlled = true;
     }
 
     void Update()
     {
         var sb = GetComponent<SeedBehavior>();
-
+        motion ??= GetComponent<SeedMotion>();
         if (t < duration)
         {
-            transform.position += forwardDir * speed * Time.deltaTime;
+            if (motion && motion.Velocity.sqrMagnitude > 1e-6f)
+            {
+                motion.SteerTowardDir(forwardDir, Time.deltaTime * 0.5f);
+            }
 
             Transform instant = FindUnlitLightWithin(arriveDistance);
             if (instant != null)
@@ -87,7 +95,6 @@ public class SeedCourier : MonoBehaviour
                 sb.currentState = SeedBehavior.State.Idle;
             }
         }
-
         Destroy(this);
     }
 
