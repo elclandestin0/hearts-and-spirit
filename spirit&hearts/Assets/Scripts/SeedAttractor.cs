@@ -4,6 +4,7 @@ public class SeedBehavior : MonoBehaviour
 {
     public enum State { Idle, AttractToPlayer, AttachedToPlayer, MoveToLight }
     public State currentState = State.Idle;
+    public bool IsHomingToLight => currentState == State.MoveToLight && currentLightTarget != null;
     [HideInInspector] public bool externallyControlled = false;
 
     private Transform player;
@@ -22,6 +23,13 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] private float attractDecel = 20f;  // how fast we bleed speed when released
     [SerializeField] private float homingMinKick = 6f;   // one-time speed if we enter with 0
     [SerializeField] private float homingMinCruise = 30f; // speed floor while homing
+    [Header("MoveToLight Speed By Proximity")]
+    [SerializeField] private float homingMaxSpeed = 45f;          // max speed when very close
+    [SerializeField] private float homingAccel = 30f;          // how fast we approach target speed (m/s² feel)
+    [SerializeField] private float homingCaptureRadius = 120f;    // distance where scaling starts (far -> near)
+    [SerializeField]
+    private AnimationCurve homingSpeedByProximity =
+        AnimationCurve.EaseInOut(0, 0, 1, 1); // 0..1 (far..near) -> 0..1 speed scaling
     [Header("Light Seeking Settings")]
     [SerializeField] private float lightSeekRadius;
     [SerializeField] private string lightTag = "Light";
@@ -56,54 +64,53 @@ public class SeedBehavior : MonoBehaviour
                 break;
 
             case State.AttractToPlayer:
+                float dt = Time.deltaTime;
+                bool held = Input.GetKey(KeyCode.C);
+                float distance = Vector3.Distance(transform.position, player.position);
+
+                if (!held || distance >= attractionRadius)
                 {
-                    float dt = Time.deltaTime;
-                    bool held = Input.GetKey(KeyCode.C);
-                    float distance = Vector3.Distance(transform.position, player.position);
-
-                    if (!held || distance >= attractionRadius)
-                    {
-                        currentState = State.Idle;
-                        break;
-                    }
-
-                    // keep your MoveToward(seedHolster) if you want “rubber band” feel OR remove to rely purely on velocity
-                    // MoveToward(seedHolster);  // optional now
-
-                    if (held && motion)
-                    {
-                        Vector3 toHolster = seedHolster.position - transform.position;
-                        float d = toHolster.magnitude;
-                        if (d > 0.001f)
-                        {
-                            Vector3 targetDir = toHolster / d;
-                            Vector3 curDir = (motion.Velocity.sqrMagnitude > 1e-6f) ? motion.Velocity.normalized : targetDir;
-
-                            Vector3 blendedDir = Vector3.Slerp(curDir, targetDir, dt * moveBlendGain);
-
-                            // accelerate while held (cap to maxSpeed)
-                            float speedNow = motion.Velocity.magnitude;
-                            float speedNext = Mathf.MoveTowards(speedNow, maxSpeed, attractAccel * dt);
-                            motion.Velocity = blendedDir * speedNext;
-                        }
-                        CheckForAttachment();
-                    }
-                    else if (motion)
-                    {
-                        float speed = motion.Velocity.magnitude - attractDecel * dt;
-                        if (speed <= 0f)
-                        {
-                            motion.Velocity = Vector3.zero;
-                            currentState = State.Idle;
-                        }
-                        else
-                        {
-                            Vector3 keepDir = motion.Velocity.sqrMagnitude > 1e-6f ? motion.Velocity.normalized : transform.forward;
-                            motion.Velocity = keepDir * speed;
-                        }
-                    }
+                    currentState = State.Idle;
                     break;
                 }
+
+                // keep your MoveToward(seedHolster) if you want “rubber band” feel OR remove to rely purely on velocity
+                // MoveToward(seedHolster);  // optional now
+
+                if (held && motion)
+                {
+                    Vector3 toHolster = seedHolster.position - transform.position;
+                    float d = toHolster.magnitude;
+                    if (d > 0.001f)
+                    {
+                        Vector3 targetDir = toHolster / d;
+                        Vector3 curDir = (motion.Velocity.sqrMagnitude > 1e-6f) ? motion.Velocity.normalized : targetDir;
+
+                        Vector3 blendedDir = Vector3.Slerp(curDir, targetDir, dt * moveBlendGain);
+
+                        // accelerate while held (cap to maxSpeed)
+                        float speedNow = motion.Velocity.magnitude;
+                        float speedNext = Mathf.MoveTowards(speedNow, maxSpeed, attractAccel * dt);
+                        motion.Velocity = blendedDir * speedNext;
+                    }
+                    CheckForAttachment();
+                }
+                else if (motion)
+                {
+                    float speed = motion.Velocity.magnitude - attractDecel * dt;
+                    if (speed <= 0f)
+                    {
+                        motion.Velocity = Vector3.zero;
+                        currentState = State.Idle;
+                    }
+                    else
+                    {
+                        Vector3 keepDir = motion.Velocity.sqrMagnitude > 1e-6f ? motion.Velocity.normalized : transform.forward;
+                        motion.Velocity = keepDir * speed;
+                    }
+                }
+                break;
+
 
 
             case State.AttachedToPlayer:
@@ -118,13 +125,19 @@ public class SeedBehavior : MonoBehaviour
                     if (dist > 0.001f)
                     {
                         Vector3 targetDir = toTarget / dist;
-
                         Vector3 currentDir = (motion.Velocity.sqrMagnitude > 1e-6f) ? motion.Velocity.normalized : targetDir;
-
                         Vector3 blendedDir = Vector3.Slerp(currentDir, targetDir, Time.deltaTime * moveBlendGain);
 
-                        float speed = Mathf.Max(motion.Velocity.magnitude, homingMinCruise);
-                        motion.Velocity = blendedDir * speed;
+                        float tNear = Mathf.InverseLerp(homingCaptureRadius, 0f, dist);
+                        tNear = homingSpeedByProximity.Evaluate(tNear);
+
+                        float targetSpeed = Mathf.Lerp(homingMinCruise, homingMaxSpeed, tNear);
+
+                        float currentSpeed = motion.Velocity.magnitude;
+                        float nextSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, homingAccel * Time.deltaTime);
+
+                        // 5) Apply
+                        motion.Velocity = blendedDir * nextSpeed;
                     }
 
                     float d = Vector3.Distance(transform.position, currentLightTarget.position);

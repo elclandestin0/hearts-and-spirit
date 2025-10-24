@@ -19,6 +19,9 @@ public class SeedCourier : MonoBehaviour
     private SeedMotion motion;
     private float t;
     private Action onBegin, onDestroyed;
+    [SerializeField] private float launchDecel = 5f;     // m/s² — speed bleed after throw
+    [SerializeField] private float minLaunchSpeed = 0.5f; // when below this, we consider the throw “over”
+
 
     public void InitForward(
         Vector3 dir, float duration, float speed, float arriveDistance,
@@ -54,48 +57,50 @@ public class SeedCourier : MonoBehaviour
     {
         var sb = GetComponent<SeedBehavior>();
         motion ??= GetComponent<SeedMotion>();
-        if (t < duration)
+
+        if (sb != null && sb.IsHomingToLight)
         {
-            if (motion && motion.Velocity.sqrMagnitude > 1e-6f)
-            {
-                motion.SteerTowardDir(forwardDir, Time.deltaTime * 0.5f);
-            }
-
-            Transform instant = FindUnlitLightWithin(arriveDistance);
-            if (instant != null)
-            {
-                TryLight(instant);
-                onDestroyed?.Invoke();
-                Destroy(gameObject);
-                return;
-            }
-
-            if (sb != null)
-            {
-                sb.externallyControlled = false;
-                bool started = sb.BeginSeekNearestUnlit();
-                if (started)
-                {
-                    Destroy(this);
-                    return;
-                }
-                sb.externallyControlled = true;
-            }
-
-            t += Time.deltaTime;
+            Destroy(this);
             return;
         }
 
+        // 1) instant light if we brush close
+        Transform instant = FindUnlitLightWithin(arriveDistance);
+        if (instant != null)
+        {
+            TryLight(instant);
+            onDestroyed?.Invoke();
+            Destroy(this);
+            return;
+        }
+
+        // 2) continuously try to start homing via SeedBehavior
         if (sb != null)
         {
-            sb.externallyControlled = false;
-            bool started = sb.BeginSeekNearestUnlit();
-            if (!started)
+            sb.externallyControlled = false;                  // allow its FSM to run
+            bool started = sb.BeginSeekNearestUnlit();        // will enter MoveToLight if a target exists
+            if (started)
             {
-                sb.currentState = SeedBehavior.State.Idle;
+                Destroy(this);                                // courier done; SeedBehavior takes over
+                return;
             }
+            sb.externallyControlled = true;                   // no target yet; keep us in charge
         }
-        Destroy(this);
+
+        // 3) bleed launch speed until it naturally stops
+        if (motion != null)
+        {
+            float s = motion.Velocity.magnitude;
+            s = Mathf.Max(0f, s - launchDecel * Time.deltaTime);
+            if (s <= minLaunchSpeed)
+            {
+                // throw has “expired” — hand off gracefully (idle or seek if something appears later)
+                if (sb != null) { sb.externallyControlled = false; }
+                Destroy(this);
+                return;
+            }
+            motion.SetSpeed(s);
+        }
     }
 
     private Transform FindUnlitLightWithin(float radius)
