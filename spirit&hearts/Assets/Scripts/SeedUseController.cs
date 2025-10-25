@@ -12,17 +12,12 @@ public class SeedUseController : MonoBehaviour
     [SerializeField] private Transform head;
     [SerializeField] private TutorialManager _tutorial;
     [Header("Light Seeking")]
-    public float lightSeekRadius = 500f;
     public string lightTag = "Light";
-
-    // internal kk 
     private bool _courierActive = false;
     private MovementEventHub _hub;
     private SeedInventory _inv;
     private AmbientLightManager _ambient;
     private bool _isLaunchingForward = false;
-
-
     void Awake()
     {
         _inv = GetComponent<SeedInventory>();
@@ -41,9 +36,8 @@ public class SeedUseController : MonoBehaviour
     private void LaunchCourierForward()
     {
         if (courierPrefab == null || seedHolster == null) return;
-        if (_inv == null || _inv.GetSeedCount() <= 0) return;
-
-        _inv.RemoveSeed();
+        // if (_inv == null || _inv.GetSeedCount() <= 0) return;
+        // _inv.RemoveSeed();
 
         var courierGO = Instantiate(courierPrefab, seedHolster.position, courierPrefab.transform.rotation);
 

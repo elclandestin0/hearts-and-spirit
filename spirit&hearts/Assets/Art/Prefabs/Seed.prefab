@@ -170,6 +170,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentState: 0
   externallyControlled: 0
+  minTurnDegPerSec: 80
+  turnDegPerSecPerMs: 40
   attractionRadius: 500
   attachDistance: 40
   minSpeed: 100
@@ -180,7 +182,15 @@ MonoBehaviour:
   attractDecel: 20
   homingMinKick: 6
   homingMinCruise: 3
-  lightSeekRadius: 500
+  homingMaxSpeed: 200
+  homingAccel: 20
+  homingCaptureRadius: 300
+  baseTurnDegPerSec: 30
+  maxTurnDegPerSec: 60
+  curveStrengthAt1: 10
+  curvePerMs: 2
+  minInwardSpeedNear: 6
+  lightSeekRadius: 700
   lightTag: Light
   lightManager: {fileID: 0}
   _hub: {fileID: 0}

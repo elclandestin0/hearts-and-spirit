@@ -6,7 +6,8 @@ public class SeedBehavior : MonoBehaviour
     public State currentState = State.Idle;
     public bool IsHomingToLight => currentState == State.MoveToLight && currentLightTarget != null;
     [HideInInspector] public bool externallyControlled = false;
-
+    [SerializeField] private float minTurnDegPerSec = 80f;   // gentle curl when slow
+    [SerializeField] private float turnDegPerSecPerMs = 40f; // extra deg/sec per 1 m/s of speed
     private Transform player;
     private Transform currentLightTarget;
     [Header("Attraction Settings")]
@@ -18,18 +19,22 @@ public class SeedBehavior : MonoBehaviour
 
     [Header("MoveToLight Homing")]
     // put with your other fields
-    [SerializeField] private float moveBlendGain = 6f;   // like your glide blendSpeed
-    [SerializeField] private float attractAccel = 30f;  // how fast we ramp up while held
-    [SerializeField] private float attractDecel = 20f;  // how fast we bleed speed when released
-    [SerializeField] private float homingMinKick = 6f;   // one-time speed if we enter with 0
-    [SerializeField] private float homingMinCruise = 30f; // speed floor while homing
+    [SerializeField] private float moveBlendGain = 6f;
+    [SerializeField] private float attractAccel = 100f;
+    [SerializeField] private float attractDecel = 20f;
+    [SerializeField] private float homingMinKick = 6f;
+    [SerializeField] private float homingMinCruise = 30f;
     [Header("MoveToLight Speed By Proximity")]
-    [SerializeField] private float homingMaxSpeed = 500f;          // max speed when very close
-    [SerializeField] private float homingAccel = 500f;          // how fast we approach target speed (m/s² feel)
-    [SerializeField] private float homingCaptureRadius = 120f;    // distance where scaling starts (far -> near)
-    [SerializeField]
+    [SerializeField] private float homingMaxSpeed = 500f;
+    [SerializeField] private float homingAccel = 500f;
+    [SerializeField] private float homingCaptureRadius = 200f;
+    [SerializeField] private float baseTurnDegPerSec = 10f;
+    [SerializeField] private float maxTurnDegPerSec = 30f;
+    [SerializeField] private float curveStrengthAt1 = 2.0f;
+    [SerializeField] private float curvePerMs = 0.08f;
+    [SerializeField] float minInwardSpeedNear = 6f;
     private AnimationCurve homingSpeedByProximity =
-        AnimationCurve.EaseInOut(0, 0, 1, 1); // 0..1 (far..near) -> 0..1 speed scaling
+        AnimationCurve.EaseInOut(0, 0, 1, 1);
     [Header("Light Seeking Settings")]
     [SerializeField] private float lightSeekRadius;
     [SerializeField] private string lightTag = "Light";
@@ -39,7 +44,9 @@ public class SeedBehavior : MonoBehaviour
     private DovinaAudioManager dovinaAudioManager;
     private TutorialManager tutorialManager;
     private float pickupDisabledUntil = 0f;
+    private float outsideTimer = 0f;
     private SeedMotion motion;
+    private int orbitSign = +1;
 
     void Start()
     {
@@ -73,9 +80,6 @@ public class SeedBehavior : MonoBehaviour
                     currentState = State.Idle;
                     break;
                 }
-
-                // keep your MoveToward(seedHolster) if you want “rubber band” feel OR remove to rely purely on velocity
-                // MoveToward(seedHolster);  // optional now
 
                 if (held && motion)
                 {
@@ -118,35 +122,82 @@ public class SeedBehavior : MonoBehaviour
                 break;
 
             case State.MoveToLight:
-                if (currentLightTarget != null || motion != null)
                 {
+                    if (currentLightTarget == null || motion == null) break;
+
                     Vector3 toTarget = currentLightTarget.position - transform.position;
                     float dist = toTarget.magnitude;
-                    if (dist > 0.001f)
+
+                    // outside seek radius timer → Idle fallback
+                    if (dist > lightSeekRadius) outsideTimer += Time.deltaTime;
+                    else outsideTimer = 0f;
+
+                    if (outsideTimer > 20f)
                     {
-                        Vector3 targetDir = toTarget / dist;
-                        Vector3 currentDir = (motion.Velocity.sqrMagnitude > 1e-6f) ? motion.Velocity.normalized : targetDir;
-                        Vector3 blendedDir = Vector3.Slerp(currentDir, targetDir, Time.deltaTime * moveBlendGain);
-
-                        float tNear = 1f - Mathf.InverseLerp(0f, homingCaptureRadius, dist);
-                        float targetSpeed = Mathf.Lerp(homingMinCruise, homingMaxSpeed, Mathf.SmoothStep(0f, 1f, tNear));
-
-                        Debug.Log("tnear: " + tNear + "targetSpeed: " + targetSpeed);
-                        float targetMult = 1.25f;
-                        float lerpRate = 2f;
-                        float currentSpeed = Mathf.Lerp(motion.Velocity.magnitude,
-                                                        motion.Velocity.magnitude * targetMult,
-                                                        Time.deltaTime * lerpRate);
-                        Debug.Log("current speed " + currentSpeed);
-                        float nextSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, homingAccel * Time.deltaTime);
-                        Debug.Log("Next speed: " + nextSpeed);
-                        motion.Velocity = blendedDir * nextSpeed;
+                        currentLightTarget = null;
+                        currentState = State.Idle;
+                        outsideTimer = 0f;
+                        motion.Velocity *= 0.5f;      // optional damp
+                        return;                       // leave Update() cleanly
                     }
 
-                    float d = Vector3.Distance(transform.position, currentLightTarget.position);
-                    if (d <= 10f)
+                    // normal homing until we hit the center zone
+                    if (dist > 10f)
                     {
-                        // *** your existing lighting block (unchanged) ***
+                        // toward-light unit
+                        Vector3 rHat = toTarget / dist;
+
+                        // current velocity state
+                        Vector3 v = motion.Velocity;
+                        float speed = v.magnitude;
+                        Vector3 vDir = (speed > 1e-6f) ? v / speed : rHat;
+
+                        // proximity: 0 at radius edge → 1 near center
+                        float tNear = 1f - Mathf.InverseLerp(0f, lightSeekRadius, dist);
+
+                        // preserve winding
+                        Vector3 upRef = Vector3.up; // swap to planet-up if needed
+                        float wind = Mathf.Sign(Vector3.Dot(Vector3.Cross(toTarget, v), upRef));
+                        if (wind == 0f) wind = 1f;
+                        Vector3 swirlDir = Vector3.Cross(rHat, upRef).normalized * wind; // tangential
+
+                        // swirl fades near center, inward pull grows near center
+                        float swirlAmt = (curveStrengthAt1 + curvePerMs * speed) * (1f - tNear);
+                        float pullBase = 1.5f, pullPerMs = 0.06f;
+                        float pullAmt = (pullBase + pullPerMs * speed) * tNear;
+
+                        // desired direction = inward + swirl (with inward bias)
+                        Vector3 desiredDir = (rHat * pullAmt + swirlDir * swirlAmt).normalized;
+                        float coneBias = Mathf.Lerp(0.15f, 0.7f, tNear);                // keep some "toward" component
+                        desiredDir = Vector3.Normalize(Vector3.Lerp(desiredDir, rHat, coneBias));
+
+                        // turn allowance (faster near target)
+                        float turnDegSec = Mathf.Lerp(baseTurnDegPerSec, maxTurnDegPerSec, Mathf.Pow(tNear, 0.6f));
+                        float maxRadStep = turnDegSec * Mathf.Deg2Rad * Time.deltaTime;
+                        Vector3 newDir = Vector3.RotateTowards(vDir, desiredDir, maxRadStep, 0f);
+
+                        // speed increases as we approach
+                        float targetSpeed = Mathf.Lerp(homingMinCruise, homingMaxSpeed, tNear);
+                        float newSpeed = Mathf.MoveTowards(speed, targetSpeed, homingAccel * Time.deltaTime);
+
+                        // build velocity, then enforce inward convergence
+                        Vector3 newV = newDir * newSpeed;
+
+                        // remove any outward radial component
+                        float vRad = Vector3.Dot(newV, rHat);               // >0 toward light
+                        if (vRad < 0f) newV -= rHat * vRad;
+
+                        // ensure a minimum inward component that ramps up near the center
+                        const float minInwardSpeedNear = 8f;                 // tweak or serialize
+                        float minInward = Mathf.Lerp(0f, minInwardSpeedNear, tNear);
+                        vRad = Vector3.Dot(newV, rHat);
+                        if (vRad < minInward) newV += rHat * (minInward - vRad);
+
+                        motion.Velocity = newV;
+                    }
+                    else
+                    {
+                        // arrive & light
                         LightController light = currentLightTarget.GetComponent<LightController>()
                                                 ?? currentLightTarget.GetComponentInParent<LightController>()
                                                 ?? currentLightTarget.GetComponentInChildren<LightController>();
@@ -169,10 +220,11 @@ public class SeedBehavior : MonoBehaviour
                             ProgressManager.Instance?.MarkLastLit(pid, playerRoot);
                             SaveManager.Save("slot1");
                             Destroy(this.gameObject);
+                            return;
                         }
                     }
+                    break;
                 }
-                break;
         }
     }
 
@@ -182,14 +234,16 @@ public class SeedBehavior : MonoBehaviour
         transform.SetParent(null);
         currentLightTarget = target;
         currentState = State.MoveToLight;
+        // capture winding sign from current angular momentum
+        Vector3 r = target.position - transform.position;
+        Vector3 v = (motion ? motion.Velocity : Vector3.zero);
+        Vector3 upRef = Vector3.up;
+        if (r.sqrMagnitude > 0.0001f && v.sqrMagnitude > 0.0001f)
+            orbitSign = (int)Mathf.Sign(Vector3.Dot(Vector3.Cross(r, v), upRef));
+        if (orbitSign == 0) orbitSign = +1;
 
-        if (motion != null && motion.Velocity.sqrMagnitude < 1e-6f)
-        {
-            Vector3 toTarget = currentLightTarget.position - transform.position;
-            Vector3 dir = toTarget.sqrMagnitude > 1e-6f ? toTarget.normalized : transform.forward;
-            motion.Velocity = dir * homingMinKick;
-        }
-
+        if (motion && motion.Velocity.sqrMagnitude < 1e-6f)
+            motion.Velocity = r.normalized * homingMinKick;
     }
 
 
