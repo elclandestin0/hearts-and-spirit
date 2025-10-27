@@ -36,8 +36,8 @@ public class SeedUseController : MonoBehaviour
     private void LaunchCourierForward()
     {
         if (courierPrefab == null || seedHolster == null) return;
-        // if (_inv == null || _inv.GetSeedCount() <= 0) return;
-        // _inv.RemoveSeed();
+        if (_inv == null || _inv.GetSeedCount() <= 0) return;
+        _inv.RemoveSeed();
 
         var courierGO = Instantiate(courierPrefab, seedHolster.position, courierPrefab.transform.rotation);
 

@@ -60,6 +60,31 @@ public class SeedCourier : MonoBehaviour
         var sb = GetComponent<SeedBehavior>();
         motion ??= GetComponent<SeedMotion>();
 
+        // --- Player attraction override (KeyCode.C) ---
+        if (sb != null && Input.GetKey(KeyCode.C))
+        {
+            var player = GameObject.FindWithTag("Player")?.transform;
+            if (player != null)
+            {
+                float distance = Vector3.Distance(transform.position, player.position);
+
+                // Only attract if within player’s influence radius
+                float attractionRadius = 120f; // tune as needed
+                if (distance < attractionRadius)
+                {
+                    // Lerp position toward player’s seed holster (like SeedBehavior)
+                    Transform holster = player.Find("SeedHolster");
+                    if (holster != null)
+                    {
+                        Vector3 toHolster = holster.position - transform.position;
+                        float speed = Mathf.Lerp(10f, 60f, Mathf.InverseLerp(attractionRadius, 0f, distance));
+                        Vector3 accel = toHolster.normalized * speed;
+                        motion?.SetVelocity(accel * Time.deltaTime);
+                    }
+                }
+            }
+        }
+
         // if homing already started, courier is done
         if (sb != null && sb.IsHomingToLight)
         {
@@ -106,13 +131,31 @@ public class SeedCourier : MonoBehaviour
 
         if ((lifeTimer >= worldSeekDelay || throwExpired) && sb != null)
         {
-            // final handoff to world gravity
             sb.externallyControlled = false;
-            sb.BeginWorldGravity(worldCenterOverride);     // <- your planet center GO (optional override)
+            sb.BeginWorldGravity(worldCenterOverride);
             onDestroyed?.Invoke();
-            // do NOT damp velocity; let WorldGravity capture from current v
             Destroy(this);
             return;
+        }
+
+        if (sb != null && Input.GetKey(KeyCode.C))
+        {
+            var player = GameObject.FindWithTag("Player")?.transform;
+            if (player != null)
+            {
+                float distance = Vector3.Distance(transform.position, player.position);
+                float attractionRadius = 500f;
+                if (distance < attractionRadius)
+                {
+                    Transform holster = player.Find("SeedHolster");
+                    if (holster != null)
+                    {
+                        Vector3 toHolster = holster.position - transform.position;
+                        float speed = Mathf.Lerp(10f, 60f, Mathf.InverseLerp(attractionRadius, 0f, distance));
+                        transform.position += toHolster.normalized * speed * Time.deltaTime;
+                    }
+                }
+            }
         }
     }
     private Transform FindUnlitLightWithin(float radius)

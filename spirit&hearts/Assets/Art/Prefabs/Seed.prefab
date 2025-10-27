@@ -174,12 +174,12 @@ MonoBehaviour:
   turnDegPerSecPerMs: 40
   attractionRadius: 500
   attachDistance: 40
-  minSpeed: 100
-  maxSpeed: 200
+  minSpeed: 400
+  maxSpeed: 600
   seedHolster: {fileID: 0}
   moveBlendGain: 6
-  attractAccel: 30
-  attractDecel: 20
+  attractAccel: 100
+  attractDecel: 15
   homingMinKick: 6
   homingMinCruise: 3
   homingMaxSpeed: 200
@@ -190,13 +190,20 @@ MonoBehaviour:
   curveStrengthAt1: 10
   curvePerMs: 2
   minInwardSpeedNear: 6
+  commitFrac: 0.2
+  closeCaptureRadius: 25
+  farAggression: 0.35
+  nearAggression: 1
   lightSeekRadius: 700
   lightTag: Light
   lightManager: {fileID: 0}
   _hub: {fileID: 0}
   worldCenter: {fileID: 0}
-  worldOrbitRadius: 4000
-  worldOrbitSpeed: 300
+  innerOrbit: 2500
+  outerOrbit: 4000
+  orbitSpeedInner: 500
+  orbitSpeedOuter: 300
+  radialOscPeriod: 12
   radialKp: 2
   radialKd: 5
   tangentAlignGain: 6
