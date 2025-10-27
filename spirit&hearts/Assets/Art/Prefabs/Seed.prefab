@@ -194,6 +194,14 @@ MonoBehaviour:
   lightTag: Light
   lightManager: {fileID: 0}
   _hub: {fileID: 0}
+  worldCenter: {fileID: 0}
+  worldOrbitRadius: 4000
+  worldOrbitSpeed: 300
+  radialKp: 2
+  radialKd: 5
+  tangentAlignGain: 6
+  tangentAccel: 20
+  worldRecaptureRadius: 120
 --- !u!114 &6593313786030574643
 MonoBehaviour:
   m_ObjectHideFlags: 0

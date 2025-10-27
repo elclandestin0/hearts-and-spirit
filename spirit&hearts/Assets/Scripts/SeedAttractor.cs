@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SeedBehavior : MonoBehaviour
 {
-    public enum State { Idle, AttractToPlayer, AttachedToPlayer, MoveToLight }
+    public enum State { Idle, AttractToPlayer, AttachedToPlayer, MoveToLight, WorldGravity }
     public State currentState = State.Idle;
     public bool IsHomingToLight => currentState == State.MoveToLight && currentLightTarget != null;
     [HideInInspector] public bool externallyControlled = false;
@@ -35,6 +35,15 @@ public class SeedBehavior : MonoBehaviour
     [SerializeField] float minInwardSpeedNear = 6f;
     private AnimationCurve homingSpeedByProximity =
         AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [Header("Light Capture Aggression")]
+    [SerializeField] private float commitFrac = 0.2f;
+    [SerializeField] private float closeCaptureRadius = 25f;  // "thrown just a little away"
+    [SerializeField] private float farAggression = 0.35f; // how weak convergence is when far
+    [SerializeField] private float nearAggression = 1.0f;  // full aggression when close
+    private bool enteredClose = false;
+    private float moveToLightEnterDist = 0f;
+    private float moveToLightEnterSpeed = 0f;
+
     [Header("Light Seeking Settings")]
     [SerializeField] private float lightSeekRadius;
     [SerializeField] private string lightTag = "Light";
@@ -48,6 +57,26 @@ public class SeedBehavior : MonoBehaviour
     private SeedMotion motion;
     private int orbitSign = +1;
 
+    [Header("World Gravity")]
+    [SerializeField] private Transform worldCenter;
+    [SerializeField] private float innerOrbit = 2500f;
+    [SerializeField] private float outerOrbit = 4000f;
+    [SerializeField] private float orbitSpeedInner = 500f;   // fast when near inner radius
+    [SerializeField] private float orbitSpeedOuter = 300f;    // slow when near outer radius
+    [SerializeField] private float radialOscPeriod = 12f;   // seconds for one in→out→in cycle
+    [SerializeField] private float radialKp = 1.2f;         // radius spring (0.6–2)
+    [SerializeField] private float radialKd = 4.0f;         // radial damping (2–8)
+    [SerializeField] private float tangentAlignGain = 6f;   // 3–12
+    [SerializeField] private float tangentAccel = 20f;      // 8–30
+    [SerializeField] private float worldRecaptureRadius = 120f;
+
+    private float worldOscStartTime;
+    private float worldOrbitPhase; // per-seed phase so multiple seeds don't sync
+    private bool committedToLight = false;
+    private float commitRadius = 0f; // computed as lightSeekRadius * commitFrac
+
+
+
     void Start()
     {
         player = GameObject.FindWithTag("MainPlayer")?.transform;
@@ -57,6 +86,7 @@ public class SeedBehavior : MonoBehaviour
         _hub = GameObject.FindWithTag("MainPlayer")?.GetComponent<MovementEventHub>();
         tutorialManager = GameObject.FindWithTag("MainPlayer")?.GetComponent<TutorialManager>();
         motion = GetComponent<SeedMotion>();
+        worldCenter = GameObject.FindWithTag("Mountain")?.transform;
     }
 
     void Update()
@@ -64,6 +94,14 @@ public class SeedBehavior : MonoBehaviour
         if (externallyControlled) return;
         if (PauseState.IsPaused) return;
         if (player == null) return;
+        if (currentState != State.AttachedToPlayer && player != null && Input.GetKey(KeyCode.C))
+        {
+            float distance = Vector3.Distance(transform.position, player.position);
+            if (distance < attractionRadius)
+            {
+                currentState = State.AttractToPlayer;
+            }
+        }
         switch (currentState)
         {
             case State.Idle:
@@ -128,68 +166,81 @@ public class SeedBehavior : MonoBehaviour
                     Vector3 toTarget = currentLightTarget.position - transform.position;
                     float dist = toTarget.magnitude;
 
-                    // outside seek radius timer → Idle fallback
-                    if (dist > lightSeekRadius) outsideTimer += Time.deltaTime;
-                    else outsideTimer = 0f;
+                    // --- COMMIT when inside 1/5th of lightSeekRadius ---
+                    if (!committedToLight && dist <= commitRadius)
+                        committedToLight = true;
 
-                    if (outsideTimer > 20f)
+                    // --- outside-seek bailout only if NOT yet committed ---
+                    if (!committedToLight)
                     {
-                        currentLightTarget = null;
-                        currentState = State.Idle;
+                        if (dist > lightSeekRadius) outsideTimer += Time.deltaTime;
+                        else outsideTimer = 0f;
+
+                        if (outsideTimer > 20f)
+                        {
+                            currentLightTarget = null;
+                            currentState = State.WorldGravity;   // or Idle if you prefer
+                            outsideTimer = 0f;
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        // once committed, never bail + clamp outward radial motion
                         outsideTimer = 0f;
-                        motion.Velocity *= 0.5f;      // optional damp
-                        return;                       // leave Update() cleanly
                     }
 
-                    // normal homing until we hit the center zone
-                    if (dist > 10f)
+                    if (dist > 30f)
                     {
-                        // toward-light unit
+                        // --- existing steer math, but scale with aggression ---
                         Vector3 rHat = toTarget / dist;
-
-                        // current velocity state
                         Vector3 v = motion.Velocity;
                         float speed = v.magnitude;
                         Vector3 vDir = (speed > 1e-6f) ? v / speed : rHat;
 
-                        // proximity: 0 at radius edge → 1 near center
+                        // 0 far → 1 near
                         float tNear = 1f - Mathf.InverseLerp(0f, lightSeekRadius, dist);
 
-                        // preserve winding
-                        Vector3 upRef = Vector3.up; // swap to planet-up if needed
+                        // aggression: weak when far, strong when near; hard-lock to 1 if committed
+                        float aggr = committedToLight ? 1f : Mathf.Lerp(farAggression, nearAggression, tNear);
+
+                        // winding/tangent
+                        Vector3 upRef = Vector3.up;
                         float wind = Mathf.Sign(Vector3.Dot(Vector3.Cross(toTarget, v), upRef));
                         if (wind == 0f) wind = 1f;
-                        Vector3 swirlDir = Vector3.Cross(rHat, upRef).normalized * wind; // tangential
+                        Vector3 swirlDir = Vector3.Cross(rHat, upRef).normalized * wind;
 
-                        // swirl fades near center, inward pull grows near center
+                        // keep swirl when far, fade near; inward pull grows with proximity * aggression
                         float swirlAmt = (curveStrengthAt1 + curvePerMs * speed) * (1f - tNear);
                         float pullBase = 1.5f, pullPerMs = 0.06f;
-                        float pullAmt = (pullBase + pullPerMs * speed) * tNear;
+                        float pullAmt = (pullBase + pullPerMs * speed) * tNear * aggr;
 
-                        // desired direction = inward + swirl (with inward bias)
                         Vector3 desiredDir = (rHat * pullAmt + swirlDir * swirlAmt).normalized;
-                        float coneBias = Mathf.Lerp(0.15f, 0.7f, tNear);                // keep some "toward" component
+
+                        // inward bias scales with aggr; stronger if committed
+                        float coneBias = Mathf.Lerp(0.05f, 0.7f, tNear) * (committedToLight ? 1.0f : aggr);
                         desiredDir = Vector3.Normalize(Vector3.Lerp(desiredDir, rHat, coneBias));
 
-                        // turn allowance (faster near target)
-                        float turnDegSec = Mathf.Lerp(baseTurnDegPerSec, maxTurnDegPerSec, Mathf.Pow(tNear, 0.6f));
+                        // turn rate scales with proximity and aggression
+                        float turnDegSec = Mathf.Lerp(baseTurnDegPerSec, maxTurnDegPerSec, Mathf.Pow(tNear, 0.6f))
+                                         * Mathf.Lerp(0.6f, 1f, aggr);
                         float maxRadStep = turnDegSec * Mathf.Deg2Rad * Time.deltaTime;
                         Vector3 newDir = Vector3.RotateTowards(vDir, desiredDir, maxRadStep, 0f);
 
-                        // speed increases as we approach
-                        float targetSpeed = Mathf.Lerp(homingMinCruise, homingMaxSpeed, tNear);
-                        float newSpeed = Mathf.MoveTowards(speed, targetSpeed, homingAccel * Time.deltaTime);
+                        // speed up as we approach; earlier ramp softened unless committed
+                        float targetSpeed = Mathf.Lerp(homingMinCruise, homingMaxSpeed, tNear * (committedToLight ? 1f : aggr));
+                        float newSpeed = Mathf.MoveTowards(speed, targetSpeed, (homingAccel * (committedToLight ? 1f : aggr)) * Time.deltaTime);
 
                         // build velocity, then enforce inward convergence
                         Vector3 newV = newDir * newSpeed;
 
-                        // remove any outward radial component
-                        float vRad = Vector3.Dot(newV, rHat);               // >0 toward light
-                        if (vRad < 0f) newV -= rHat * vRad;
+                        // never allow outward radial when committed (guarantees eventual lighting)
+                        float vRad = Vector3.Dot(newV, rHat); // >0 toward light
+                        if (committedToLight && vRad < 0f) newV -= rHat * vRad;
 
-                        // ensure a minimum inward component that ramps up near the center
-                        const float minInwardSpeedNear = 8f;                 // tweak or serialize
-                        float minInward = Mathf.Lerp(0f, minInwardSpeedNear, tNear);
+                        // minimum inward component ramps up near the center (strong if committed)
+                        const float minInwardSpeedNear = 8f;
+                        float minInward = (committedToLight ? 1f : aggr) * Mathf.Lerp(0f, minInwardSpeedNear, tNear);
                         vRad = Vector3.Dot(newV, rHat);
                         if (vRad < minInward) newV += rHat * (minInward - vRad);
 
@@ -197,10 +248,10 @@ public class SeedBehavior : MonoBehaviour
                     }
                     else
                     {
-                        // arrive & light
+                        // ARRIVE & LIGHT (unchanged)
                         LightController light = currentLightTarget.GetComponent<LightController>()
-                                                ?? currentLightTarget.GetComponentInParent<LightController>()
-                                                ?? currentLightTarget.GetComponentInChildren<LightController>();
+                                            ?? currentLightTarget.GetComponentInParent<LightController>()
+                                            ?? currentLightTarget.GetComponentInChildren<LightController>();
                         if (light != null && !light.isLit)
                         {
                             light.isLit = true;
@@ -225,6 +276,69 @@ public class SeedBehavior : MonoBehaviour
                     }
                     break;
                 }
+
+            case State.WorldGravity:
+                {
+                    if (!worldCenter || motion == null) break;
+
+                    Vector3 toCenter = worldCenter.position - transform.position;
+                    float dist = toCenter.magnitude;
+                    if (dist < 0.001f) break;
+
+                    // OUTWARD unit (easier PD signs)
+                    Vector3 rOutHat = -toCenter / dist;
+                    Vector3 v = motion.Velocity;
+
+                    // Oscillating target radius: inner ↔ outer with phase
+                    float omega = 2f * Mathf.PI / Mathf.Max(0.01f, radialOscPeriod);
+                    float osc = 0.5f + 0.5f * Mathf.Sin(omega * (Time.time - worldOscStartTime) + worldOrbitPhase); // 0..1
+                    float rTarget = Mathf.Lerp(innerOrbit, outerOrbit, osc);
+
+                    // Decompose velocity
+                    float vRadOut = Vector3.Dot(v, rOutHat);         // + outward, - inward
+                    Vector3 vTan = v - vRadOut * rOutHat;
+
+                    // Desired tangential direction (keep winding)
+                    Vector3 upRef = Vector3.up; // replace with planet-up if you have it
+                    Vector3 tDesired = Vector3.Cross(upRef, rOutHat).normalized;
+                    if (Vector3.Dot(vTan, tDesired) < 0f) tDesired = -tDesired;
+
+                    // --- Radial PD toward oscillating shell ---
+                    float e = dist - rTarget;                 // >0 too far out, <0 too far in
+                    float aOut = -radialKp * e - radialKd * vRadOut;
+                    float vRadOutNext = vRadOut + aOut * Time.deltaTime;
+
+                    // --- Tangential cruise speed: faster at inner, slower at outer ---
+                    // Use current distance so speed follows actual radius (Kepler-ish feel)
+                    float innerToOuter01 = Mathf.InverseLerp(innerOrbit, outerOrbit, dist); // 0 at inner, 1 at outer
+                    float tanTargetSpeed = Mathf.Lerp(orbitSpeedInner, orbitSpeedOuter, innerToOuter01);
+
+                    // Align tangent and approach target speed
+                    Vector3 tHat = (vTan.sqrMagnitude > 1e-6f) ? vTan.normalized : tDesired;
+                    Vector3 tNew = Vector3.Slerp(tHat, tDesired, tangentAlignGain * Time.deltaTime);
+                    float tanNextSp = Mathf.MoveTowards(vTan.magnitude, tanTargetSpeed, tangentAccel * Time.deltaTime);
+
+                    // Rebuild velocity
+                    Vector3 vNext = tNew * tanNextSp + rOutHat * vRadOutNext;
+
+                    // When very close to the desired shell, kill tiny radial creep
+                    if (Mathf.Abs(e) < 0.5f)
+                        vNext -= rOutHat * Vector3.Dot(vNext, rOutHat);
+
+                    motion.Velocity = vNext;
+
+                    // Recapture by nearby light, if any
+                    Transform nearLight = FindNearestUnlitLight(worldRecaptureRadius);
+                    if (nearLight != null)
+                    {
+                        BeginMoveToLight(nearLight);
+                        break;
+                    }
+
+                    // Allow pickup
+                    CheckForAttachment();
+                    break;
+                }
         }
     }
 
@@ -234,26 +348,42 @@ public class SeedBehavior : MonoBehaviour
         transform.SetParent(null);
         currentLightTarget = target;
         currentState = State.MoveToLight;
-        // capture winding sign from current angular momentum
-        Vector3 r = target.position - transform.position;
-        Vector3 v = (motion ? motion.Velocity : Vector3.zero);
-        Vector3 upRef = Vector3.up;
-        if (r.sqrMagnitude > 0.0001f && v.sqrMagnitude > 0.0001f)
-            orbitSign = (int)Mathf.Sign(Vector3.Dot(Vector3.Cross(r, v), upRef));
-        if (orbitSign == 0) orbitSign = +1;
+
+        commitRadius = lightSeekRadius * Mathf.Clamp01(commitFrac);
+        committedToLight = false;
 
         if (motion && motion.Velocity.sqrMagnitude < 1e-6f)
-            motion.Velocity = r.normalized * homingMinKick;
+        {
+            Vector3 toTarget = currentLightTarget.position - transform.position;
+            motion.Velocity = (toTarget.sqrMagnitude > 1e-6f ? toTarget.normalized : transform.forward) * homingMinKick;
+        }
+    }
+
+
+    public void BeginWorldGravity(Transform centerOverride = null)
+    {
+        if (centerOverride) worldCenter = centerOverride;
+        currentLightTarget = null;
+        externallyControlled = false;
+        currentState = State.WorldGravity;
+
+        worldOscStartTime = Time.time;
+        worldOrbitPhase = UnityEngine.Random.value * Mathf.PI * 2f; // de-sync seeds
     }
 
 
     public bool BeginSeekNearestUnlit(float searchRadius = 300f)
     {
         Transform nearest = FindNearestUnlitLight(searchRadius);
-        if (nearest == null) return false;
+        if (nearest == null)
+        {
+            currentState = State.WorldGravity;
+            return false;
+        }
         BeginMoveToLight(nearest);
         return true;
     }
+
 
     private Transform FindNearestUnlitLight(float radius)
     {

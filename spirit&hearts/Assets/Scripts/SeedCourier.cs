@@ -21,7 +21,9 @@ public class SeedCourier : MonoBehaviour
     private Action onBegin, onDestroyed;
     [SerializeField] private float launchDecel = 2f;     // m/s² — speed bleed after throw
     [SerializeField] private float minLaunchSpeed = 0.5f; // when below this, we consider the throw “over”
-
+    [SerializeField] private float worldSeekDelay = 5f; // if no light within this time → world gravity
+    private float lifeTimer = 0f;
+    [SerializeField] private Transform worldCenterOverride; // optional: assign your planet center GO
 
     public void InitForward(
         Vector3 dir, float duration, float speed, float arriveDistance,
@@ -58,51 +60,61 @@ public class SeedCourier : MonoBehaviour
         var sb = GetComponent<SeedBehavior>();
         motion ??= GetComponent<SeedMotion>();
 
+        // if homing already started, courier is done
         if (sb != null && sb.IsHomingToLight)
         {
+            lifeTimer = 0f; // safety
             Destroy(this);
             return;
         }
 
-        // 1) instant light if we brush close
+        // 1) instant brush lighting during the throw
         Transform instant = FindUnlitLightWithin(arriveDistance);
         if (instant != null)
         {
             TryLight(instant);
             onDestroyed?.Invoke();
+            lifeTimer = 0f;          // reset timer on success
             Destroy(this);
             return;
         }
 
-        // 2) continuously try to start homing via SeedBehavior
+        // 2) let SeedBehavior try to acquire a light every frame
         if (sb != null)
         {
-            sb.externallyControlled = false;                  // allow its FSM to run
-            bool started = sb.BeginSeekNearestUnlit();        // will enter MoveToLight if a target exists
-            if (started)
+            sb.externallyControlled = false;          // allow FSM
+            if (sb.BeginSeekNearestUnlit())           // will set MoveToLight on success
             {
-                Destroy(this);                                // courier done; SeedBehavior takes over
+                lifeTimer = 0f;                       // reset timer on success
+                Destroy(this);                        // courier hands off
                 return;
             }
-            sb.externallyControlled = true;                   // no target yet; keep us in charge
+            sb.externallyControlled = true;           // keep courier in charge for now
         }
 
-        // 3) bleed launch speed until it naturally stops
-        if (motion != null)
+        // 3) bleed launch energy while searching
+        // if (motion != null)
+        // {
+        //     float s = motion.Velocity.magnitude;
+        //     s = Mathf.Max(0f, s - launchDecel * Time.deltaTime);
+        //     motion.SetSpeed(s);
+        // }
+
+        // 4) fallback timer → WorldGravity
+        lifeTimer += Time.deltaTime;
+        bool throwExpired = motion != null && motion.Velocity.magnitude <= minLaunchSpeed;
+
+        if ((lifeTimer >= worldSeekDelay || throwExpired) && sb != null)
         {
-            float s = motion.Velocity.magnitude;
-            s = Mathf.Max(0f, s - launchDecel * Time.deltaTime);
-            if (s <= minLaunchSpeed)
-            {
-                // throw has “expired” — hand off gracefully (idle or seek if something appears later)
-                if (sb != null) { sb.externallyControlled = false; }
-                Destroy(this);
-                return;
-            }
-            motion.SetSpeed(s);
+            // final handoff to world gravity
+            sb.externallyControlled = false;
+            sb.BeginWorldGravity(worldCenterOverride);     // <- your planet center GO (optional override)
+            onDestroyed?.Invoke();
+            // do NOT damp velocity; let WorldGravity capture from current v
+            Destroy(this);
+            return;
         }
     }
-
     private Transform FindUnlitLightWithin(float radius)
     {
         GameObject[] lights = GameObject.FindGameObjectsWithTag(lightTag);
