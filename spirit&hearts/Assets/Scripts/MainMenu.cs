@@ -28,7 +28,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private Camera cam;
     private bool isPaused = false;
     private bool settingsFromPause = false;
-    private bool gameBegun = false;
+    public bool gameBegun = false;
     [SerializeField] private LineRenderer leftRayInteractor;
     [SerializeField] private LineRenderer rightRayInteractor;
 

@@ -13,10 +13,11 @@ public class KeyboardMovementDebug : MonoBehaviour
     public bool enableMouseLook = true;
     public float mouseSensitivity = 4.5f;
     [SerializeField] private TutorialManager tutorialManager;
+    [SerializeField] private MainMenu mainMenu;
 
     void Update()
     {
-        if (!tutorialManager.IsRunning) return;
+        if (!tutorialManager.IsRunning && !mainMenu.gameBegun) return;
         if (PauseState.IsPaused) return;
         if (movement == null || movement.head == null) return;
 

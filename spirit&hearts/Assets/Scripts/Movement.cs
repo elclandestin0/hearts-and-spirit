@@ -336,7 +336,6 @@ public class Movement : MonoBehaviour
         float holdSeconds = fHoldStartTime > 0f ? Time.time - fHoldStartTime : 0f;
         float holdT = Mathf.InverseLerp(0f, maxHoldSeconds, Mathf.Clamp(holdSeconds, 0f, maxHoldSeconds));
         
-        // h
         float strokeTriggerTCurrent = downstrokeT;
         float strokeTriggerTOnRelease = holdT;
         bool enoughTimePassed = (Time.time - lastFlapTime) >= 0.665f;
