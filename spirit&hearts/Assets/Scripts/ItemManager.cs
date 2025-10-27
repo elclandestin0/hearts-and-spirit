@@ -34,9 +34,11 @@ public class ItemManager : MonoBehaviour
 
     public void PlayPickUpSound() 
     {
+        Debug.Log("Attempting to play pick up sound...");
         if (pickupSound == null) return;
         else 
         {
+            Debug.Log("Blay...");
             pickupSound.Play();
         }
     }

@@ -152,7 +152,6 @@ public class TextLightController : MonoBehaviour
             if (_tmp != null)
             {
                 _matInstance.SetColor("_FaceColor", Color.Lerp(startFace, targetHDR, k));
-                // keep outline/glow constant; or lerp if you want:
                 _matInstance.SetFloat("_OutlineWidth", outlineWidth);
                 _matInstance.SetColor("_OutlineColor", outlineColor);
                 _matInstance.SetColor("_GlowColor", glowColor * Mathf.Max(1f, bloomBoost * 0.5f));

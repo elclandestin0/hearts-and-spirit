@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 8546025100054043572}
   - component: {fileID: 2097975818630986166}
   - component: {fileID: 6593313786030574643}
+  - component: {fileID: -4699203539289196182}
   m_Layer: 0
   m_Name: Seed
   m_TagString: Seed
@@ -168,15 +169,46 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
-  attractionRadius: 100
+  externallyControlled: 0
+  minTurnDegPerSec: 80
+  turnDegPerSecPerMs: 40
+  attractionRadius: 500
   attachDistance: 40
-  minSpeed: 100
-  maxSpeed: 200
+  minSpeed: 400
+  maxSpeed: 600
   seedHolster: {fileID: 0}
-  lightSeekRadius: 300
+  moveBlendGain: 6
+  attractAccel: 100
+  attractDecel: 15
+  homingMinKick: 6
+  homingMinCruise: 3
+  homingMaxSpeed: 200
+  homingAccel: 20
+  homingCaptureRadius: 300
+  baseTurnDegPerSec: 30
+  maxTurnDegPerSec: 60
+  curveStrengthAt1: 10
+  curvePerMs: 2
+  minInwardSpeedNear: 6
+  commitFrac: 0.2
+  closeCaptureRadius: 25
+  farAggression: 0.35
+  nearAggression: 1
+  lightSeekRadius: 700
   lightTag: Light
   lightManager: {fileID: 0}
   _hub: {fileID: 0}
+  worldCenter: {fileID: 0}
+  innerOrbit: 2500
+  outerOrbit: 4000
+  orbitSpeedInner: 500
+  orbitSpeedOuter: 300
+  radialOscPeriod: 12
+  radialKp: 2
+  radialKd: 5
+  tangentAlignGain: 6
+  tangentAccel: 20
+  worldRecaptureRadius: 120
 --- !u!114 &6593313786030574643
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,3 +228,19 @@ MonoBehaviour:
   litIntensity: 1000
   transitionDuration: 1.5
   isLit: 1
+--- !u!114 &-4699203539289196182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4170091215176379153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7e3afe28b7d14557be8794cdf8a0627, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Velocity: {x: 0, y: 0, z: 0}
+  drag: 0
+  debugLogs: 0
+  integrationEnabled: 1

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using Unity.VisualScripting;
 
 // TO-DO: Split into: Input, Glide, Dive, Wind, Audio.
 public class Movement : MonoBehaviour
@@ -15,7 +16,7 @@ public class Movement : MonoBehaviour
     public Transform rightHand;
     public Transform head;
     public Transform rigRoot; // usually XROrigin or a parent of the camera
-    
+
     [Header("Physics Controls")]
     [SerializeField] private float gravity = 9.8f; // m/s²
     [SerializeField] private float glideStrength = 4.0f;
@@ -32,7 +33,7 @@ public class Movement : MonoBehaviour
     private readonly float flapStrength = 5f;
     private readonly float forwardPropulsionStrength = 1f;
     private readonly float maxSpeed = 30f;
-    private readonly float maxDiveSpeed = 200f;
+    private readonly float maxDiveSpeed = 300f;
 
     private float snapAngle = 45f;
     private float turnThreshold = 0.8f;
@@ -149,6 +150,14 @@ public class Movement : MonoBehaviour
         : new MovementPolicy { Allowed = (MovementAbility)(-1), GravityEnabled = true };
     private bool Allowed(MovementAbility a) => (Policy.Allowed & a) != 0;
 
+    // Add these fields to your class (top-level)
+    [SerializeField] float maxOverallMul = 10f;   // hard cap
+    [SerializeField] float speedMaxMul = 5f;   // speed multiplier cap
+    [SerializeField] float strokeMaxMul = 5f;   // hand/F multiplier cap
+    [SerializeField] float maxHoldSeconds = 3f;   // full charge on release, debug only
+    [SerializeField] float maxFlapVelocity = 10f;  // full hand-down at 10 m/s
+    private float fHoldStartTime = -1f;
+
     void Awake()
     {
         policyProvider = GetComponentInParent<IMovementPolicyProvider>();
@@ -217,7 +226,7 @@ public class Movement : MonoBehaviour
 
         if (Allowed(MovementAbility.Hover) && Input.GetKey(KeyCode.N))
             wantHover = true;
-            
+
         isHovering = wantHover;
         DetectSnapTurn();
     }
@@ -294,13 +303,15 @@ public class Movement : MonoBehaviour
         wasDiving = isCurrentlyDiving;
     }
 
+
     private void HandleFlapDetection()
     {
         if (!Allowed(MovementAbility.Flap)) { isFlapping = false; return; }
-        // Debug flap magnitude
-        float flapMagnitude = 2.0f;
+
+        // ---------- Strengthener A: Player speed (1..speedMaxMul)
         float speed = velocity.magnitude;
-        float flapStrengthMultiplier = Mathf.Lerp(1f, 4f, Mathf.InverseLerp(1f, maxDiveSpeed, speed));
+        float speedT = Mathf.InverseLerp(1f, maxDiveSpeed, speed);     // 0..1
+        float speedMul = Mathf.Lerp(1f, speedMaxMul, speedT);          // 1..speedMaxMul
 
         // if (leftHand == null || rightHand == null || leftVelocity == null || rightVelocity == null) return;
         // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
@@ -312,47 +323,70 @@ public class Movement : MonoBehaviour
         // ↓ movement (downward stroke) detection
         float leftDown = -leftVelocity.SmoothedVelocity.y;
         float rightDown = -rightVelocity.SmoothedVelocity.y;
+        float avgDownSpeed = Mathf.Max(0f, (leftDown + rightDown) * 0.5f);
 
-        float avgDownSpeed = (leftDown + rightDown) * 0.5f * 0.5f;
         float minFlapThreshold = 0.5f;
-        float maxFlapVelocity = 10f;
         bool isMovingDown = avgDownSpeed > minFlapThreshold && avgDownSpeed < maxFlapVelocity;
-
         bool justStartedMovingDown = isMovingDown && !wasMovingDownLastFrame;
-        bool enoughTimePassed = Time.time - lastFlapTime >= 0.665f;
 
-        // Fire flap
-        if ((Input.GetKeyDown(KeyCode.F) || justStartedMovingDown) && enoughTimePassed)
+        float downstrokeT = Mathf.InverseLerp(0f, maxFlapVelocity, Mathf.Clamp(avgDownSpeed, 0f, maxFlapVelocity));
+
+        if (Input.GetKeyDown(KeyCode.F)) fHoldStartTime = Time.time;
+        bool fReleased = Input.GetKeyUp(KeyCode.F);
+        float holdSeconds = fHoldStartTime > 0f ? Time.time - fHoldStartTime : 0f;
+        float holdT = Mathf.InverseLerp(0f, maxHoldSeconds, Mathf.Clamp(holdSeconds, 0f, maxHoldSeconds));
+        
+        // h
+        float strokeTriggerTCurrent = downstrokeT;
+        float strokeTriggerTOnRelease = holdT;
+        bool enoughTimePassed = (Time.time - lastFlapTime) >= 0.665f;
+
+        if (justStartedMovingDown && enoughTimePassed)
         {
-            velocity += flapStrengthMultiplier * FlightPhysics.CalculateFlapVelocity(
-                head.forward, flapMagnitude, flapStrength, forwardPropulsionStrength
-            );
-            glideTime = 0f;
-            lastFlapTime = Time.time;
-            OnFlap?.Invoke();
-            PlayFlap();
-
-            eventHub.RaiseFlap();
-
-            // Latch gliding through the flap
-            glideHoldUntil = Mathf.Max(glideHoldUntil, Time.time + glideHoldDuration);
+            float strokeMul = Mathf.Lerp(1f, strokeMaxMul, strokeTriggerTCurrent);
+            FireFlap(speedMul, strokeMul);
         }
 
-        // Stroke latch (arms moving strongly up OR down keeps glide alive briefly)
+        if (fReleased && enoughTimePassed)
+        {
+            float strokeMul = Mathf.Lerp(1f, strokeMaxMul, strokeTriggerTOnRelease);
+            FireFlap(speedMul, strokeMul);
+            fHoldStartTime = -1f;
+        }
+
+        // Stroke latch (unchanged)
         float ly = leftVelocity.SmoothedVelocity.y;
         float ry = rightVelocity.SmoothedVelocity.y;
-        bool goingUpFast = ly > strokeSpeedThreshold && ry > strokeSpeedThreshold;
+        bool goingUpFast   = ly >  strokeSpeedThreshold && ry >  strokeSpeedThreshold;
         bool goingDownFast = ly < -strokeSpeedThreshold && ry < -strokeSpeedThreshold;
-        bool strokeActive = goingUpFast || goingDownFast;
-
+        bool strokeActive  = goingUpFast || goingDownFast;
         if ((isGliding || wasGlidingLastFrame) && strokeActive)
-        {
             glideHoldUntil = Mathf.Max(glideHoldUntil, Time.time + strokeHoldDuration);
-        }
 
         wasMovingDownLastFrame = isMovingDown;
     }
 
+    private void FireFlap(float speedMul, float strokeMul)
+    {
+        float overallMul = Mathf.Min(maxOverallMul, speedMul * strokeMul); // multiplicative combo, clamped
+        float flapMagnitude = 3.0f;
+        Debug.Log("SpeedMul: " + speedMul + " and strokeMul: " + strokeMul + " and overall mul: " + overallMul);
+        Vector3 flapVelocity = FlightPhysics.CalculateFlapVelocity(
+            head.forward, flapMagnitude, flapStrength, forwardPropulsionStrength
+        );
+
+        velocity += overallMul * flapVelocity;
+        Debug.Log("Flap velocity: " + flapVelocity + " and velocity: " + velocity);
+
+        glideTime = 0f;
+        lastFlapTime = Time.time;
+        OnFlap?.Invoke();
+        PlayFlap();
+        eventHub.RaiseFlap();
+        // 
+        // Latch gliding through the flap.
+        glideHoldUntil = Mathf.Max(glideHoldUntil, Time.time + glideHoldDuration);
+    }
     private void HandleGlideLogic()
     {
         if (!Allowed(MovementAbility.Glide))
@@ -433,8 +467,6 @@ public class Movement : MonoBehaviour
             isGliding,
             ref glideTime,
             ref diveAngle,
-            recentlyBounced,
-            bounceTimer,
             timeSinceDive,
             diveStartTime,
             isSpeedBoosted
@@ -510,7 +542,6 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        Debug.Log("In ApplyGravityIfNeeded()");
         bool appliedGravityThisFrame = false;
         bool isInWindZone = false;
 
@@ -547,7 +578,6 @@ public class Movement : MonoBehaviour
             gravityDirection.Normalize();
             velocity += gravityDirection * gravity * Time.deltaTime;
             appliedGravityThisFrame = true;
-            Debug.Log("Applying gravity " + gravity);
         }
 
         if (appliedGravityThisFrame)
@@ -560,10 +590,10 @@ public class Movement : MonoBehaviour
         float liftBonus = Mathf.Lerp(0f, 3f, speedFactor);
         velocity += Vector3.up * liftBonus * Time.deltaTime;
     }
-
+    
     private void ApplyMovement()
     {
-        transform.position += velocity * Time.deltaTime;
+        transform.position += (velocity * 1.25f) * Time.deltaTime;
     }
 
     private void ApplyDrag()
