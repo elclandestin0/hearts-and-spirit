@@ -255,7 +255,7 @@ public class SeedBehavior : MonoBehaviour
                                             ?? currentLightTarget.GetComponentInChildren<LightController>();
                         if (light != null && !light.isLit)
                         {
-                            light.isLit = true;
+                            light.Ignite();
 
                             var _player = GameObject.FindWithTag("Player");
                             _player.GetComponent<ItemManager>().PlayLightSound();

@@ -178,7 +178,7 @@ public class SeedCourier : MonoBehaviour
         var lc = targetLight.GetComponent<LightController>() ?? targetLight.GetComponentInParent<LightController>() ?? targetLight.GetComponentInChildren<LightController>();
         if (lc == null || lc.isLit) return;
 
-        lc.isLit = true;
+        lc.Ignite();
 
         if (tutorial == null || !tutorial.IsRunning)
         {
