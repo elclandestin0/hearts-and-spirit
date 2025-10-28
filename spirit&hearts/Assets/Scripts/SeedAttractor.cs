@@ -75,8 +75,6 @@ public class SeedBehavior : MonoBehaviour
     private bool committedToLight = false;
     private float commitRadius = 0f; // computed as lightSeekRadius * commitFrac
 
-
-
     void Start()
     {
         player = GameObject.FindWithTag("MainPlayer")?.transform;
@@ -96,6 +94,7 @@ public class SeedBehavior : MonoBehaviour
         if (player == null) return;
         if (currentState != State.AttachedToPlayer && player != null && Input.GetKey(KeyCode.C))
         {
+            Debug.Log("Attempting to attract seed.");
             float distance = Vector3.Distance(transform.position, player.position);
             if (distance < attractionRadius)
             {
@@ -112,19 +111,21 @@ public class SeedBehavior : MonoBehaviour
                 float dt = Time.deltaTime;
                 bool held = Input.GetKey(KeyCode.C);
                 float distance = Vector3.Distance(transform.position, player.position);
-
+                Debug.Log("Attracting seed...");
                 if (!held || distance >= attractionRadius)
                 {
                     currentState = State.Idle;
                     break;
                 }
 
-                if (held && motion)
+                if (held && motion != null)
                 {
+                    Debug.Log("Holding buttons");
                     Vector3 toHolster = seedHolster.position - transform.position;
                     float d = toHolster.magnitude;
                     if (d > 0.001f)
                     {
+                        Debug.Log("Supposed to be adding speed... I guess.");
                         Vector3 targetDir = toHolster / d;
                         Vector3 curDir = (motion.Velocity.sqrMagnitude > 1e-6f) ? motion.Velocity.normalized : targetDir;
 

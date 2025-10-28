@@ -69,13 +69,14 @@ public class SeedCourier : MonoBehaviour
                 float distance = Vector3.Distance(transform.position, player.position);
 
                 // Only attract if within player’s influence radius
-                float attractionRadius = 120f; // tune as needed
+                float attractionRadius = 500f; // tune as needed
                 if (distance < attractionRadius)
                 {
                     // Lerp position toward player’s seed holster (like SeedBehavior)
                     Transform holster = player.Find("SeedHolster");
                     if (holster != null)
                     {
+                        Debug.Log("Attracting towards player...");
                         Vector3 toHolster = holster.position - transform.position;
                         float speed = Mathf.Lerp(10f, 60f, Mathf.InverseLerp(attractionRadius, 0f, distance));
                         Vector3 accel = toHolster.normalized * speed;

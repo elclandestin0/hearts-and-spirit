@@ -10,10 +10,10 @@ public class LightController : MonoBehaviour, ISaveable
 
     [Header("Unlit → Lit Settings")]
     public Color unlitColor = Color.black;
-    [Min(0)] public float unlitIntensity = 0.0f;
+    [Min(0)] public float unlitIntensity;
 
     public Color litColor = Color.yellow;
-    [Min(0)] public float litIntensity = 0.5f;
+    [Min(0)] public float litIntensity;
 
     [Tooltip("Extra multiplier only on the emission output to really pop bloom.")]
     [Min(0)] public float bloomBoost = 1.2f;
