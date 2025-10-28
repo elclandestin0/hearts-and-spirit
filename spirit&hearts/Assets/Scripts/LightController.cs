@@ -13,7 +13,7 @@ public class LightController : MonoBehaviour, ISaveable
     [Min(0)] public float unlitIntensity = 0.0f;
 
     public Color litColor = Color.yellow;
-    [Min(0)] public float litIntensity = 6.0f;
+    [Min(0)] public float litIntensity = 0.5f;
 
     [Tooltip("Extra multiplier only on the emission output to really pop bloom.")]
     [Min(0)] public float bloomBoost = 1.2f;
