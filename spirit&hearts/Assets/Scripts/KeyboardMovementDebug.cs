@@ -11,7 +11,7 @@ public class KeyboardMovementDebug : MonoBehaviour
 
     [Header("Mouse / Touchpad")]
     public bool enableMouseLook = true;
-    public float mouseSensitivity = 4.5f;
+    public float mouseSensitivity = 3f;
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private MainMenu mainMenu;
 
