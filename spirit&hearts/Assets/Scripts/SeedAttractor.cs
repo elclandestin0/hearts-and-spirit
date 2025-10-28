@@ -191,7 +191,7 @@ public class SeedBehavior : MonoBehaviour
                         outsideTimer = 0f;
                     }
 
-                    if (dist > 20f)
+                    if (dist > 30f)
                     {
                         // --- existing steer math, but scale with aggression ---
                         Vector3 rHat = toTarget / dist;
