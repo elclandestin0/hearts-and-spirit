@@ -70,7 +70,6 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 8190105543783233190, guid: 5f84aa12f9818134d8c1aaea44a15616, type: 3}
   - {fileID: 2100000, guid: a29f6fafb374e764fb55414ad3c078d3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -169,16 +168,46 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
-  attractionRadius: 300
-  attachDistance: 40
+  externallyControlled: 0
+  minTurnDegPerSec: 80
+  turnDegPerSecPerMs: 40
+  attractionRadius: 500
+  attachDistance: 30
   minSpeed: 400
   maxSpeed: 600
   seedHolster: {fileID: 0}
+  moveBlendGain: 6
+  attractAccel: 100
+  attractDecel: 15
+  homingMinKick: 6
+  homingMinCruise: 3
+  homingMaxSpeed: 200
+  homingAccel: 20
+  homingCaptureRadius: 500
+  baseTurnDegPerSec: 30
+  maxTurnDegPerSec: 60
+  curveStrengthAt1: 10
+  curvePerMs: 2
+  minInwardSpeedNear: 6
+  commitFrac: 0.15
+  closeCaptureRadius: 25
+  farAggression: 0.35
+  nearAggression: 1
   lightSeekRadius: 500
   lightTag: Light
   lightManager: {fileID: 0}
   _hub: {fileID: 0}
-  externallyControlled: 0
+  worldCenter: {fileID: 0}
+  innerOrbit: 2500
+  outerOrbit: 4000
+  orbitSpeedInner: 500
+  orbitSpeedOuter: 300
+  radialOscPeriod: 12
+  radialKp: 2
+  radialKd: 5
+  tangentAlignGain: 6
+  tangentAccel: 20
+  worldRecaptureRadius: 120
 --- !u!114 &6593313786030574643
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -194,9 +223,37 @@ MonoBehaviour:
   lightMaterial: {fileID: 0}
   unlitColor: {r: 1, g: 1, b: 1, a: 0}
   unlitIntensity: 1
-  litColor: {r: 0.7529412, g: 0.08627451, b: 0, a: 0}
-  litIntensity: 1000
+  litColor: {r: 1, g: 0.83137256, b: 0.11372549, a: 1}
+  litIntensity: 10
+  bloomBoost: 1.2
   transitionDuration: 1.5
+  ease:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  pulseAtEnd: 1
+  pulseDuration: 0.25
+  pulseMultiplier: 1.75
   isLit: 1
 --- !u!114 &-4699203539289196182
 MonoBehaviour:
