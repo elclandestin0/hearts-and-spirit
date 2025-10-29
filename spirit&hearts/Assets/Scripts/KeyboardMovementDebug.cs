@@ -3,6 +3,7 @@ using UnityEngine;
 public class KeyboardMovementDebug : MonoBehaviour
 {
     public Movement movement;
+
     [Header("Settings")]
     public float pitchSpeed = 45f;
     public float yawSpeed = 60f;
@@ -12,8 +13,26 @@ public class KeyboardMovementDebug : MonoBehaviour
     [Header("Mouse / Touchpad")]
     public bool enableMouseLook = true;
     public float mouseSensitivity = 3f;
+    [Tooltip("How quickly mouse input smooths (lower = snappier).")]
+    public float mouseSmoothTime = 0.05f; // 0.05–0.1 good range
+
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private MainMenu mainMenu;
+
+    private float smoothMouseX;
+    private float smoothMouseY;
+    private float targetYaw;
+    private float targetPitch;
+
+    void Start()
+    {
+        if (movement && movement.head)
+        {
+            Vector3 euler = movement.head.localEulerAngles;
+            targetPitch = euler.x > 180f ? euler.x - 360f : euler.x;
+            targetYaw = euler.y > 180f ? euler.y - 360f : euler.y;
+        }
+    }
 
     void Update()
     {
@@ -22,28 +41,38 @@ public class KeyboardMovementDebug : MonoBehaviour
         if (movement == null || movement.head == null) return;
 
         Transform head = movement.head;
-        Vector3 currentEuler = head.localEulerAngles;
 
-        float pitch = currentEuler.x > 180f ? currentEuler.x - 360f : currentEuler.x;
-        float yaw = currentEuler.y > 180f ? currentEuler.y - 360f : currentEuler.y;
+        // Keyboard input
+        if (Input.GetKey(KeyCode.W)) targetPitch -= pitchSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.S)) targetPitch += pitchSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.A)) targetYaw -= yawSpeed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.D)) targetYaw += yawSpeed * Time.deltaTime;
 
-        // Keyboard controls
-        if (Input.GetKey(KeyCode.W)) pitch -= pitchSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.S)) pitch += pitchSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.A)) yaw -= yawSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.D)) yaw += yawSpeed * Time.deltaTime;
-
-        // Touchpad (Mouse) look
-        if (enableMouseLook) // Hold Right-Click or Cmd+click
+        // Mouse input (smooth)
+        if (enableMouseLook)
         {
-            float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
-            float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+            float rawMouseX = Input.GetAxis("Mouse X");
+            float rawMouseY = Input.GetAxis("Mouse Y");
 
-            yaw += mouseX * yawSpeed * Time.deltaTime;
-            pitch -= mouseY * pitchSpeed * Time.deltaTime;
+            // Smooth mouse deltas
+            smoothMouseX = Mathf.Lerp(smoothMouseX, rawMouseX, 1f - Mathf.Exp(-Time.deltaTime / mouseSmoothTime));
+            smoothMouseY = Mathf.Lerp(smoothMouseY, rawMouseY, 1f - Mathf.Exp(-Time.deltaTime / mouseSmoothTime));
+
+            targetYaw += smoothMouseX * yawSpeed * mouseSensitivity * Time.deltaTime;
+            targetPitch -= smoothMouseY * pitchSpeed * mouseSensitivity * Time.deltaTime;
         }
 
-        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-        head.localEulerAngles = new Vector3(pitch, yaw, currentEuler.z);
+        // Clamp pitch
+        targetPitch = Mathf.Clamp(targetPitch, minPitch, maxPitch);
+
+        // Smooth final rotation
+        Vector3 current = head.localEulerAngles;
+        float currentPitch = current.x > 180f ? current.x - 360f : current.x;
+        float currentYaw = current.y > 180f ? current.y - 360f : current.y;
+
+        float smoothedPitch = Mathf.Lerp(currentPitch, targetPitch, 1f - Mathf.Exp(-Time.deltaTime / 0.08f));
+        float smoothedYaw = Mathf.Lerp(currentYaw, targetYaw, 1f - Mathf.Exp(-Time.deltaTime / 0.08f));
+
+        head.localEulerAngles = new Vector3(smoothedPitch, smoothedYaw, 0f);
     }
 }
