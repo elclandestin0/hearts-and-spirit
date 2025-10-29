@@ -7,21 +7,17 @@ public class AsteroidOrbit : MonoBehaviour
 
     [Header("Orbit (around Z axis)")]
     public float baseRadius = 7000f;
-    public float spawnRadiusOffset = 0f;     // static offset from base radius
-    public float angularSpeedDeg = 0.1f;     // very slow drift
-    public float initialAngleDeg = 0f;       // starting angle in the orbit plane (XY)
-    public float phaseJitterDeg = 0f;        // extra per-asteroid offset
+    public float spawnRadiusOffset = 0f;
+    public float angularSpeedDeg = 0.1f;
+    public float initialAngleDeg = 0f;
+    public float phaseJitterDeg = 0f;
 
-    [Header("Height")]
-    [Tooltip("Fixed Y offset chosen at spawn so not all rocks share the same Y.")]
-    public float fixedYOffset = 0f;          // NO Y oscillation over time
+    [Header("Layer Offset (vertical offset relative to world center)")]
+    public float fixedYOffset = 0f;
 
     [Header("Visuals")]
-    [Tooltip("Optional self-spin ONLY around local Z.")]
     public float selfSpinZ_DegPerSec = 0f;
-    [Tooltip("(Kept for compatibility; unused for Z orbit unless you want it.)")]
-    public float selfSpinX_DegPerSec = 0f;   // safe to ignore; spawner may set 0
-    [Tooltip("Force yaw (rotation around world Y) to zero each frame.")]
+    public float selfSpinX_DegPerSec = 0f;
     public bool lockYawZero = true;
 
     private float _t;
@@ -39,27 +35,24 @@ public class AsteroidOrbit : MonoBehaviour
     {
         _t += Time.deltaTime;
 
-        // Angle around Z axis → ring in XY plane
         float angle = (initialAngleDeg + phaseJitterDeg) + angularSpeedDeg * _t;
         float a = angle * Mathf.Deg2Rad;
 
         float r = baseRadius + spawnRadiusOffset;
         Vector3 center = worldCenter.position;
 
-        // XY ring with fixed Y offset (adds thickness, but no time-based Y motion)
+        // Orbit in XY plane, with Z offset per layer
         Vector3 targetPos = center + new Vector3(
             Mathf.Cos(a) * r,
-            0f,
-            Mathf.Sin(a) * r + fixedYOffset
+            fixedYOffset,
+            Mathf.Sin(a) * r
         );
 
         transform.position = targetPos;
 
-        // Optional self-spin ONLY around local Z (no Y-axis spin introduced)
         if (selfSpinZ_DegPerSec != 0f)
             transform.Rotate(Vector3.forward, selfSpinZ_DegPerSec * Time.deltaTime, Space.Self);
 
-        // Keep yaw (world Y rotation) zeroed if requested
         if (lockYawZero)
         {
             Vector3 e = transform.rotation.eulerAngles;

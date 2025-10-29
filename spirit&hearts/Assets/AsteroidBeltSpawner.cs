@@ -5,9 +5,9 @@ public class AsteroidBeltSpawner : MonoBehaviour
     [Header("Setup")]
     [SerializeField] private Transform worldCenter;        // planet center
     [SerializeField] private GameObject[] rockPrefabs;     // assign your 5 rock prefabs
-    [SerializeField] private int asteroidCount = 80;
+    [SerializeField] private int asteroidCount = 90;       // divisible by 3 is ideal (30 per layer)
 
-    [Header("Belt Placement (XZ plane, orbit around Z axis)")]
+    [Header("Belt Placement (XY plane, orbit around Z axis)")]
     [Tooltip("Base radius of the asteroid belt from world center.")]
     [SerializeField] private float baseRadius = 7000f;
 
@@ -16,15 +16,16 @@ public class AsteroidBeltSpawner : MonoBehaviour
 
     [Header("Orbit Speed (deg/s)")]
     [Tooltip("Slower than seeds for a drifting look.")]
-    [SerializeField] private float minAngularSpeedDeg = 0.1f;  // very slow
-    [SerializeField] private float maxAngularSpeedDeg = 0.2f;  // very slow
-
+    [SerializeField] private float minAngularSpeedDeg = 0.1f;
+    [SerializeField] private float maxAngularSpeedDeg = 0.2f;
     [Tooltip("Randomize clockwise / counter-clockwise around Z.")]
     [SerializeField] private bool randomizeWinding = true;
 
-    [Header("Spawn Height Variety")]
-    [Tooltip("Fixed Y offset assigned at spawn so not all rocks are on the same Y.")]
-    [SerializeField] private Vector2 spawnYJitterRange = new Vector2(-4000f, 4000f);
+    [Header("Layer Heights")]
+    [Tooltip("Vertical offset above world center for top layer.")]
+    [SerializeField] private float topLayerOffset = 3000f;
+    [Tooltip("Vertical offset below world center for bottom layer.")]
+    [SerializeField] private float bottomLayerOffset = -3000f;
 
     [Header("Rock Rotation Options")]
     [Tooltip("Optional self-spin ONLY around local Z (no yaw).")]
@@ -50,13 +51,30 @@ public class AsteroidBeltSpawner : MonoBehaviour
         Vector3 t1 = Vector3.right;  // X
         Vector3 t2 = Vector3.up;     // Y
 
-        for (int i = 0; i < asteroidCount; i++)
+        // Divide count into 3 layers
+        int layerCount = Mathf.Max(1, asteroidCount / 3);
+        int remaining = asteroidCount - (layerCount * 3);
+        int midCount = layerCount + (remaining > 0 ? 1 : 0);
+        int topCount = layerCount + (remaining > 1 ? 1 : 0);
+        int bottomCount = layerCount;
+
+        SpawnLayer(midCount, 0f);                  // mid layer (center)
+        SpawnLayer(topCount, topLayerOffset);      // top layer
+        SpawnLayer(bottomCount, bottomLayerOffset); // bottom layer
+    }
+
+    private void SpawnLayer(int count, float yOffset)
+    {
+        Vector3 t1 = Vector3.right;  // X
+        Vector3 t2 = Vector3.up;     // Y
+
+        for (int i = 0; i < count; i++)
         {
             var prefab = rockPrefabs[Random.Range(0, rockPrefabs.Length)];
             if (!prefab) continue;
 
             // Even-ish angular distribution with a touch of jitter
-            float baseAngle = (i / (float)asteroidCount) * Mathf.PI * 2f;
+            float baseAngle = (i / (float)count) * Mathf.PI * 2f;
             float angleJitter = Random.Range(-6f, 6f) * Mathf.Deg2Rad;
             float theta = baseAngle + angleJitter;
 
@@ -66,9 +84,8 @@ public class AsteroidBeltSpawner : MonoBehaviour
             // Compute spawn position on XY ring
             Vector3 posOnRing = worldCenter.position + (Mathf.Cos(theta) * t1 + Mathf.Sin(theta) * t2) * r0;
 
-            // Give each asteroid a fixed Y offset so heights differ (no Y motion later)
-            float fixedY = Random.Range(spawnYJitterRange.x, spawnYJitterRange.y);
-            posOnRing.y += fixedY;
+            // Apply vertical layer offset
+            posOnRing.z += yOffset;
 
             // Spawn the rock
             var go = Instantiate(prefab, posOnRing, Random.rotationUniform);
@@ -77,7 +94,6 @@ public class AsteroidBeltSpawner : MonoBehaviour
             var orbit = go.AddComponent<AsteroidOrbit>();
             orbit.worldCenter = worldCenter;
 
-            // Force Z-axis orbit behavior (ring in XY)
             orbit.baseRadius = baseRadius;
             orbit.spawnRadiusOffset = r0 - baseRadius;
 
@@ -87,19 +103,17 @@ public class AsteroidBeltSpawner : MonoBehaviour
 
             orbit.initialAngleDeg = theta * Mathf.Rad2Deg;
             orbit.phaseJitterDeg = Random.Range(0f, 360f);
-
-            // Fixed height
-            orbit.fixedYOffset = fixedY;
+            orbit.fixedYOffset = yOffset;
 
             // Visual tweaks
-            orbit.selfSpinX_DegPerSec = 0f; // disable X spin
+            orbit.selfSpinX_DegPerSec = 0f;
             orbit.selfSpinZ_DegPerSec = (selfSpinZ_DegPerSec.x == selfSpinZ_DegPerSec.y)
                 ? selfSpinZ_DegPerSec.x
                 : Random.Range(selfSpinZ_DegPerSec.x, selfSpinZ_DegPerSec.y);
             orbit.lockYawZero = lockYawZero;
         }
 
-        Debug.Log($"[AsteroidBeltSpawner] Spawned {asteroidCount} asteroids around Z-axis ring (R≈{baseRadius}).");
+        Debug.Log($"[AsteroidBeltSpawner] Spawned {count} asteroids at Y offset {yOffset}.");
     }
 
     private void Start()
@@ -110,21 +124,27 @@ public class AsteroidBeltSpawner : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         if (!worldCenter) return;
+
         Gizmos.color = new Color(1f, 0.6f, 0.2f, 0.35f);
-
-        // Draw belt ring in XY plane at base radius (preview)
         Vector3 center = worldCenter.position;
-        Vector3 t1 = Vector3.right;  // X
-        Vector3 t2 = Vector3.up;     // Y
 
-        int seg = 128;
-        Vector3 prev = Vector3.zero;
-        for (int i = 0; i <= seg; i++)
+        // Draw belt rings for visualization
+        float[] yOffsets = { bottomLayerOffset, 0f, topLayerOffset };
+        foreach (float yOffset in yOffsets)
         {
-            float a = (i / (float)seg) * Mathf.PI * 2f;
-            Vector3 p = center + (Mathf.Cos(a) * t1 + Mathf.Sin(a) * t2) * baseRadius;
-            if (i > 0) Gizmos.DrawLine(prev, p);
-            prev = p;
+            Vector3 t1 = Vector3.right;
+            Vector3 t2 = Vector3.up;
+            int seg = 128;
+            Vector3 prev = Vector3.zero;
+
+            for (int i = 0; i <= seg; i++)
+            {
+                float a = (i / (float)seg) * Mathf.PI * 2f;
+                Vector3 p = center + (Mathf.Cos(a) * t1 + Mathf.Sin(a) * t2) * baseRadius;
+                p.z += yOffset;
+                if (i > 0) Gizmos.DrawLine(prev, p);
+                prev = p;
+            }
         }
     }
 }
