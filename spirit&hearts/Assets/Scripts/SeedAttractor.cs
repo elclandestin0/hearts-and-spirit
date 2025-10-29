@@ -36,7 +36,7 @@ public class SeedBehavior : MonoBehaviour
     private AnimationCurve homingSpeedByProximity =
         AnimationCurve.EaseInOut(0, 0, 1, 1);
     [Header("Light Capture Aggression")]
-    [SerializeField] private float commitFrac = 0.2f;
+    [SerializeField] private float commitFrac = 0.1f;
     [SerializeField] private float closeCaptureRadius = 25f;  // "thrown just a little away"
     [SerializeField] private float farAggression = 0.35f; // how weak convergence is when far
     [SerializeField] private float nearAggression = 1.0f;  // full aggression when close
@@ -120,12 +120,10 @@ public class SeedBehavior : MonoBehaviour
 
                 if (held && motion != null)
                 {
-                    Debug.Log("Holding buttons");
                     Vector3 toHolster = seedHolster.position - transform.position;
                     float d = toHolster.magnitude;
                     if (d > 0.001f)
                     {
-                        Debug.Log("Supposed to be adding speed... I guess.");
                         Vector3 targetDir = toHolster / d;
                         Vector3 curDir = (motion.Velocity.sqrMagnitude > 1e-6f) ? motion.Velocity.normalized : targetDir;
 
@@ -185,6 +183,7 @@ public class SeedBehavior : MonoBehaviour
                             return;
                         }
                     }
+
                     else
                     {
                         // once committed, never bail + clamp outward radial motion
@@ -327,15 +326,7 @@ public class SeedBehavior : MonoBehaviour
                         vNext -= rOutHat * Vector3.Dot(vNext, rOutHat);
 
                     motion.Velocity = vNext;
-
-                    // Recapture by nearby light, if any
-                    Transform nearLight = FindNearestUnlitLight(worldRecaptureRadius);
-                    if (nearLight != null)
-                    {
-                        BeginMoveToLight(nearLight);
-                        break;
-                    }
-
+                    
                     // Allow pickup
                     CheckForAttachment();
                     break;

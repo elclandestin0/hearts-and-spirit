@@ -183,17 +183,17 @@ MonoBehaviour:
   homingMinCruise: 3
   homingMaxSpeed: 200
   homingAccel: 20
-  homingCaptureRadius: 300
+  homingCaptureRadius: 500
   baseTurnDegPerSec: 30
   maxTurnDegPerSec: 60
   curveStrengthAt1: 10
   curvePerMs: 2
   minInwardSpeedNear: 6
-  commitFrac: 0.2
+  commitFrac: 0.15
   closeCaptureRadius: 25
   farAggression: 0.35
   nearAggression: 1
-  lightSeekRadius: 700
+  lightSeekRadius: 500
   lightTag: Light
   lightManager: {fileID: 0}
   _hub: {fileID: 0}
