@@ -430,10 +430,8 @@ public class SeedBehavior : MonoBehaviour
             var dove = dovinaAudioManager ?? GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
             dove?.PlayPriority("gp_changes/seed", 2, 2, 14);
 
-            // 2) Fire the tutorial/event hub
             _hub.RaiseSeedPicked();
 
-            // 3) REMOVE the world pickup object (don't keep it in holster)
             Destroy(gameObject);
         }
     }
@@ -441,7 +439,6 @@ public class SeedBehavior : MonoBehaviour
     private void CheckForPlayerProximity()
     {
         float distance = Vector3.Distance(transform.position, player.position);
-
         if (distance < attractionRadius && Input.GetKey(KeyCode.C))
         {
             currentState = State.AttractToPlayer;

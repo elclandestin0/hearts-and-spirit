@@ -57,11 +57,8 @@ public class SeedCourier : MonoBehaviour
 
     void Update()
     {
-        var sb = GetComponent<SeedBehavior>();
-        motion ??= GetComponent<SeedMotion>();
-
-        // --- Player attraction override (KeyCode.C) ---
-        if (sb != null && Input.GetKey(KeyCode.C))
+        // move forward for 'duration' w
+        if (t < duration)
         {
             var player = GameObject.FindWithTag("Player")?.transform;
             if (player != null)

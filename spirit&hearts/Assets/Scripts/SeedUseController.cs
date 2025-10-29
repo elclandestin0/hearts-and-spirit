@@ -6,8 +6,8 @@ public class SeedUseController : MonoBehaviour
     public Transform seedHolster;                 // assign in Inspector (a small anchor near chest)
     public GameObject courierPrefab;              // visual seed that flies to lights
     public DovinaAudioManager doveAudio;          // optional
-    [SerializeField] private float launchDuration = 5.0f;
-    [SerializeField] private float launchSpeed = 300f;
+    [SerializeField] private float launchDuration = 1.0f;
+    [SerializeField] private float launchSpeed = 500f;
     [SerializeField] private float arriveDistance = 10f;   // “counts as hit” radius
     [SerializeField] private Transform head;
     [SerializeField] private TutorialManager _tutorial;

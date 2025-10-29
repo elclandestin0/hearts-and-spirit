@@ -51,6 +51,7 @@ public class MainMenu : MonoBehaviour
         if (fader != null) SetAlpha(fader, 0f);
     }
 
+    // c
     void Start()
     {
         leftRayInteractor.gameObject.SetActive(true);
