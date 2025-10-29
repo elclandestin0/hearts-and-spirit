@@ -36,7 +36,7 @@ public class SeedBehavior : MonoBehaviour
     private AnimationCurve homingSpeedByProximity =
         AnimationCurve.EaseInOut(0, 0, 1, 1);
     [Header("Light Capture Aggression")]
-    [SerializeField] private float commitFrac = 0.2f;
+    [SerializeField] private float commitFrac = 0.1f;
     [SerializeField] private float closeCaptureRadius = 25f;  // "thrown just a little away"
     [SerializeField] private float farAggression = 0.35f; // how weak convergence is when far
     [SerializeField] private float nearAggression = 1.0f;  // full aggression when close
@@ -75,8 +75,6 @@ public class SeedBehavior : MonoBehaviour
     private bool committedToLight = false;
     private float commitRadius = 0f; // computed as lightSeekRadius * commitFrac
 
-
-
     void Start()
     {
         player = GameObject.FindWithTag("MainPlayer")?.transform;
@@ -96,6 +94,7 @@ public class SeedBehavior : MonoBehaviour
         if (player == null) return;
         if (currentState != State.AttachedToPlayer && player != null && Input.GetKey(KeyCode.C))
         {
+            Debug.Log("Attempting to attract seed.");
             float distance = Vector3.Distance(transform.position, player.position);
             if (distance < attractionRadius)
             {
@@ -112,14 +111,14 @@ public class SeedBehavior : MonoBehaviour
                 float dt = Time.deltaTime;
                 bool held = Input.GetKey(KeyCode.C);
                 float distance = Vector3.Distance(transform.position, player.position);
-
+                Debug.Log("Attracting seed...");
                 if (!held || distance >= attractionRadius)
                 {
                     currentState = State.Idle;
                     break;
                 }
 
-                if (held && motion)
+                if (held && motion != null)
                 {
                     Vector3 toHolster = seedHolster.position - transform.position;
                     float d = toHolster.magnitude;
@@ -184,13 +183,14 @@ public class SeedBehavior : MonoBehaviour
                             return;
                         }
                     }
+
                     else
                     {
                         // once committed, never bail + clamp outward radial motion
                         outsideTimer = 0f;
                     }
 
-                    if (dist > 20f)
+                    if (dist > 30f)
                     {
                         // --- existing steer math, but scale with aggression ---
                         Vector3 rHat = toTarget / dist;
@@ -326,15 +326,7 @@ public class SeedBehavior : MonoBehaviour
                         vNext -= rOutHat * Vector3.Dot(vNext, rOutHat);
 
                     motion.Velocity = vNext;
-
-                    // Recapture by nearby light, if any
-                    Transform nearLight = FindNearestUnlitLight(worldRecaptureRadius);
-                    if (nearLight != null)
-                    {
-                        BeginMoveToLight(nearLight);
-                        break;
-                    }
-
+                    
                     // Allow pickup
                     CheckForAttachment();
                     break;
@@ -430,8 +422,10 @@ public class SeedBehavior : MonoBehaviour
             var dove = dovinaAudioManager ?? GameObject.Find("Dove")?.GetComponent<DovinaAudioManager>();
             dove?.PlayPriority("gp_changes/seed", 2, 2, 14);
 
+            // 2) Fire the tutorial/event hub
             _hub.RaiseSeedPicked();
 
+            // 3) REMOVE the world pickup object (don't keep it in holster)
             Destroy(gameObject);
         }
     }
@@ -439,6 +433,7 @@ public class SeedBehavior : MonoBehaviour
     private void CheckForPlayerProximity()
     {
         float distance = Vector3.Distance(transform.position, player.position);
+
         if (distance < attractionRadius && Input.GetKey(KeyCode.C))
         {
             currentState = State.AttractToPlayer;
