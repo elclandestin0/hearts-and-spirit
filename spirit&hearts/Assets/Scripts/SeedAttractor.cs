@@ -79,6 +79,9 @@ public class SeedBehavior : MonoBehaviour
     private bool committedToLight = false;
     private float commitRadius = 0f; // computed as lightSeekRadius * commitFrac
 
+    [Header("Audio and light")]
+    public AudioSource attractSound;
+
     void Start()
     {
         player = GameObject.FindWithTag("MainPlayer")?.transform;
@@ -89,6 +92,7 @@ public class SeedBehavior : MonoBehaviour
         tutorialManager = GameObject.FindWithTag("MainPlayer")?.GetComponent<TutorialManager>();
         motion = GetComponent<SeedMotion>();
         worldCenter = GameObject.FindWithTag("Mountain")?.transform;
+        attractSound = GameObject.FindWithTag("SeedHolster")?.GetComponent<AudioSource>();
     }
 
     void Update()
@@ -108,12 +112,22 @@ public class SeedBehavior : MonoBehaviour
 
         if (currentState != State.AttachedToPlayer && player != null && (Input.GetKey(KeyCode.C) || (leftHeld && rightHeld)))
         {
-            Debug.Log("Attempting to attract seed.");
             float distance = Vector3.Distance(transform.position, player.position);
+
+            if (!attractSound.isPlaying)
+                attractSound.Play(); // play once while key is held
+
             if (distance < attractionRadius)
             {
                 currentState = State.AttractToPlayer;
             }
+
+            Debug.Log("Attempting to attract seed.");
+        }
+        else
+        {
+            if (attractSound.isPlaying)
+                attractSound.Stop(); // stop only when key is released
         }
         switch (currentState)
         {
@@ -339,7 +353,7 @@ public class SeedBehavior : MonoBehaviour
                         vNext -= rOutHat * Vector3.Dot(vNext, rOutHat);
 
                     motion.Velocity = vNext;
-                    
+
                     // Allow pickup
                     CheckForAttachment();
                     break;
