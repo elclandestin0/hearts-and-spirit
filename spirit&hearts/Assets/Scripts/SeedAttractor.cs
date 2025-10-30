@@ -96,7 +96,17 @@ public class SeedBehavior : MonoBehaviour
         if (externallyControlled) return;
         if (PauseState.IsPaused) return;
         if (player == null) return;
-        if (currentState != State.AttachedToPlayer && player != null && Input.GetKey(KeyCode.C))
+
+        float leftGripValue = leftGrip != null ? leftGrip.action.ReadValue<float>() : 0f;
+        float rightGripValue = rightGrip != null ? rightGrip.action.ReadValue<float>() : 0f;
+        bool leftHeld = leftGripValue > 0.1f;
+        bool rightHeld = rightGripValue > 0.1f;
+        Debug.Log("LeftGripValue: " + leftGripValue);
+        Debug.Log("RightGripValue: " + rightGripValue);
+        Debug.Log("Left Held: " + leftHeld);
+        Debug.Log("Right Held: " + rightHeld);
+
+        if (currentState != State.AttachedToPlayer && player != null && (Input.GetKey(KeyCode.C) || (leftHeld && rightHeld)))
         {
             Debug.Log("Attempting to attract seed.");
             float distance = Vector3.Distance(transform.position, player.position);
@@ -115,13 +125,13 @@ public class SeedBehavior : MonoBehaviour
                 float dt = Time.deltaTime;
                 bool held = Input.GetKey(KeyCode.C);
                 float distance = Vector3.Distance(transform.position, player.position);
-                if (!held || distance >= attractionRadius)
+                if ((!held || (!leftHeld && !rightHeld)) || distance >= attractionRadius)
                 {
                     currentState = State.Idle;
                     break;
                 }
 
-                if (held && motion != null)
+                if ((held || (leftHeld && rightHeld)) && motion != null)
                 {
                     Vector3 toHolster = seedHolster.position - transform.position;
                     float d = toHolster.magnitude;
@@ -437,7 +447,12 @@ public class SeedBehavior : MonoBehaviour
     {
         float distance = Vector3.Distance(transform.position, player.position);
 
-        if (distance < attractionRadius && Input.GetKey(KeyCode.C))
+        float leftGripValue = leftGrip != null ? leftGrip.action.ReadValue<float>() : 0f;
+        float rightGripValue = rightGrip != null ? rightGrip.action.ReadValue<float>() : 0f;
+        bool leftHeld = leftGripValue > 0.1f;
+        bool rightHeld = rightGripValue > 0.1f;
+
+        if (distance < attractionRadius && (Input.GetKey(KeyCode.C) || (leftHeld && rightHeld)))
         {
             currentState = State.AttractToPlayer;
         }
