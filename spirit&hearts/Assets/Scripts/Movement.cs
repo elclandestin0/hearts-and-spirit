@@ -1,14 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
-using Unity.VisualScripting;
 
 // TO-DO: Split into: Input, Glide, Dive, Wind, Audio.
 public class Movement : MonoBehaviour
 {
     [Header("XR Input Actions")]
-    public InputActionReference leftGrip;
-    public InputActionReference rightGrip;
+    public InputActionReference leftTrigger;
+    public InputActionReference rightTrigger;
     public InputActionReference rightStickAction;
 
     [Header("XR Transform References")]
@@ -216,8 +215,8 @@ public class Movement : MonoBehaviour
 
     private void DetectControllerInput()
     {
-        float leftGripValue = leftGrip != null ? leftGrip.action.ReadValue<float>() : 0f;
-        float rightGripValue = rightGrip != null ? rightGrip.action.ReadValue<float>() : 0f;
+        float leftGripValue = leftTrigger != null ? leftTrigger.action.ReadValue<float>() : 0f;
+        float rightGripValue = rightTrigger != null ? rightTrigger.action.ReadValue<float>() : 0f;
 
         bool leftHeld = leftGripValue > 0.5f;
         bool rightHeld = rightGripValue > 0.5f;
@@ -390,12 +389,12 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        // if (leftHand == null || rightHand == null) return;
-        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        // {
-        //     isGliding = false;
-        //     return;
-        // }
+        if (leftHand == null || rightHand == null) return;
+        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        {
+            isGliding = false;
+            return;
+        }
 
         // --- Hand spread calculation (projected to ignore vertical "squeeze") ---
         Vector3 lPos = currentLeftRel;

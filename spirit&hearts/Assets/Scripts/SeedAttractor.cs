@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SeedBehavior : MonoBehaviour
 {
@@ -8,6 +9,9 @@ public class SeedBehavior : MonoBehaviour
     [HideInInspector] public bool externallyControlled = false;
     [SerializeField] private float minTurnDegPerSec = 80f;   // gentle curl when slow
     [SerializeField] private float turnDegPerSecPerMs = 40f; // extra deg/sec per 1 m/s of speed
+    [Header("XR Input Actions")]
+    public InputActionReference leftGrip;
+    public InputActionReference rightGrip;
     private Transform player;
     private Transform currentLightTarget;
     [Header("Attraction Settings")]
@@ -111,7 +115,6 @@ public class SeedBehavior : MonoBehaviour
                 float dt = Time.deltaTime;
                 bool held = Input.GetKey(KeyCode.C);
                 float distance = Vector3.Distance(transform.position, player.position);
-                Debug.Log("Attracting seed...");
                 if (!held || distance >= attractionRadius)
                 {
                     currentState = State.Idle;
