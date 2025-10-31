@@ -389,12 +389,12 @@ public class Movement : MonoBehaviour
             return;
         }
 
-        if (leftHand == null || rightHand == null) return;
-        if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
-        {
-            isGliding = false;
-            return;
-        }
+        // if (leftHand == null || rightHand == null) return;
+        // if (!leftHand.gameObject.activeInHierarchy || !rightHand.gameObject.activeInHierarchy)
+        // {
+        //     isGliding = false;
+        //     return;
+        // }
 
         // --- Hand spread calculation (projected to ignore vertical "squeeze") ---
         Vector3 lPos = currentLeftRel;
