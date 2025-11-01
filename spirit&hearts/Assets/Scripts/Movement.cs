@@ -312,7 +312,7 @@ public class Movement : MonoBehaviour
         float speedT = Mathf.InverseLerp(1f, maxDiveSpeed, speed);     // 0..1
         float speedMul = Mathf.Lerp(1f, speedMaxMul, speedT);          // 1..speedMaxMul
 
-        float leftDown  = -leftVelocity.SmoothedVelocity.y;
+        float leftDown = -leftVelocity.SmoothedVelocity.y;
         float rightDown = -rightVelocity.SmoothedVelocity.y;
         float avgDownSpeed = Mathf.Max(0f, (leftDown + rightDown) * 0.5f);
 
@@ -326,7 +326,7 @@ public class Movement : MonoBehaviour
         bool fReleased = Input.GetKeyUp(KeyCode.F);
         float holdSeconds = fHoldStartTime > 0f ? Time.time - fHoldStartTime : 0f;
         float holdT = Mathf.InverseLerp(0f, maxHoldSeconds, Mathf.Clamp(holdSeconds, 0f, maxHoldSeconds));
-        
+
         // h
         float strokeTriggerTCurrent = downstrokeT;
         float strokeTriggerTOnRelease = holdT;
@@ -348,9 +348,9 @@ public class Movement : MonoBehaviour
         // Stroke latch (unchanged)
         float ly = leftVelocity.SmoothedVelocity.y;
         float ry = rightVelocity.SmoothedVelocity.y;
-        bool goingUpFast   = ly >  strokeSpeedThreshold && ry >  strokeSpeedThreshold;
+        bool goingUpFast = ly > strokeSpeedThreshold && ry > strokeSpeedThreshold;
         bool goingDownFast = ly < -strokeSpeedThreshold && ry < -strokeSpeedThreshold;
-        bool strokeActive  = goingUpFast || goingDownFast;
+        bool strokeActive = goingUpFast || goingDownFast;
         if ((isGliding || wasGlidingLastFrame) && strokeActive)
             glideHoldUntil = Mathf.Max(glideHoldUntil, Time.time + strokeHoldDuration);
 
@@ -434,8 +434,7 @@ public class Movement : MonoBehaviour
             eventHub.RaiseGlideTick(Time.deltaTime);
         }
 
-        // Steering direction: in hover keep travel/wind heading; otherwise head
-        bool hoverActive = isHovering && isGliding;
+        bool hoverActive = isHovering; // CHANGED: allow hover logic even if not gliding
 
         Vector3 hoverDir;
         if (velocity.sqrMagnitude > (minHoverDirSpeed * minHoverDirSpeed))
@@ -444,8 +443,27 @@ public class Movement : MonoBehaviour
             hoverDir = lastKnownWindDir;
         else
             hoverDir = headFwd.normalized;
+        Vector3 steerDir;
+        if (!hoverActive)
+        {
+            steerDir = headFwd.normalized;
+        }
+        else
+        {
+            // Consider a short window after a flap as "active" guiding too.
+            bool recentFlap = (Time.time - lastFlapTime) < 0.35f;
 
-        Vector3 steerDir = hoverActive ? hoverDir : headFwd.normalized;
+            // How much to bias toward head.forward when guiding during hover.
+            // 0 = stay with hoverDir; 0.5 = balanced blend.
+            float blendT = 0f;
+            if (isGliding) blendT = Mathf.Max(blendT, 0.5f);
+            if (recentFlap) blendT = Mathf.Max(blendT, 0.8f);
+
+            steerDir = (blendT > 0f)
+                ? Vector3.Slerp(hoverDir, headFwd.normalized, blendT)
+                : hoverDir;
+        }
+
 
         float timeSinceDive = Time.time - lastDiveEndTime;
 
@@ -581,7 +599,7 @@ public class Movement : MonoBehaviour
         float liftBonus = Mathf.Lerp(0f, 3f, speedFactor);
         velocity += Vector3.up * liftBonus * Time.deltaTime;
     }
-    
+
     private void ApplyMovement()
     {
         transform.position += (velocity * 1.25f) * Time.deltaTime;
