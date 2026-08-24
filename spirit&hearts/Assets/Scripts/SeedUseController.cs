@@ -32,7 +32,7 @@ public class SeedUseController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.X))
             LaunchCourierForward();
     }
-    
+
     private void LaunchCourierForward()
     {
         if (courierPrefab == null || seedHolster == null) return;
@@ -49,7 +49,7 @@ public class SeedUseController : MonoBehaviour
         }
 
         // choose forward as player head forward (usually nicer) or this.transform.forward
-            Vector3 launchDir = head.forward;
+        Vector3 launchDir = head.forward;
 
         var courier = courierGO.AddComponent<SeedCourier>();
         courier.InitForward(
