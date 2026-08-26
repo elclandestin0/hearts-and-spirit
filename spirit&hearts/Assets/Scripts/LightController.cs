@@ -74,6 +74,8 @@ public class LightController : MonoBehaviour, ISaveable
 
     private void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (isLit != _prevLit)
         {
             BeginTransition(isLit);

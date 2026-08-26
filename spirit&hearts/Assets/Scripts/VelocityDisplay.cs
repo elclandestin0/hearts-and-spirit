@@ -17,6 +17,8 @@ public class VelocityDisplay : MonoBehaviour
 
     void LateUpdate()
     {
+        if (PauseState.IsPaused) return;
+
         if (ghost == null || textMesh == null || target == null || ghost.CurrentFrame == null)
             return;
 

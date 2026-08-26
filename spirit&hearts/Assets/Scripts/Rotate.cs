@@ -11,6 +11,8 @@ public class Rotate : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
         transform.position -= lastBobbingOffset;
         float bobY = Mathf.Sin(Time.time * bobFrequency) * bobAmplitude;

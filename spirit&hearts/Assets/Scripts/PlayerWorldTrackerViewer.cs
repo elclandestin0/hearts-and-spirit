@@ -6,6 +6,8 @@ public class PlayerWorldTrackerViewer : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         currentZone = PlayerWorldTracker.CurrentCoord;
     }
 }

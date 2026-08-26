@@ -18,6 +18,8 @@ public class LightingZone : MonoBehaviour
 
     private void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (!inLightZone || customLight == null || rend == null) return;
 
         Vector3 lightDir = -customLight.forward.normalized;

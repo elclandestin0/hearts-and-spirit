@@ -29,6 +29,8 @@ public class SeedUseController : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (Input.GetKeyDown(KeyCode.X))
             LaunchCourierForward();
     }

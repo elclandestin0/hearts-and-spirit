@@ -47,6 +47,8 @@ public class GhostFlightPlayback : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (frames.Count == 0) return;
 
         playbackTime += Time.deltaTime * playbackSpeed;

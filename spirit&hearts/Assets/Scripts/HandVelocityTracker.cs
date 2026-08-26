@@ -15,6 +15,8 @@ public class HandVelocityTracker : MonoBehaviour
 
     void LateUpdate()
     {
+        if (PauseState.IsPaused) return;
+
         if (headReference == null) return;
 
         Vector3 currentRelativePos = headReference.InverseTransformPoint(transform.position);

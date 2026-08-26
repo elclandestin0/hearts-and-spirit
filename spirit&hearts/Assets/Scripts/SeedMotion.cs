@@ -13,6 +13,8 @@ public class SeedMotion : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (!integrationEnabled) return;
 
         // integrate

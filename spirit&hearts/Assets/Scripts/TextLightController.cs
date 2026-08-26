@@ -45,6 +45,8 @@ public class TextLightController : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (Application.isPlaying && isLit != _prevLit)
         {
             StartTransition(isLit);

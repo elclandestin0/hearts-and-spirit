@@ -8,6 +8,8 @@ public class WingFollower : MonoBehaviour
 
     void LateUpdate()
     {
+        if (PauseState.IsPaused) return;
+
         if (target != null)
         {
             transform.position = target.position + target.rotation * positionOffset;

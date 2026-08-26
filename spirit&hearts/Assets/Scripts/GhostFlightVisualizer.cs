@@ -15,6 +15,8 @@ public class GhostFlightVisualizer : MonoBehaviour
 
     void LateUpdate()
     {
+        if (PauseState.IsPaused) return;
+
         if (ghost == null || ghost.CurrentFrame == null)
             return;
 

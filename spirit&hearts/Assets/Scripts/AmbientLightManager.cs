@@ -25,6 +25,8 @@ public class AmbientLightManager : MonoBehaviour
 
     private void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (isTransitioning)
         {
             transitionTimer += Time.deltaTime; 

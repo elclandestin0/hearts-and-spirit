@@ -174,6 +174,8 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         // Still read inputs/poses; but if translate is locked, zero out motion and skip forces.
         bool allowTranslate = Allowed(MovementAbility.Translate);
 

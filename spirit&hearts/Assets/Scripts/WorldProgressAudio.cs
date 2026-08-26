@@ -14,6 +14,8 @@ public class WorldProgressAudio : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (!lightManager || !dovinaAudioManager) return;
 
         float p = lightManager.litPercent;

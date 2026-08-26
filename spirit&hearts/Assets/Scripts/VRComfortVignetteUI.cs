@@ -58,6 +58,8 @@ public class VRComfortVignetteUI : MonoBehaviour
     }
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (playerMovement == null || mat == null) return;
 
         // speed term

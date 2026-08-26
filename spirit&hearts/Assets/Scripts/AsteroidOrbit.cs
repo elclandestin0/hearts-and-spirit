@@ -33,6 +33,8 @@ public class AsteroidOrbit : MonoBehaviour
 
     private void Update()
     {
+        if (PauseState.IsPaused) return;
+
         _t += Time.deltaTime;
 
         float angle = (initialAngleDeg + phaseJitterDeg) + angularSpeedDeg * _t;

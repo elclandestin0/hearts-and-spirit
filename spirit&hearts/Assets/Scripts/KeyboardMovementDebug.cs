@@ -16,6 +16,8 @@ public class KeyboardMovementDebug : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (movement == null || movement.head == null) return;
 
         Transform head = movement.head;

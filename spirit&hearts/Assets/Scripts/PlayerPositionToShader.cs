@@ -7,6 +7,8 @@ public class PlayerPositionToShader : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         Shader.SetGlobalVector("_PlayerPosition", transform.position);
         Shader.SetGlobalColor("_PlayerColor", playerColor);
         Shader.SetGlobalFloat("_PlayerLightRange", playerLightRange);

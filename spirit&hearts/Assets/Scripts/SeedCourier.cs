@@ -57,6 +57,8 @@ public class SeedCourier : MonoBehaviour
 
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         var sb = GetComponent<SeedBehavior>();
         motion ??= GetComponent<SeedMotion>();
 

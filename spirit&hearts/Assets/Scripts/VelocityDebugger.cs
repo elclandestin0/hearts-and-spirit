@@ -9,6 +9,8 @@ public class VelocityDebugger : MonoBehaviour
 
     void LateUpdate()
     {
+        if (PauseState.IsPaused) return;
+
         if (textMesh == null)
             return;
 

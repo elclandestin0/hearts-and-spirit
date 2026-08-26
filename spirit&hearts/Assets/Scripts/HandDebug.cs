@@ -6,6 +6,8 @@ public class HandDebug : MonoBehaviour
     public XRNode node;
     void Update()
     {
+        if (PauseState.IsPaused) return;
+
         InputDevice rightHand = InputDevices.GetDeviceAtXRNode(node);
 
         if (rightHand.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 pos))

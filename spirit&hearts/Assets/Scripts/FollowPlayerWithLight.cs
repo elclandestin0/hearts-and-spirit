@@ -17,6 +17,8 @@ public class FollowPlayerWithLight : MonoBehaviour
 
     private void Update()
     {
+        if (PauseState.IsPaused) return;
+
         if (shouldFollow && target != null)
         {
             Vector3 directionToTarget = (target.position - transform.position).normalized;
