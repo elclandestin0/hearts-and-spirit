@@ -10,18 +10,23 @@ using UnityEngine;
 /// </summary>
 public static class SaveManager
 {
+    // v1 stored state in an `object` field, which JsonUtility silently writes as "{}".
+    // v2 serializes the concrete state type by name so the payload survives the round trip.
+    private const int CurrentVersion = 2;
+
     [Serializable]
     private class SaveRecord
     {
         public string id;          // entity id
         public string type;        // component type
+        public string stateType;   // concrete type of the state object
         public string json;        // json of component state
     }
 
     [Serializable]
     private class SaveEnvelope
     {
-        public int version = 1;
+        public int version = CurrentVersion;
         public string scene;
         public string timestamp;
         public List<SaveRecord> records = new List<SaveRecord>();
@@ -40,29 +45,41 @@ public static class SaveManager
 
     public static void Save(string slot)
     {
-        Debug.Log("Saving into " + slot);
         var env = new SaveEnvelope
         {
+            version = CurrentVersion,
             scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
             timestamp = DateTime.UtcNow.ToString("o"),
             records = new List<SaveRecord>()
         };
+
+        var seenIds = new HashSet<string>();
+
         foreach (var e in entities)
         {
+            if (e == null) continue;
+
+            if (!seenIds.Add(e.Id))
+                Debug.LogWarning($"[SaveManager] Duplicate entity id '{e.Id}' on '{e.name}'. " +
+                                 "Only one of these will be restored.");
+
             foreach (var (type, state) in e.CaptureAll())
             {
-                var record = new SaveRecord
+                if (state == null) continue;
+
+                env.records.Add(new SaveRecord
                 {
                     id = e.Id,
                     type = type,
-                    json = JsonUtility.ToJson(new Box() { payload = state })
-                };
-                env.records.Add(record);
+                    stateType = state.GetType().AssemblyQualifiedName,
+                    json = JsonUtility.ToJson(state)
+                });
             }
         }
+
         var json = JsonUtility.ToJson(env, true);
         File.WriteAllText(GetSavePath(slot), json);
-        Debug.Log($"[SaveManager] Saved {env.records.Count} records to: {GetSavePath(slot)}");
+        GameLog.Log($"[SaveManager] Saved {env.records.Count} records to: {GetSavePath(slot)}");
     }
 
     public static bool Load(string slot)
@@ -70,43 +87,64 @@ public static class SaveManager
         var path = GetSavePath(slot);
         if (!File.Exists(path))
         {
-#if UNITY_EDITOR
-            Debug.LogWarning($"[SaveManager] No save file found at {path}");
-#endif
+            GameLog.Log($"[SaveManager] No save file found at {path}");
             return false;
         }
 
         var json = File.ReadAllText(path);
         var env = JsonUtility.FromJson<SaveEnvelope>(json);
+        if (env == null) return false;
+
+        if (env.version < CurrentVersion)
+        {
+            Debug.LogWarning($"[SaveManager] Save at {path} is version {env.version} " +
+                             $"(current {CurrentVersion}) and carries no usable state. Ignoring it.");
+            return false;
+        }
 
         // group by entity id then feed back to components
         var byEntity = env.records.GroupBy(r => r.id);
         int restored = 0;
         foreach (var group in byEntity)
         {
-            var entity = entities.FirstOrDefault(e => e.Id == group.Key);
+            var entity = entities.FirstOrDefault(e => e != null && e.Id == group.Key);
             if (entity == null) continue;
 
             var list = new List<(string type, object state)>();
             foreach (var rec in group)
             {
-                var boxed = JsonUtility.FromJson<Box>(rec.json);
-                list.Add((rec.type, boxed.payload));
+                var state = Deserialize(rec);
+                if (state == null) continue;
+                list.Add((rec.type, state));
                 restored++;
             }
             entity.RestoreAll(list);
         }
 
-#if UNITY_EDITOR
-        Debug.Log($"[SaveManager] Loaded {restored} component states from: {path}");
-#endif
+        GameLog.Log($"[SaveManager] Loaded {restored} component states from: {path}");
         return true;
     }
 
-    // Small helper since JsonUtility can't (de)serialize object directly.
-    [Serializable]
-    private class Box
+    private static object Deserialize(SaveRecord rec)
     {
-        public object payload;
+        if (rec == null || string.IsNullOrEmpty(rec.stateType) || string.IsNullOrEmpty(rec.json))
+            return null;
+
+        var t = Type.GetType(rec.stateType);
+        if (t == null)
+        {
+            Debug.LogWarning($"[SaveManager] Unknown state type '{rec.stateType}'; skipping record.");
+            return null;
+        }
+
+        try
+        {
+            return JsonUtility.FromJson(rec.json, t);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[SaveManager] Could not read state for '{rec.type}': {ex.Message}");
+            return null;
+        }
     }
 }
