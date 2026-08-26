@@ -242,14 +242,14 @@ public class HoverTextLightTweenerSafe : MonoBehaviour,
         var found = new List<UnityEngine.XR.Interaction.Toolkit.Interactors.XRRayInteractor>();
 
         // 1) Direct find with your declared type (will work if project uses that namespace)
-        var typed = FindObjectsOfType<UnityEngine.XR.Interaction.Toolkit.Interactors.XRRayInteractor>(true);
+        var typed = FindObjectsByType<UnityEngine.XR.Interaction.Toolkit.Interactors.XRRayInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         if (typed != null && typed.Length > 0) found.AddRange(typed);
 
         // 2) Fallback: try the classic namespace via reflection (UnityEngine.XR.Interaction.Toolkit.XRRayInteractor)
         var classicType = System.Type.GetType("UnityEngine.XR.Interaction.Toolkit.XRRayInteractor, Unity.XR.Interaction.Toolkit");
         if (classicType != null)
         {
-            var objs = FindObjectsOfType(classicType, true);
+            var objs = FindObjectsByType(classicType, FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var o in objs)
             {
                 // best-effort cast; if not compatible, skip

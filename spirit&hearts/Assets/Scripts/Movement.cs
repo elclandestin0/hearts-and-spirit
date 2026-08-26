@@ -109,7 +109,6 @@ public class Movement : MonoBehaviour
     // Wind zones. GetWindForceAtPosition runs an iterative nearest-point
     // search over the spline, so the whole set is sampled once per frame and
     // shared - the gravity check used to walk all of them a second time.
-    private SplineWindZone[] zones;
     private Vector3 windForceThisFrame;
     private bool inWindZoneThisFrame;
 
@@ -171,7 +170,6 @@ public class Movement : MonoBehaviour
         tutorialManager = GetComponent<TutorialManager>();
         prevLeftPos = leftHand.position;
         prevRightPos = rightHand.position;
-        zones = FindObjectsOfType<SplineWindZone>();
     }
 
     void Update()
@@ -799,11 +797,11 @@ public class Movement : MonoBehaviour
         windForceThisFrame = Vector3.zero;
         inWindZoneThisFrame = false;
 
-        if (zones == null) return;
-
         Vector3 pos = transform.position;
-        foreach (var zone in zones)
+        var zones = SplineWindZone.Active;
+        for (int i = 0; i < zones.Count; i++)
         {
+            var zone = zones[i];
             if (zone == null) continue;
 
             Vector3 wind = zone.GetWindForceAtPosition(pos);

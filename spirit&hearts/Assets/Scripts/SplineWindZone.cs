@@ -1,9 +1,19 @@
 using UnityEngine;
 using UnityEngine.Splines;
 using Unity.Mathematics;
+using System.Collections.Generic;
 
 public class SplineWindZone : MonoBehaviour
 {
+    // Zones register themselves so Movement does not have to scan the scene
+    // once at Start - which was both a deprecated call and permanently blind
+    // to any zone spawned afterwards.
+    private static readonly List<SplineWindZone> active = new List<SplineWindZone>();
+    public static IReadOnlyList<SplineWindZone> Active => active;
+
+    private void OnEnable() => active.Add(this);
+    private void OnDisable() => active.Remove(this);
+
     public SplineContainer spline;
     public float windStrength = 100f;
     public float influenceRadius = 25f;
