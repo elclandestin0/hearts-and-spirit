@@ -27,18 +27,18 @@ public class ItemManager : MonoBehaviour
         // Level section
         if (other.CompareTag("SpeedBooster"))
         {
-            Debug.Log("Whaaa!");
+            GameLog.Log("Whaaa!");
             movementScript.ActivateSpeedBoost();
         }
     }
 
     public void PlayPickUpSound() 
     {
-        Debug.Log("Attempting to play pick up sound...");
+        GameLog.Log("Attempting to play pick up sound...");
         if (pickupSound == null) return;
         else 
         {
-            Debug.Log("Blay...");
+            GameLog.Log("Blay...");
             pickupSound.Play();
         }
     }

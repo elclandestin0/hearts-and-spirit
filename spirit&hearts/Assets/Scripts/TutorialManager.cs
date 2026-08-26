@@ -82,10 +82,10 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         {
             StopCoroutine(cinematicRoutine);
             cinematicRoutine = null;
-            Debug.Log("Stopping cinematic routine...");
+            GameLog.Log("Stopping cinematic routine...");
         }
 
-        Debug.Log("End of Skip Tutorial...");
+        GameLog.Log("End of Skip Tutorial...");
         EndTutorialToFreeFlight();
     }
 
@@ -98,7 +98,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         StepIndex++;
         if (steps == null || StepIndex >= steps.Length)
         {
-            Debug.Log("Invoking EndTutorialToFreeFlight()");
+            GameLog.Log("Invoking EndTutorialToFreeFlight()");
             EndTutorialToFreeFlight();
             return;
         }
@@ -167,10 +167,10 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     {
         foreach (var p in scenePoints)
         {
-            Debug.Log($"[ResolvePoint] Comparing '{p.id}' with '{id}'");
+            GameLog.Log($"[ResolvePoint] Comparing '{p.id}' with '{id}'");
             if (p.id == id)
             {
-                Debug.Log($"[ResolvePoint] MATCH found for {id}, transform={p.transform.name}");
+                GameLog.Log($"[ResolvePoint] MATCH found for {id}, transform={p.transform.name}");
                 return p.transform;
             }
         }
@@ -228,7 +228,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         IsRunning = false;
         enabled = false;
 
-        Debug.Log("[Tutorial] Skipped → Free Flight (Everything enabled).");
+        GameLog.Log("[Tutorial] Skipped → Free Flight (Everything enabled).");
     }
 
     /// <summary>True while both hand controllers report their primary face button down.</summary>
@@ -251,7 +251,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     {
         if (Input.GetKeyDown(KeyCode.P))
         {
-            Debug.Log("Skipping tutorial...");
+            GameLog.Log("Skipping tutorial...");
             SkipTutorial();
             return;
         }
@@ -266,7 +266,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
             _skipHeldFor += Time.unscaledDeltaTime;
             if (_skipHeldFor >= skipHoldSeconds)
             {
-                Debug.Log("[Tutorial] Skip gesture held; skipping tutorial.");
+                GameLog.Log("[Tutorial] Skip gesture held; skipping tutorial.");
                 _skipHeldFor = 0f;
                 SkipTutorial();
                 return;

@@ -9,7 +9,7 @@ public static class PauseState
 
     public static void SetPaused(bool paused)
     {
-        Debug.Log("Set paused. " + paused);
+        GameLog.Log("Set paused. " + paused);
         if (IsPaused == paused) return;
         IsPaused = paused;
         OnPauseChanged?.Invoke(IsPaused);

@@ -126,7 +126,7 @@ public class SeedBeltSpawner : MonoBehaviour
             }
         }
 
-        Debug.Log($"[SeedBeltSpawner] Spawned {seedCount} seeds on spherical cap (R={shellRadius}, y≥center+{capYMin}).");
+        GameLog.Log($"[SeedBeltSpawner] Spawned {seedCount} seeds on spherical cap (R={shellRadius}, y≥center+{capYMin}).");
     }
 
     private void Start()

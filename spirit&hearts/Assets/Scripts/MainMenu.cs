@@ -169,7 +169,7 @@ public class MainMenu : MonoBehaviour
 
     private void ResumeFromPause()
     {
-        Debug.Log("Resume from pause.");
+        GameLog.Log("Resume from pause.");
         isPaused = false;
         settingsFromPause = false;
         HideAllPanels();
@@ -253,13 +253,13 @@ public class MainMenu : MonoBehaviour
             if (settingsFromPause)
             {
                 ShowPause();
-                Debug.Log("Showing panel pause");
+                GameLog.Log("Showing panel pause");
             }
 
             else
             {
                 ShowRoot();
-                Debug.Log("Showing panel root");
+                GameLog.Log("Showing panel root");
             }
             return;
         }

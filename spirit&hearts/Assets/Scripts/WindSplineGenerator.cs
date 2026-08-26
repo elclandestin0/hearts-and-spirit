@@ -72,7 +72,7 @@ public class WindSplineGenerator : MonoBehaviour
             }
         }
 
-        Debug.Log($"[WindSplineGenerator] Generated {numberOfSplines} wind splines from peak.");
+        GameLog.Log($"[WindSplineGenerator] Generated {numberOfSplines} wind splines from peak.");
     }
 }
 

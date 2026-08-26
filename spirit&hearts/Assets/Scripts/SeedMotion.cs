@@ -25,7 +25,7 @@ public class SeedMotion : MonoBehaviour
         }
 
         if (debugLogs)
-            Debug.Log($"[SeedMotion] pos={transform.position} vel={Velocity} speed={Velocity.magnitude:F2}");
+            GameLog.Log($"[SeedMotion] pos={transform.position} vel={Velocity} speed={Velocity.magnitude:F2}");
     }
 
     public void SetVelocity(Vector3 v) => Velocity = v;

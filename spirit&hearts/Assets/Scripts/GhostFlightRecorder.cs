@@ -19,7 +19,7 @@ public class GhostFlightRecorder : MonoBehaviour
         timer = 0f;
         nextRecord = 0f;
         isRecording = true;
-        Debug.Log("🎙️ Recorder triggered by Movement script.");
+        GameLog.Log("🎙️ Recorder triggered by Movement script.");
     }
 
     void OnApplicationQuit()
@@ -27,7 +27,7 @@ public class GhostFlightRecorder : MonoBehaviour
         if (isRecording && frames.Count > 0)
         {
             SaveToFile();
-            Debug.Log("💾 Auto-saved ghost flight on quit.");
+            GameLog.Log("💾 Auto-saved ghost flight on quit.");
         }
     }
 
@@ -55,7 +55,7 @@ public void SaveToFile()
     string json = JsonUtility.ToJson(container, true);
 
     File.WriteAllText(filePath, json);
-    Debug.Log("💾 Saved ghost flight to: " + filePath);
+    GameLog.Log("💾 Saved ghost flight to: " + filePath);
 }
 
 

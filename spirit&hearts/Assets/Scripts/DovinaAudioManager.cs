@@ -211,7 +211,7 @@ public class DovinaAudioManager : MonoBehaviour
     {
         if (!CategoryHasCooldown(category)) return false;
         if (!categoryCooldownUntil.TryGetValue(category, out var until)) return false;
-        Debug.Log("Category " + category + " on cooldown. Until: " + until);
+        GameLog.Log("Category " + category + " on cooldown. Until: " + until);
         return Time.time < until;
     }
     private void StartCategoryCooldown(string category)
@@ -369,7 +369,7 @@ public class DovinaAudioManager : MonoBehaviour
         {
             if (priority > currentPriority)
             {
-                Debug.Log("stopping audio");
+                GameLog.Log("stopping audio");
                 audioSource.Stop();
                 OnClipInterrupted?.Invoke(_playToken);
             }
@@ -377,7 +377,7 @@ public class DovinaAudioManager : MonoBehaviour
             {
                 if (doNotQueueWhenBusy.Contains(context))
                 {
-                    Debug.Log("Context is in do-not-queue list, skipping queue.");
+                    GameLog.Log("Context is in do-not-queue list, skipping queue.");
                     return;
                 }
                 clipQueue.Enqueue(new ClipRequest(clip, priority, context));
@@ -392,7 +392,7 @@ public class DovinaAudioManager : MonoBehaviour
         audioSource.Stop();
         audioSource.clip = clip;
         audioSource.Play();
-        Debug.Log("Playing clip " + clip.name);
+        GameLog.Log("Playing clip " + clip.name);
 
         isPriorityPlaying = true;
         currentPriority = priority;

@@ -18,7 +18,7 @@ public class MovementEventHub : MonoBehaviour
 
     public void RaiseSeedPicked()
     {
-        Debug.Log("Invoking seed pick up");
+        GameLog.Log("Invoking seed pick up");
         _seedCount++;
         OnSeedPicked?.Invoke();
         OnSeedCountChanged?.Invoke(_seedCount);

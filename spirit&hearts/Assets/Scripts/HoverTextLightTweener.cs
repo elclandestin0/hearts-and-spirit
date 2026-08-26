@@ -285,7 +285,7 @@ public class HoverTextLightTweenerSafe : MonoBehaviour,
             var r = uiRays[i];
             sb.AppendLine($"  [{i}] {(r ? r.name : "null")}");
         }
-        Debug.Log(sb.ToString());
+        GameLog.Log(sb.ToString());
     }
 
     // ---------- Debug helpers ----------
@@ -331,7 +331,7 @@ public class HoverTextLightTweenerSafe : MonoBehaviour,
                 sb.AppendLine("  3D Hit: none");
         }
 
-        Debug.Log(sb.ToString());
+        GameLog.Log(sb.ToString());
 
         if (_lastUIHitState != null && index < _lastUIHitState.Length)
             _lastUIHitState[index] = uiHit;

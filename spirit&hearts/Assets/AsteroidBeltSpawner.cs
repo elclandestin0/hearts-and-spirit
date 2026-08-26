@@ -113,7 +113,7 @@ public class AsteroidBeltSpawner : MonoBehaviour
             orbit.lockYawZero = lockYawZero;
         }
 
-        Debug.Log($"[AsteroidBeltSpawner] Spawned {count} asteroids at Y offset {yOffset}.");
+        GameLog.Log($"[AsteroidBeltSpawner] Spawned {count} asteroids at Y offset {yOffset}.");
     }
 
     private void Start()

@@ -20,7 +20,7 @@ public class SeedInventory : MonoBehaviour
         {
             seedCount--;
             subtitleUI.text = "Seeds: " + seedCount;
-            Debug.Log("Seed removed. Remaining: " + seedCount);
+            GameLog.Log("Seed removed. Remaining: " + seedCount);
             if (seedCount == 0) 
             {
                 subtitleUI.text = "Find some seeds!";

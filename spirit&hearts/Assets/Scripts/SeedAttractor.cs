@@ -136,7 +136,7 @@ public class SeedBehavior : MonoBehaviour
                 float distance = Vector3.Distance(transform.position, player.position);
                 if ((!held || (!leftHeld && !rightHeld)) && distance >= attractionRadius)
                 {
-                    Debug.Log("Back to Idle.");
+                    GameLog.Log("Back to Idle.");
                     currentState = State.Idle;
                     break;
                 }

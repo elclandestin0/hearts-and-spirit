@@ -55,6 +55,6 @@ public class GhostFlightVisualizer : MonoBehaviour
         Debug.DrawRay(headPos, Quaternion.Euler(60f, 0f, 0f) * Vector3.down * 2f, coneColor);
         Debug.DrawRay(headPos, Quaternion.Euler(-60f, 0f, 0f) * Vector3.down * 2f, coneColor);
 
-        Debug.Log($"[DIVE DEBUG] Angle to down: {diveAngle:F1}° — {(diveAngle < 60f ? "🦅 Diving!" : "🧍 No dive")}");
+        GameLog.Log($"[DIVE DEBUG] Angle to down: {diveAngle:F1}° — {(diveAngle < 60f ? "🦅 Diving!" : "🧍 No dive")}");
     }
 }

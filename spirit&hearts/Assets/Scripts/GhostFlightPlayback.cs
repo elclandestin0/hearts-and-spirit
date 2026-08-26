@@ -88,7 +88,7 @@ public class GhostFlightPlayback : MonoBehaviour
         string json = flightDataFile.text;
         GhostFlightRecording recording = JsonUtility.FromJson<GhostFlightRecording>(json);
         frames = new List<FlightFrame>(recording.frames);
-        Debug.Log($"Loaded {frames.Count} ghost frames.");
+        GameLog.Log($"Loaded {frames.Count} ghost frames.");
     }
 
     [System.Serializable]

@@ -367,13 +367,13 @@ public class Movement : MonoBehaviour
     {
         float overallMul = Mathf.Min(maxOverallMul, speedMul * strokeMul); // multiplicative combo, clamped
         float flapMagnitude = 3.0f;
-        Debug.Log("SpeedMul: " + speedMul + " and strokeMul: " + strokeMul + " and overall mul: " + overallMul);
+        GameLog.Log("SpeedMul: " + speedMul + " and strokeMul: " + strokeMul + " and overall mul: " + overallMul);
         Vector3 flapVelocity = FlightPhysics.CalculateFlapVelocity(
             head.forward, flapMagnitude, flapStrength, forwardPropulsionStrength
         );
 
         velocity += overallMul * flapVelocity;
-        Debug.Log("Flap velocity: " + flapVelocity + " and velocity: " + velocity);
+        GameLog.Log("Flap velocity: " + flapVelocity + " and velocity: " + velocity);
 
         glideTime = 0f;
         lastFlapTime = Time.time;
@@ -391,7 +391,7 @@ public class Movement : MonoBehaviour
             if (isGliding || wasGlidingLastFrame) { eventHub.RaiseGlideEnd(); }
             isGliding = false;
             wasGlidingLastFrame = false;
-            Debug.Log("isGliding " + isGliding);
+            GameLog.Log("isGliding " + isGliding);
             return;
         }
 

@@ -42,13 +42,13 @@ public class GhostRecordingManager : MonoBehaviour
         }
 
         isRecording = true;
-        Debug.Log("🟥 Recording started via GhostRecordingManager.");
+        GameLog.Log("🟥 Recording started via GhostRecordingManager.");
     }
 
     public void StopAllRecordings()
     {
         isRecording = false;
-        Debug.Log("⏹️ Recording stopped manually.");
+        GameLog.Log("⏹️ Recording stopped manually.");
     }
 
     public void SaveAllRecordings()
@@ -59,7 +59,7 @@ public class GhostRecordingManager : MonoBehaviour
                 recorder.SaveToFile();
         }
 
-        Debug.Log("💾 All ghost recordings saved.");
+        GameLog.Log("💾 All ghost recordings saved.");
     }
 
     void OnApplicationQuit()

@@ -75,7 +75,7 @@ public class SeedCourier : MonoBehaviour
                     Transform holster = player.Find("SeedHolster");
                     if (holster != null)
                     {
-                        Debug.Log("Attracting towards player...");
+                        GameLog.Log("Attracting towards player...");
                         Vector3 toHolster = holster.position - transform.position;
                         float speed = Mathf.Lerp(10f, 60f, Mathf.InverseLerp(attractionRadius, 0f, distance));
                         Vector3 accel = toHolster.normalized * speed;
