@@ -21,7 +21,6 @@ public class Movement : MonoBehaviour
     [SerializeField] private float glideStrength = 4.0f;
     [SerializeField] private float diveAcceleratorSmoothness = 2.5f;
     [SerializeField] private float sphereRadius = 2.5f;
-    [SerializeField] private float sphereCastDistance = 1.0f;
     [SerializeField] private LayerMask impactLayer;
     public float diveAngle = 0f;
 
@@ -30,8 +29,8 @@ public class Movement : MonoBehaviour
 
     // Flight values
     private readonly float flapStrength = 5f;
+    private readonly float flapCooldownSeconds = 0.665f;
     private readonly float forwardPropulsionStrength = 1f;
-    private readonly float maxSpeed = 30f;
     private readonly float maxDiveSpeed = 300f;
 
     private float snapAngle = 45f;
@@ -45,7 +44,6 @@ public class Movement : MonoBehaviour
 
     [Header("Debug variables")]
     public bool isGliding = false;
-    public bool isFlapping = false;
     public bool isHovering = false;
 
     // Public refs
@@ -56,7 +54,6 @@ public class Movement : MonoBehaviour
     public delegate void FlapEvent();
     public event FlapEvent OnFlap;
     private float lastFlapTime = -1f;
-    [SerializeField] private float minFlapInterval = 1.2f;
     public HandVelocityTracker leftVelocity;
     public HandVelocityTracker rightVelocity;
     private bool wasMovingDownLastFrame = false;
@@ -69,11 +66,9 @@ public class Movement : MonoBehaviour
     // Dive->Lift 
     private bool wasDiving = false;
     private float lastDiveEndTime = -10f;
-    private float lastDiveTime = -1f;
     private float postDiveLiftBoostDuration = 0f;
     private float diveStartTime = -1f;
     private float diveEndTime = -1f;
-    private float lastRecordedDiveSpeed = 0f;
     private Vector3 lastDiveForward = Vector3.zero;
 
     [Header("Audio")]
@@ -92,15 +87,10 @@ public class Movement : MonoBehaviour
     private float speedBoostFadeDuration = 2f;
     private float speedBoostMagnitude = 1.0f;
     private Vector3 speedBoostDirection = Vector3.zero;
-    private float boostDecayStartTime = -1f;
-    private bool wasBoostedRecently = false;
-    [SerializeField] private float boostDecayDuration = 2.0f;
 
     // Wind
     private Vector3 lastKnownWindDir = Vector3.forward;
     private bool wasInWindZoneLastFrame = false;
-    private float lastWindExitTime = -10f;
-    private float windExitBlendDuration = 2.5f;
 
     // Hover
     public float maxHoverSpeed = 10.0f;
@@ -281,7 +271,6 @@ public class Movement : MonoBehaviour
             if (!wasDiving)
             {
                 diveStartTime = Time.time;
-                lastRecordedDiveSpeed = velocity.magnitude;
             }
 
             // Nothing raised this before, so TutorialManager's diveSec never
@@ -313,7 +302,7 @@ public class Movement : MonoBehaviour
 
     private void HandleFlapDetection()
     {
-        if (!Allowed(MovementAbility.Flap)) { isFlapping = false; return; }
+        if (!Allowed(MovementAbility.Flap)) return;
 
         // ---------- Strengthener A: Player speed (1..speedMaxMul)
         float speed = velocity.magnitude;
@@ -338,7 +327,7 @@ public class Movement : MonoBehaviour
         // h
         float strokeTriggerTCurrent = downstrokeT;
         float strokeTriggerTOnRelease = holdT;
-        bool enoughTimePassed = (Time.time - lastFlapTime) >= 0.665f;
+        bool enoughTimePassed = (Time.time - lastFlapTime) >= flapCooldownSeconds;
 
         if (justStartedMovingDown && enoughTimePassed)
         {
@@ -574,7 +563,6 @@ public class Movement : MonoBehaviour
         }
         else if (wasInWindZoneLastFrame)
         {
-            lastWindExitTime = Time.time;
             wasInWindZoneLastFrame = false;
         }
 
@@ -671,8 +659,6 @@ public class Movement : MonoBehaviour
         else
         {
             isSpeedBoosted = false;
-            wasBoostedRecently = true;
-            boostDecayStartTime = Time.time;
         }
     }
 
