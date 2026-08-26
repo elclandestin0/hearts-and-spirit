@@ -106,8 +106,12 @@ public class Movement : MonoBehaviour
     public float maxHoverSpeed = 10.0f;
     [SerializeField] private float minHoverDirSpeed = 0.25f;
 
-    // Wind zones
+    // Wind zones. GetWindForceAtPosition runs an iterative nearest-point
+    // search over the spline, so the whole set is sampled once per frame and
+    // shared - the gravity check used to walk all of them a second time.
     private SplineWindZone[] zones;
+    private Vector3 windForceThisFrame;
+    private bool inWindZoneThisFrame;
 
     // Audio state trackers
     [SerializeField] private DovinaAudioManager dovinaAudioManager;
@@ -556,18 +560,7 @@ public class Movement : MonoBehaviour
         }
 
         bool appliedGravityThisFrame = false;
-        bool isInWindZone = false;
-
-        foreach (var zone in zones)
-        {
-            Vector3 wind = zone.GetWindForceAtPosition(transform.position);
-            if (wind != Vector3.zero)
-            {
-                isInWindZone = true;
-                lastKnownWindDir = wind.normalized;
-                break;
-            }
-        }
+        bool isInWindZone = inWindZoneThisFrame;   // sampled in ApplyWindForces
 
         if (isInWindZone)
         {
@@ -797,12 +790,38 @@ public class Movement : MonoBehaviour
         Gizmos.DrawWireSphere(endPoint, sphereRadius);
     }
 
-    private void ApplyWindForces()
+    /// <summary>
+    /// Samples every wind zone once and caches the result for this frame.
+    /// Called from ApplyWindForces, which runs before ApplyGravityIfNeeded.
+    /// </summary>
+    private void SampleWind()
     {
+        windForceThisFrame = Vector3.zero;
+        inWindZoneThisFrame = false;
+
+        if (zones == null) return;
+
+        Vector3 pos = transform.position;
         foreach (var zone in zones)
         {
-            velocity += zone.GetWindForceAtPosition(transform.position) * Time.deltaTime;
+            if (zone == null) continue;
+
+            Vector3 wind = zone.GetWindForceAtPosition(pos);
+            if (wind == Vector3.zero) continue;
+
+            windForceThisFrame += wind;
+            if (!inWindZoneThisFrame)
+            {
+                inWindZoneThisFrame = true;
+                lastKnownWindDir = wind.normalized;
+            }
         }
+    }
+
+    private void ApplyWindForces()
+    {
+        SampleWind();
+        velocity += windForceThisFrame * Time.deltaTime;
     }
 
     public void SetMovementEnabled(bool enabled)
