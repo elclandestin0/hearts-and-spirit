@@ -281,10 +281,16 @@ public class Movement : MonoBehaviour
                 diveStartTime = Time.time;
                 lastRecordedDiveSpeed = velocity.magnitude;
             }
+
+            // Nothing raised this before, so TutorialManager's diveSec never
+            // moved and any DiveDuration step could never complete.
+            if (Allowed(MovementAbility.Dive))
+                eventHub.RaiseDiveTick(Time.deltaTime);
         }
 
         if (wasDiving && !isCurrentlyDiving)
         {
+            eventHub.RaiseDiveEnd();
             diveEndTime = Time.time;
             float diveDuration = diveEndTime - diveStartTime;
             float diveSpeedFactor = Mathf.InverseLerp(10f, maxDiveSpeed, velocity.magnitude);
