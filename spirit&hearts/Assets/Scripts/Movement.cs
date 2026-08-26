@@ -65,8 +65,6 @@ public class Movement : MonoBehaviour
     private bool recentlyBounced = false;
     private float bounceTimer = 0f;
     private float bounceDuration = 1f;
-    private float bounceDampFactor = 0.9f;
-    private bool inputLockedDuringBounce => recentlyBounced && bounceTimer > 0f;
 
     // Dive->Lift 
     private bool wasDiving = false;
@@ -700,6 +698,9 @@ public class Movement : MonoBehaviour
 
     private void CheckSurfaceImpact()
     {
+        // Cooling down from the last impact: ignore new ones. Update() owns
+        // movement integration - a second copy of it used to live at the
+        // bottom of this method and ran on every impact frame.
         if (recentlyBounced)
         {
             bounceTimer -= Time.deltaTime;
@@ -737,20 +738,6 @@ public class Movement : MonoBehaviour
             }
         }
 
-        if (inputLockedDuringBounce)
-        {
-            bounceTimer -= Time.deltaTime;
-            velocity *= 0.98f;
-
-            ApplyMovement();
-            ApplyDrag();
-            DrawDebugLines();
-
-            if (bounceTimer <= 0f)
-                recentlyBounced = false;
-
-            return;
-        }
     }
 
     private void PlayFlap()
