@@ -25,6 +25,17 @@ public class PersistentId : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Assigns a known id to an object created at runtime, so its saved state
+    /// can be matched across sessions instead of getting a fresh GUID each run.
+    /// Does nothing if an id is already set.
+    /// </summary>
+    public void SetIdIfEmpty(string fixedId)
+    {
+        if (string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(fixedId))
+            id = fixedId;
+    }
+
 #if UNITY_EDITOR
     // Ensure uniqueness in editor when duplicating
     private void OnValidate()
