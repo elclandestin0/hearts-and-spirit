@@ -62,7 +62,7 @@ public class SeedCourier : MonoBehaviour
         var sb = GetComponent<SeedBehavior>();
         motion ??= GetComponent<SeedMotion>();
 
-        if (sb != null && Input.GetKey(KeyCode.C))
+        if (sb != null && DebugKeys.Held(KeyCode.C))
         {
             var player = GameObject.FindWithTag("Player")?.transform;
             if (player != null)
@@ -140,7 +140,7 @@ public class SeedCourier : MonoBehaviour
             return;
         }
 
-        if (sb != null && Input.GetKey(KeyCode.C))
+        if (sb != null && DebugKeys.Held(KeyCode.C))
         {
             var player = GameObject.FindWithTag("Player")?.transform;
             if (player != null)

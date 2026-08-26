@@ -249,7 +249,7 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
+        if (DebugKeys.Pressed(KeyCode.P))
         {
             GameLog.Log("Skipping tutorial...");
             SkipTutorial();

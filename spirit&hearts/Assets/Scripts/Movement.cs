@@ -225,7 +225,7 @@ public class Movement : MonoBehaviour
 
         bool wantHover = Allowed(MovementAbility.Hover) && leftHeld && rightHeld;
 
-        if (Allowed(MovementAbility.Hover) && Input.GetKey(KeyCode.N))
+        if (Allowed(MovementAbility.Hover) && DebugKeys.Held(KeyCode.N))
             wantHover = true;
 
         isHovering = wantHover;
@@ -330,8 +330,8 @@ public class Movement : MonoBehaviour
 
         float downstrokeT = Mathf.InverseLerp(0f, maxFlapVelocity, Mathf.Clamp(avgDownSpeed, 0f, maxFlapVelocity));
 
-        if (Input.GetKeyDown(KeyCode.F)) fHoldStartTime = Time.time;
-        bool fReleased = Input.GetKeyUp(KeyCode.F);
+        if (DebugKeys.Pressed(KeyCode.F)) fHoldStartTime = Time.time;
+        bool fReleased = DebugKeys.Released(KeyCode.F);
         float holdSeconds = fHoldStartTime > 0f ? Time.time - fHoldStartTime : 0f;
         float holdT = Mathf.InverseLerp(0f, maxHoldSeconds, Mathf.Clamp(holdSeconds, 0f, maxHoldSeconds));
 
@@ -424,7 +424,7 @@ public class Movement : MonoBehaviour
             wingsOutstretched = true;
 
         isGliding = wingsOutstretched;
-        if (Input.GetKey(KeyCode.M))
+        if (DebugKeys.Held(KeyCode.M))
         {
             isGliding = true;
         }

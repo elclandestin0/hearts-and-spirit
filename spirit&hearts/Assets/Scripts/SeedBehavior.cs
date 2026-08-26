@@ -106,7 +106,7 @@ public class SeedBehavior : MonoBehaviour
         bool leftHeld = leftGripValue > 0.1f;
         bool rightHeld = rightGripValue > 0.1f;
 
-        if (currentState != State.AttachedToPlayer && player != null && (Input.GetKey(KeyCode.C) || (leftHeld && rightHeld)))
+        if (currentState != State.AttachedToPlayer && player != null && (DebugKeys.Held(KeyCode.C) || (leftHeld && rightHeld)))
         {
             float distance = Vector3.Distance(transform.position, player.position);
 
@@ -132,7 +132,7 @@ public class SeedBehavior : MonoBehaviour
 
             case State.AttractToPlayer:
                 float dt = Time.deltaTime;
-                bool held = Input.GetKey(KeyCode.C);
+                bool held = DebugKeys.Held(KeyCode.C);
                 float distance = Vector3.Distance(transform.position, player.position);
                 if ((!held || (!leftHeld && !rightHeld)) && distance >= attractionRadius)
                 {
@@ -462,7 +462,7 @@ public class SeedBehavior : MonoBehaviour
         bool leftHeld = leftGripValue > 0.1f;
         bool rightHeld = rightGripValue > 0.1f;
 
-        if (distance < attractionRadius && (Input.GetKey(KeyCode.C) || (leftHeld && rightHeld)))
+        if (distance < attractionRadius && (DebugKeys.Held(KeyCode.C) || (leftHeld && rightHeld)))
         {
             currentState = State.AttractToPlayer;
         }

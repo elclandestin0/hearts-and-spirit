@@ -31,7 +31,7 @@ public class SeedUseController : MonoBehaviour
     {
         if (PauseState.IsPaused) return;
 
-        if (Input.GetKeyDown(KeyCode.X))
+        if (DebugKeys.Pressed(KeyCode.X))
             LaunchCourierForward();
     }
     

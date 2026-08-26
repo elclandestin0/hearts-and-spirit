@@ -27,10 +27,10 @@ public class KeyboardMovementDebug : MonoBehaviour
         float yaw = currentEuler.y > 180f ? currentEuler.y - 360f : currentEuler.y;
 
         // Keyboard controls
-        if (Input.GetKey(KeyCode.W)) pitch -= pitchSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.S)) pitch += pitchSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.A)) yaw -= yawSpeed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.D)) yaw += yawSpeed * Time.deltaTime;
+        if (DebugKeys.Held(KeyCode.W)) pitch -= pitchSpeed * Time.deltaTime;
+        if (DebugKeys.Held(KeyCode.S)) pitch += pitchSpeed * Time.deltaTime;
+        if (DebugKeys.Held(KeyCode.A)) yaw -= yawSpeed * Time.deltaTime;
+        if (DebugKeys.Held(KeyCode.D)) yaw += yawSpeed * Time.deltaTime;
 
         // Touchpad (Mouse) look
         if (enableMouseLook) // Hold Right-Click or Cmd+click
