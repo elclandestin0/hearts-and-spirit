@@ -97,11 +97,14 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         currentCinematic = so as CinematicStep;
         if (currentCinematic != null)
         {
-            // lock to cinematic policy (usually Look only)
+            // lock to cinematic policy (usually Look only).
+            // Cinematics always hold the player still - CinematicStep has no
+            // gravity setting of its own. This used to read currentInteractive,
+            // which Advance() nulls a few lines up, so it only ever meant false.
             _policy = new MovementPolicy
             {
                 Allowed = currentCinematic.allowedAbilities,
-                GravityEnabled = currentInteractive ? currentInteractive.gravityEnabled : false
+                GravityEnabled = false
             };
 
             if (cinematicRoutine != null) StopCoroutine(cinematicRoutine);
