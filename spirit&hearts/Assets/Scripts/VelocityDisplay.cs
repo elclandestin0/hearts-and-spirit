@@ -8,6 +8,13 @@ public class VelocityDisplay : MonoBehaviour
     public TextMeshProUGUI textMesh;
     public GhostFlightPlayback ghost; // Reference to playback system
 
+    private Transform cam;
+
+    void Awake()
+    {
+        if (Camera.main != null) cam = Camera.main.transform;
+    }
+
     void LateUpdate()
     {
         if (ghost == null || textMesh == null || target == null || ghost.CurrentFrame == null)
@@ -19,7 +26,12 @@ public class VelocityDisplay : MonoBehaviour
         transform.position = target.position + offset;
 
         // Make it face the camera
-        transform.rotation = Quaternion.LookRotation(transform.position - Camera.main.transform.position);
+        if (cam == null)
+        {
+            if (Camera.main == null) return;
+            cam = Camera.main.transform;
+        }
+        transform.rotation = Quaternion.LookRotation(transform.position - cam.position);
 
         // Show recorded velocity magnitude
         float speed = frame.resultingVelocity.magnitude;
