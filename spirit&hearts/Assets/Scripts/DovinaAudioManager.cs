@@ -64,55 +64,67 @@ public class DovinaAudioManager : MonoBehaviour
     public event Action<int> OnClipInterrupted;
     int _playToken = 0;
 
-    private void Awake() => LoadAllClips();
+    // The categories this game ships. Loaded individually, on first use.
+    private static readonly string[] Categories = {
+        "intro",
+        "gp_changes/seed",
+        "gp_changes/speed/slow",
+        "gp_changes/speed/fast",
+        "gp_changes/wind",
+        "gp_changes/world",
+        "gp_changes/locations",
+        "gp_changes/movement/hovering",
+        "gp_changes/movement/toGliding",
+        "gp_changes/movement/gliding",
+        "gp_changes/movement/toHovering",
+        "gp_changes/bouncing",
+        "gp_changes/light",
+        "parables"
+    };
+
+    private static readonly AudioClip[] NoClips = new AudioClip[0];
 
     // -------------------- LOAD --------------------
-    private void LoadAllClips()
+    /// <summary>
+    /// Returns a category's clips, loading it the first time it is asked for.
+    /// This used to run for all 14 categories in Awake, pulling every voice
+    /// clip in Resources into memory before the first frame.
+    /// </summary>
+    private AudioClip[] LoadCategory(string category)
     {
-        // Register the categories you actually ship
-        string[] categories = {
-            "intro",
-            "gp_changes/seed",
-            "gp_changes/speed/slow",
-            "gp_changes/speed/fast",
-            "gp_changes/wind",
-            "gp_changes/world",
-            "gp_changes/locations",
-            "gp_changes/movement/hovering",
-            "gp_changes/movement/toGliding",
-            "gp_changes/movement/gliding",
-            "gp_changes/movement/toHovering",
-            "gp_changes/bouncing",
-            "gp_changes/light",
-            "parables"
-        };
+        if (string.IsNullOrEmpty(category)) return NoClips;
+        if (audioCategories.TryGetValue(category, out var cached)) return cached;
 
-        foreach (var path in categories)
-        {
-            var clips = Resources.LoadAll<AudioClip>($"Dovina/Audio/{path}");
-            var valid = new List<AudioClip>(clips.Length);
-
-#if UNITY_EDITOR
-            foreach (var clip in clips)
-            {
-                string assetPath = UnityEditor.AssetDatabase.GetAssetPath(clip);
-                if (assetPath.Replace("\\", "/").Contains($"/{path}/"))
-                    valid.Add(clip);
-            }
-#else
-            valid.AddRange(clips);
-#endif
-            if (valid.Count > 0) audioCategories[path] = valid.ToArray();
-        }
+        var clips = Resources.LoadAll<AudioClip>($"Dovina/Audio/{category}") ?? NoClips;
+        audioCategories[category] = clips;   // cached even when empty, so we look once
+        return clips;
     }
 
+    /// <summary>
+    /// Drops a category's clips. The memory comes back on the next
+    /// Resources.UnloadUnusedAssets; use this when leaving a region for good.
+    /// </summary>
+    public void ReleaseCategory(string category)
+    {
+        if (string.IsNullOrEmpty(category)) return;
+        audioCategories.Remove(category);
+        nonRepeatingBags.Remove(category);
+    }
+
+    /// <summary>Every shipped category name, for anyone wanting to warm them.</summary>
+    public static System.Collections.Generic.IReadOnlyList<string> AllCategories => Categories;
+
     // -------------------- Category helpers --------------------
-    public AudioClip[] GetClips(string category) =>
-        audioCategories.TryGetValue(category, out var clips) ? clips : null;
+    public AudioClip[] GetClips(string category)
+    {
+        var clips = LoadCategory(category);
+        return clips.Length > 0 ? clips : null;
+    }
 
     public AudioClip GetClip(string category)
     {
-        if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return null;
+        var clips = LoadCategory(category);
+        if (clips.Length == 0) return null;
         return clips[UnityEngine.Random.Range(0, clips.Length)];
     }
 
@@ -153,8 +165,8 @@ public class DovinaAudioManager : MonoBehaviour
     private AudioClip FindAlternateClipNotOnPlaceCooldown(string category)
     {
         if (string.IsNullOrEmpty(category)) return null;
-        if (!audioCategories.TryGetValue(category, out var clips) || clips == null || clips.Length == 0)
-            return null;
+        var clips = LoadCategory(category);
+        if (clips.Length == 0) return null;
 
         int n = clips.Length;
         int start = UnityEngine.Random.Range(0, n);
@@ -210,7 +222,8 @@ public class DovinaAudioManager : MonoBehaviour
     }
     private void RefillBag(string category)
     {
-        if (!audioCategories.TryGetValue(category, out var src) || src.Length == 0) return;
+        var src = LoadCategory(category);
+        if (src.Length == 0) return;
         var list = new List<AudioClip>(src);
         for (int i = list.Count - 1; i > 0; i--)
         {
@@ -271,7 +284,8 @@ public class DovinaAudioManager : MonoBehaviour
     }
     public void PlayPriority(string category, int priority, int startIndex = 0, int endIndexInclusive = -1)
     {
-        if (!audioCategories.TryGetValue(category, out var clips) || clips.Length == 0) return;
+        var clips = LoadCategory(category);
+        if (clips.Length == 0) return;
 
         int idx = (endIndexInclusive == -1)
             ? Mathf.Clamp(startIndex, 0, clips.Length - 1)
@@ -296,7 +310,8 @@ public class DovinaAudioManager : MonoBehaviour
     {
         foreach (var it in items)
         {
-            if (!audioCategories.TryGetValue(it.category, out var clips) || clips.Length == 0) continue;
+            var clips = LoadCategory(it.category);
+            if (clips.Length == 0) continue;
             int idx = (it.endInclusive == -1)
                 ? Mathf.Clamp(it.start, 0, clips.Length - 1)
                 : UnityEngine.Random.Range(Mathf.Clamp(it.start, 0, clips.Length - 1), Mathf.Clamp(it.endInclusive + 1, 0, clips.Length));
