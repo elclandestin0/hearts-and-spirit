@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.XR;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 
 [RequireComponent(typeof(MovementEventHub))]
@@ -28,6 +30,14 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
     private int flapCount, nodCount;
     private float glideSec, diveSec, hoverSec, lookSec, gravitySec;
     private float stepClock;
+
+    // Headset escape hatch: hold both controller face buttons to skip.
+    // The keyboard shortcut below is useless to anyone actually wearing the
+    // headset, which is a problem if a step fails to complete.
+    [Header("Skip Gesture")]
+    [SerializeField] private float skipHoldSeconds = 2f;
+    private readonly List<InputDevice> _xrControllers = new List<InputDevice>();
+    private float _skipHeldFor;
 
     // Current step handles
     private TutorialStep currentInteractive = null;
@@ -221,6 +231,22 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
         Debug.Log("[Tutorial] Skipped → Free Flight (Everything enabled).");
     }
 
+    /// <summary>True while both hand controllers report their primary face button down.</summary>
+    private bool HoldingSkipGesture()
+    {
+        InputDevices.GetDevicesWithCharacteristics(
+            InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.HeldInHand,
+            _xrControllers);
+
+        int pressed = 0;
+        foreach (var device in _xrControllers)
+        {
+            if (device.TryGetFeatureValue(CommonUsages.primaryButton, out bool down) && down)
+                pressed++;
+        }
+        return pressed >= 2;
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.P))
@@ -232,8 +258,23 @@ public class TutorialManager : MonoBehaviour, IMovementPolicyProvider
 
         if (PauseState.IsPaused)
         {
-            Debug.Log("Game paused");
             return;
+        }
+
+        if (IsRunning && HoldingSkipGesture())
+        {
+            _skipHeldFor += Time.unscaledDeltaTime;
+            if (_skipHeldFor >= skipHoldSeconds)
+            {
+                Debug.Log("[Tutorial] Skip gesture held; skipping tutorial.");
+                _skipHeldFor = 0f;
+                SkipTutorial();
+                return;
+            }
+        }
+        else
+        {
+            _skipHeldFor = 0f;
         }
 
         if (!IsRunning || currentInteractive == null) return;
