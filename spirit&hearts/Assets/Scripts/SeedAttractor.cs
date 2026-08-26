@@ -115,7 +115,6 @@ public class SeedBehavior : MonoBehaviour
 
             if (distance < attractionRadius)
             {
-                Debug.Log("Attracting seed..");
                 currentState = State.AttractToPlayer;
             }
 
@@ -135,7 +134,6 @@ public class SeedBehavior : MonoBehaviour
                 float dt = Time.deltaTime;
                 bool held = Input.GetKey(KeyCode.C);
                 float distance = Vector3.Distance(transform.position, player.position);
-                Debug.Log("Attraction radius: " + attractionRadius + " and distance: " + distance);
                 if ((!held || (!leftHeld && !rightHeld)) && distance >= attractionRadius)
                 {
                     Debug.Log("Back to Idle.");
@@ -147,10 +145,8 @@ public class SeedBehavior : MonoBehaviour
                 {
                     Vector3 toHolster = seedHolster.position - transform.position;
                     float d = toHolster.magnitude;
-                    Debug.Log("Held...");
                     if (d > 0.001f)
                     {
-                        Debug.Log("Back to Idle.");
                         Vector3 targetDir = toHolster / d;
                         Vector3 curDir = (motion.Velocity.sqrMagnitude > 1e-6f) ? motion.Velocity.normalized : targetDir;
 
@@ -159,7 +155,6 @@ public class SeedBehavior : MonoBehaviour
                         // accelerate while held (cap to maxSpeed)
                         float speedNow = motion.Velocity.magnitude;
                         float speedNext = Mathf.MoveTowards(speedNow, maxSpeed, attractAccel * dt);
-                        Debug.Log("Velocity: " + motion.Velocity);
                         motion.Velocity = blendedDir * speedNext;
                     }
                     CheckForAttachment();
