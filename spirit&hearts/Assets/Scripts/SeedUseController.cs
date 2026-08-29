@@ -35,13 +35,26 @@ public class SeedUseController : MonoBehaviour
             LaunchCourierForward();
     }
 
+    /// <summary>Raised on a successful local launch so the net layer can replicate it. (origin, dir)</summary>
+    public static event System.Action<Vector3, Vector3> OnLocalSeedLaunched;
+
     private void LaunchCourierForward()
     {
         if (courierPrefab == null || seedHolster == null) return;
         if (_inv == null || _inv.GetSeedCount() <= 0) return;
         _inv.RemoveSeed();
 
-        var courierGO = Instantiate(courierPrefab, seedHolster.position, courierPrefab.transform.rotation);
+        Vector3 dir = head.forward;
+        SpawnCourier(seedHolster.position, dir);
+        OnLocalSeedLaunched?.Invoke(seedHolster.position, dir);
+    }
+
+    /// <summary>Spawn a courier that a remote player launched — same prefab, same params, same physics.</summary>
+    public void SpawnRemoteCourier(Vector3 origin, Vector3 dir) => SpawnCourier(origin, dir);
+
+    private void SpawnCourier(Vector3 origin, Vector3 launchDir)
+    {
+        var courierGO = Instantiate(courierPrefab, origin, courierPrefab.transform.rotation);
 
         var seedBehavior = courierGO.GetComponent<SeedBehavior>();
         if (seedBehavior != null)
@@ -49,9 +62,6 @@ public class SeedUseController : MonoBehaviour
             seedBehavior.DisablePickupFor(5f);
             seedBehavior.externallyControlled = true;
         }
-
-        // choose forward as player head forward (usually nicer) or this.transform.forward
-        Vector3 launchDir = head.forward;
 
         var courier = courierGO.AddComponent<SeedCourier>();
         courier.InitForward(

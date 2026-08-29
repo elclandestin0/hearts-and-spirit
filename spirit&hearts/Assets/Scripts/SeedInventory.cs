@@ -10,7 +10,7 @@ public class SeedInventory : MonoBehaviour
     public void AddSeed()
     {
         seedCount++;
-        subtitleUI.text = "Seeds: " + seedCount;
+        if (subtitleUI) subtitleUI.text = "Seeds: " + seedCount;
         // Optionally play pickup sound or trigger animation here
     }
 
@@ -19,9 +19,9 @@ public class SeedInventory : MonoBehaviour
         if (seedCount > 0)
         {
             seedCount--;
-            subtitleUI.text = "Seeds: " + seedCount;
+            if (subtitleUI) subtitleUI.text = "Seeds: " + seedCount;
             GameLog.Log("Seed removed. Remaining: " + seedCount);
-            if (seedCount == 0) 
+            if (seedCount == 0 && subtitleUI)
             {
                 subtitleUI.text = "Find some seeds!";
             }

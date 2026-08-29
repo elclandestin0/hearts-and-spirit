@@ -34,6 +34,10 @@ public class GhostFlightRecorder : MonoBehaviour
 
 public void SaveToFile()
 {
+#if UNITY_WEBGL && !UNITY_EDITOR
+    // Application.dataPath is a URL in the browser; there is no folder to write to.
+    return;
+#else
     string folderPath = Application.dataPath + "/FlightRecords";
     if (!Directory.Exists(folderPath))
     {
@@ -56,6 +60,7 @@ public void SaveToFile()
 
     File.WriteAllText(filePath, json);
     GameLog.Log("💾 Saved ghost flight to: " + filePath);
+#endif
 }
 
 

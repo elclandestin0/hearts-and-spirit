@@ -32,8 +32,9 @@ public class KeyboardMovementDebug : MonoBehaviour
         if (DebugKeys.Held(KeyCode.A)) yaw -= yawSpeed * Time.deltaTime;
         if (DebugKeys.Held(KeyCode.D)) yaw += yawSpeed * Time.deltaTime;
 
-        // Touchpad (Mouse) look
-        if (enableMouseLook) // Hold Right-Click or Cmd+click
+        // Touchpad (Mouse) look — hold Right-Click so the cursor stays free
+        // for UI (session panel, menus) the rest of the time.
+        if (enableMouseLook && (Input.GetMouseButton(1) || Cursor.lockState == CursorLockMode.Locked))
         {
             float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;

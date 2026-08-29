@@ -50,6 +50,9 @@ public class Movement : MonoBehaviour
     public Vector3 CurrentVelocity => velocity;
     public float MaxSpeed => maxDiveSpeed;
 
+    /// <summary>External knock (e.g. a networked seed hit) added straight into flight velocity.</summary>
+    public void AddExternalImpulse(Vector3 impulse) => velocity += impulse;
+
     // Flap
     public delegate void FlapEvent();
     public event FlapEvent OnFlap;
