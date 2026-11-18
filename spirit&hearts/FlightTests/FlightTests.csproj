@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <!-- Game code has unused fields and locals; that is not what this suite checks. -->
+    <NoWarn>$(NoWarn);CS0067;CS0108;CS0162;CS0168;CS0169;CS0219;CS0414;CS0649</NoWarn>
+  </PropertyGroup>
+
+  <!-- The real game source, compiled unmodified against UnityShim/. Do not copy these files here. -->
+  <ItemGroup>
+    <Compile Include="../Assets/Scripts/Movement.cs" Link="GameCode/Movement.cs" />
+    <Compile Include="../Assets/Scripts/FlightPhysics.cs" Link="GameCode/FlightPhysics.cs" />
+    <Compile Include="../Assets/Scripts/HandVelocityTracker.cs" Link="GameCode/HandVelocityTracker.cs" />
+    <Compile Include="../Assets/Scripts/MovementEventHub.cs" Link="GameCode/MovementEventHub.cs" />
+    <Compile Include="../Assets/Scripts/MovementPolicy.cs" Link="GameCode/MovementPolicy.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2" />
+  </ItemGroup>
+
+</Project>

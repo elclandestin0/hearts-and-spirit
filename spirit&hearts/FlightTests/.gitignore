@@ -1,0 +1,6 @@
+# The repo root ignores *.csproj because Unity generates them. This one is hand-written.
+!FlightTests.csproj
+
+bin/
+obj/
+TestResults/
